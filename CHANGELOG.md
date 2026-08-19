@@ -30,6 +30,9 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   step 2 of the onboarding contract.
 - `docs/claude/worklog.md` — the running per-change history, created only when the repo keeps no
   `CHANGELOG`/`HISTORY` `[Unreleased]` log (never two parallel logs).
+- docs: ship the /panoply skill + install instructions in README — `skills/panoply/SKILL.md` (the
+  natural-language applier skill, now shipped inside the kit) plus a README section covering the
+  trigger phrases and the one-time global install to `~/.claude/skills/panoply/SKILL.md`.
 
 ### Changed
 - `.claude/rules/clean-architecture.md` — new module-fenced **Enforcement** gate: names the per-stack

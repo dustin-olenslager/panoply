@@ -78,6 +78,34 @@ the Clean Architecture layer map — behind a port means an adapters-only swap; 
 port-extraction first, and it tells you both numbers. Run it with `--save` to keep dated reports
 and get per-element trend tracking.
 
+## The `/panoply` skill (one-instruction apply)
+
+Everything the Quickstart does by hand — fetch the kit, then run `/adapt-claude-setup` — collapses
+into a single natural-language instruction once the `panoply` skill is installed. Say **"use
+panoply"**, **"panoply this"**, or **`/panoply [path]`** (the path is optional and defaults to the
+current directory), and Claude Code fetches the kit into a temp dir and runs the adapt against the
+target for you. The skill is a thin trigger: it clones the kit and hands the whole job to the kit's
+own `/adapt-claude-setup`, so the applier and the kit can never drift.
+
+Two distinct layers — don't conflate them:
+
+- **The kit** (this repo — `skills/panoply/SKILL.md` now ships inside it) is the per-repo governance
+  content that gets copied into a project.
+- **The skill** (`~/.claude/skills/panoply/SKILL.md`) is a global/personal Claude Code skill — the
+  *applier* layer. It lives in your Claude Code config, not in any project, and its only job is to
+  fetch-and-adapt the kit on request.
+
+**Install the skill (once per machine):**
+
+```
+mkdir -p ~/.claude/skills/panoply
+cp skills/panoply/SKILL.md ~/.claude/skills/panoply/SKILL.md
+```
+
+(Copy it from a `degit`/clone of this repo, or straight out of an already-adapted project.) After
+that, `use panoply` in any project triggers the fetch-and-adapt — no need to remember the `degit`
+command or the temp-dir dance.
+
 ## What's inside
 
 ```
