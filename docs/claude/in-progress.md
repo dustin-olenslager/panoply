@@ -7,16 +7,20 @@ The **Notes** cell of the active row is its handoff: keep the *exact next step* 
 open, the command to run, the blocker — refreshed whenever you pause, so the next session resumes
 cold. A row with no next step is a row nobody can pick up. (Doctrine: `.claude/rules/documentation.md`.)
 
+Each row rolls up to a `roadmap.md` initiative (the strategic view) and leaves a trail in the worklog
+(`worklog.md` or the `CHANGELOG` `[Unreleased]`). A row with no initiative is tactical work with no
+strategic home — add the initiative to `roadmap.md`, or say in Notes why it is a deliberate one-off.
+
 When an item ships: remove its row from here, move its folder into `<area>/completed/`, and add an
 entry to `completed-features.md`.
 
 ## Active queue
 
-| # | Item | Area | Plan doc | Status | Notes |
-|---|------|------|----------|--------|-------|
-| 1 | _EXAMPLE — delete this row_ — paginated list view for the records table | `ui` | [`ui/records-list/plan.md`](ui/records-list/plan.md) | In progress — milestone 2 of 4 | **Next:** wire the `?sort=` param in `RecordsTable.tsx` `onSort`; server paging landed, filters after. Blocked on the sort-order decision (open Q in plan). |
-| 2 | | | | Not started | |
-| 3 | | | | Not started | |
+| # | Item | Area | Initiative | Plan doc | Status | Notes |
+|---|------|------|------------|----------|--------|-------|
+| 1 | _EXAMPLE — delete this row_ — paginated list view for the records table | `ui` | Records UX overhaul | [`ui/records-list/plan.md`](ui/records-list/plan.md) | In progress — milestone 2 of 4 | **Next:** wire the `?sort=` param in `RecordsTable.tsx` `onSort`; server paging landed, filters after. Blocked on the sort-order decision (open Q in plan). |
+| 2 | | | | | Not started | |
+| 3 | | | | | Not started | |
 
 **Status vocabulary:** `Not started` · `In progress — milestone N of M` · `Blocked — <on what>` ·
 `In review` · `Done — archiving`.

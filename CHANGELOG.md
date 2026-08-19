@@ -12,7 +12,45 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
-_Nothing yet._
+Provider-agnostic governance layer (MINOR — additive; safe to adopt).
+
+### Added
+- `AGENTS.md` — the provider-neutral hub for ANY coding agent (Claude, Codex, Cursor, Gemini, Copilot,
+  Windsurf, Cline, aider): the ordered onboarding contract (roadmap → in-progress → worklog → CLAUDE.md
+  → rules), the non-negotiables, a first-class Architecture section, a `MIRROR` block (the "if you read
+  nothing else" essentials), and an honest enforcement note. `CLAUDE.md` bridges to it via `@AGENTS.md`.
+- `scripts/sync-agents.sh` — POSIX-sh DRY mirror generator: extracts the `AGENTS.md` `MIRROR` block and
+  emits six tool-native files (`.github/copilot-instructions.md`, `.clinerules/`, `GEMINI.md`,
+  `CONVENTIONS.md`, `.cursor/rules/`, `.windsurf/rules/`); `--check` is the drift gate for pre-commit/CI.
+  The kit ships the script, not the mirrors (they carry an unfilled `{{PROJECT_NAME}}` until `/adapt`).
+- `scripts/templates/ci-verify.yml` + `scripts/templates/pre-commit` — the honest backstop: the one
+  server-side plane (required CI) that binds every tool regardless of vendor, plus a convenience
+  pre-commit hook. `<CMD>` slots filled by `/adapt`; branch-protection remains the one manual human step.
+- `docs/claude/roadmap.md` — the single canonical strategic plan (initiatives in Now/Next/Later),
+  step 2 of the onboarding contract.
+- `docs/claude/worklog.md` — the running per-change history, created only when the repo keeps no
+  `CHANGELOG`/`HISTORY` `[Unreleased]` log (never two parallel logs).
+
+### Changed
+- `.claude/rules/clean-architecture.md` — new module-fenced **Enforcement** gate: names the per-stack
+  boundary linter (dependency-cruiser / import-linter / ArchUnit / …), the report-only→blocking ramp,
+  and "CI is the binding plane"; review-checklist item 1 now points at `{{ARCH_CHECK_CMD}}`.
+- `.claude/rules/documentation.md` — the four-altitude anti-redundancy table (roadmap / in-progress /
+  worklog / completed-features) and the same-change update contract binding every provider.
+- `.claude/rules/git-workflow.md` — module-fenced arch-boundary pre-commit gate, and the
+  enforcement-plane note (the `settings.json` deny binds only Claude; server-side CI binds all tools).
+- `.claude/commands/adapt-claude-setup.md` — detects the running log + provider files + arch linter,
+  scaffolds roadmap/worklog, emits `AGENTS.md` + runs `sync-agents.sh`, copies the CI/pre-commit
+  templates, extends the porcelain allowlist, and reports the worklog target + mirrors + manual step.
+- `.claude/commands/audit-claude-setup.md` — Check 4 worklog/roadmap-currency, Check 5 AGENTS.md
+  presence + deny↔guardrails sync, Check 6 "wired, not just installed", and new Check 7 (provider hub
+  read-order + mirror-drift + inline-doctrine).
+- `CLAUDE.md` — `@AGENTS.md` bridge, module-fenced arch-boundary command row, roadmap + worklog in
+  Project Knowledge.
+- `docs/claude/_templates/plan.md` — a Roadmap-initiative field, a forced **Architecture** section
+  (layers/ports/DTOs/direction/swap-test), and worklog/roadmap moves in the On-ship step.
+- `docs/claude/in-progress.md` — an Initiative column and the tactical→strategic roll-up note.
+- `docs/claude/README.md` — read order, layout, and doc lifecycle now name roadmap + worklog.
 
 ## [1.0.0] — 2026-08-19
 

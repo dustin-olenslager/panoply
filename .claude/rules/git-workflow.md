@@ -15,6 +15,14 @@
 
 - **Run the FULL typecheck before committing: `{{TYPECHECK_CMD}}`.** Every package, unfiltered — do not grep the output, and do not spot-check only the files you changed. A type error in an untouched package that your change broke through a shared type is exactly the failure this catches, and partial checks have shipped broken CI more than once.
 - **Run the full test suite before committing: `{{TEST_CMD}}`.** All tests must pass. Do not skip, `.only`, or comment out a failing test to get a commit through — fix the code, or stop and report the failure.
+<!-- MODULE:arch -->
+- **Run the architecture-boundary check before committing: `{{ARCH_CHECK_CMD}}`.** It fails on any
+  import that points outward across a layer boundary (`clean-architecture.md`). A dependency-direction
+  violation caught here is a one-line move; caught after the code ships, nobody rewrites working code
+  to fix an import direction and the violation becomes permanent. *This local run is convenience, not
+  enforcement — it is `--no-verify`-skippable and a non-Claude agent may never run it; the binding
+  copy is the same check as a **required CI status** (`scripts/templates/ci-verify.yml`).*
+<!-- /MODULE:arch -->
 - If a change alters query structure, response shapes, or call ordering, update the corresponding test fixtures and mocks in the same commit — see "Sequentially-consumed mocks go stale" in `testing.md` for the failure mode and how to spot it.
 - Both gates run before the commit, not before the push. A local commit you have not verified is a commit you will push at 6pm without rechecking.
 
@@ -54,6 +62,12 @@ A branch showing commits "ahead" of `{{DEFAULT_BRANCH}}` is *not* proof it holds
 
 - **Verify commit identity before the first commit in a fresh clone.** A freshly reset or provisioned machine has empty git identity, so the first commit lands under the wrong author. Before committing in any new clone, confirm `git config user.name` and `git config user.email` match the identity this repo declares it commits under (in `CLAUDE.md`/`AGENTS.md`); set them **repo-locally** (`git config user.email …`, never `--global`) if they do not. The check is portable even though the value is per-project — the author the repo commits under is declared in-repo.
 - **Never put a credential in the remote URL, and never commit a secret.** Keep secrets in env or a secret store; keep git auth in a credential helper (`git config credential.helper`, `~/.git-credentials`, or the OS keychain) so the remote stays `https://github.com/<owner>/<repo>.git` — never `https://<user>:<token>@github.com/...`. A token in the URL leaks through `git remote -v`, shell history, CI logs, and the reflog, and removing it does not un-expose it: if one was ever embedded, **rotate it.**
+- **The `.claude/settings.json` deny-list binds only Claude Code.** It does nothing to a Cursor,
+  Codex, Copilot, Windsurf, Cline, or aider agent. The tool-agnostic guardrail is **server-side**:
+  branch protection on `{{DEFAULT_BRANCH}}` (blocks force-push and direct pushes no matter who typed
+  them) plus **required status checks** (`scripts/templates/ci-verify.yml`). Turn both on — that is
+  what actually stops a non-Claude agent, and the cross-tool `MUST NOT` list in `AGENTS.md` is advisory
+  prose until you do.
 
 ## Pull requests
 

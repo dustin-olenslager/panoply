@@ -108,11 +108,36 @@ src/platform/                         server, db client, config, wiring
 
 <!-- /MODULE:project-layers -->
 
+<!-- MODULE:arch — KEEP when a dependency-boundary linter exists or will be wired; adapt drops this whole block (and the {{ARCH_CHECK_CMD}} rows in CLAUDE.md and git-workflow.md) on a repo that has none, leaving only the doctrine below. -->
+## Enforcement — the gate, not just the checklist
+
+The review checklist below is the human pass. Dependency direction is *also* checked **mechanically**,
+so a violation fails a command instead of resting on a reviewer noticing it. This is the one guardrail
+that binds every contributor equally — a human, or any AI agent in any tool — but **only once it runs
+in required CI**: a client-side pre-commit hook is skippable with `--no-verify` and a non-Claude agent
+may never run it, so CI is the plane that actually holds.
+
+- **The tool, per stack (name it, do not hand-roll it):** JS/TS → dependency-cruiser (`forbidden`
+  rules); Python → import-linter (`layers` contract); JVM → ArchUnit (`layeredArchitecture()`);
+  Go → go-arch-lint or `depguard`; .NET → NetArchTest; Rust → module visibility + `cargo-deny`. Each
+  encodes the same table under "This project's layers": no inner layer may import an outer one.
+- **When it runs:** `{{ARCH_CHECK_CMD}}` runs in the pre-commit gate beside typecheck and test
+  (`git-workflow.md`) and — the binding copy — as a **required** CI check
+  (`scripts/templates/ci-verify.yml`). Green is the only passing score; no agent may merge past it red.
+- **Report-only ramp for a non-conforming repo:** if the layer map still has `target:` rows (business
+  logic in controllers, ORM models imported inward), start the linter in **report-only** mode so the
+  violation count is visible without blocking, then flip it to blocking once the count reaches zero.
+  This is exactly where the check earns its keep — do not skip it on the messy repos that need it most.
+- **Wiring:** the kit NAMES this gate and CHECKS for it (`/audit-claude-setup` Check 6); it does not
+  generate a layout-coupled config for you. Use your stack's tool (or the `arch-enforce` skill if you
+  have it) to create the config from the filled layer map, then set `{{ARCH_CHECK_CMD}}` to its invocation.
+<!-- /MODULE:arch -->
+
 ## Review checklist
 
 Run against any diff. Each item is pointable: a reviewer can highlight a line and say "this violates item N."
 
-1. **Import direction.** No file in `{{DOMAIN_DIR}}` imports from `{{USECASE_DIR}}`, `{{ADAPTER_DIR}}`, or `{{INFRA_DIR}}`; no file in `{{USECASE_DIR}}` imports from `{{ADAPTER_DIR}}` or `{{INFRA_DIR}}`. Read the diff's import block first — it is the fastest violation to spot. *Automate this*: an import-boundary lint rule or architecture-test tool (import-boundary ESLint plugins, dependency-graph linters, JVM architecture-test libraries) turns item 1 into a CI failure instead of a review argument. Add it once the map above is filled.
+1. **Import direction.** No file in `{{DOMAIN_DIR}}` imports from `{{USECASE_DIR}}`, `{{ADAPTER_DIR}}`, or `{{INFRA_DIR}}`; no file in `{{USECASE_DIR}}` imports from `{{ADAPTER_DIR}}` or `{{INFRA_DIR}}`. Read the diff's import block first — it is the fastest violation to spot. *Automated by the Enforcement gate above — `{{ARCH_CHECK_CMD}}`, run in pre-commit and required CI.*
 2. No framework, ORM, HTTP, SDK, or env import appears in `{{DOMAIN_DIR}}` or `{{USECASE_DIR}}` — including decorators, annotations, and type-only imports, which still bind those layers to a vendor's shape and release cycle.
 3. No domain type carries a persistence, validation-library, or serialization annotation.
 4. No use case accepts or returns a framework request/response, a status code, or a transport-shaped envelope.
