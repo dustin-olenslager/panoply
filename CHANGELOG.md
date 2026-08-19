@@ -19,10 +19,16 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   Windsurf, Cline, aider): the ordered onboarding contract (roadmap → in-progress → worklog → CLAUDE.md
   → rules), the non-negotiables, a first-class Architecture section, a `MIRROR` block (the "if you read
   nothing else" essentials), and an honest enforcement note. `CLAUDE.md` bridges to it via `@AGENTS.md`.
-- `scripts/sync-agents.sh` — POSIX-sh DRY mirror generator: extracts the `AGENTS.md` `MIRROR` block and
-  emits six tool-native files (`.github/copilot-instructions.md`, `.clinerules/`, `GEMINI.md`,
-  `CONVENTIONS.md`, `.cursor/rules/`, `.windsurf/rules/`); `--check` is the drift gate for pre-commit/CI.
-  The kit ships the script, not the mirrors (they carry an unfilled `{{PROJECT_NAME}}` until `/adapt`).
+- `scripts/sync-agents.sh` — POSIX-sh DRY mirror generator that emits **self-contained** tool-native
+  files: each mirror inlines the `AGENTS.md` `MIRROR` preamble followed by the full body of every
+  `.claude/rules/*.md` module, so Cursor/Copilot/Windsurf/Cline/Gemini/aider/Codex get the COMPLETE
+  ruleset from their own file — never a `.claude/rules/` pointer they cannot follow. `.cursor/rules/`
+  gets one `alwaysApply` `.mdc` per module (+ a preamble file); `.github/copilot-instructions.md`,
+  `GEMINI.md`, `CONVENTIONS.md`, `.clinerules/`, `.windsurf/rules/` each get one concatenated file. The
+  generator also refills `AGENTS.md`'s `<!-- PANOPLY:RULES:BEGIN/END -->` block with the same bodies so
+  AGENTS.md is self-contained without `@`-imports. `--check` is the drift gate (wired into
+  `ci-verify.yml`) for pre-commit/CI. The kit ships the script, not the per-repo mirrors (they carry an
+  unfilled `{{PROJECT_NAME}}` until `/adapt`).
 - `scripts/templates/ci-verify.yml` + `scripts/templates/pre-commit` — the honest backstop: the one
   server-side plane (required CI) that binds every tool regardless of vendor, plus a convenience
   pre-commit hook. `<CMD>` slots filled by `/adapt`; branch-protection remains the one manual human step.
@@ -35,6 +41,12 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   trigger phrases and the one-time global install to `~/.claude/skills/panoply/SKILL.md`.
 
 ### Changed
+- Provider mirrors are now **self-contained**: `sync-agents.sh` inlines the full `.claude/rules/*.md`
+  bodies into every tool file and into `AGENTS.md`'s `PANOPLY:RULES` block (was: a header + `MIRROR`
+  block + a pointer to `.claude/rules/` no non-Claude tool could follow). `AGENTS.md` carries the
+  `PANOPLY:RULES` markers; `ci-verify.yml` runs `sync-agents.sh --check` so drift fails CI for every tool;
+  `adapt-claude-setup.md` runs the inlining generator last (after rules are pruned) and verifies no
+  mirror is a bare pointer.
 - `.claude/rules/clean-architecture.md` — new module-fenced **Enforcement** gate: names the per-stack
   boundary linter (dependency-cruiser / import-linter / ArchUnit / …), the report-only→blocking ramp,
   and "CI is the binding plane"; review-checklist item 1 now points at `{{ARCH_CHECK_CMD}}`.
