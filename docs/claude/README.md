@@ -8,19 +8,23 @@ setup do **not** belong here — those live in your own `~/.claude/` memory.
 
 Start at the top; read what bears on the task, not everything every time.
 
-1. `in-progress.md` — the ordered queue of what is next, with plan-doc pointers. **Always read first.**
-2. `architecture.md` — decisions and their reasoning (ADR entries).
-3. `key-patterns.md` — conventions, gotchas, testing practice.
-4. `infrastructure.md` — deploy, hosting, data stores, secrets, background jobs.
-5. `completed-features.md` — what already exists, so you do not rebuild it.
-6. The relevant **area folder** — active plans and research for the thing you are changing.
+1. `roadmap.md` — the overall plan: initiatives in Now/Next/Later. Read with `in-progress.md`.
+2. `in-progress.md` — the ordered queue of what is next, with plan-doc pointers. **Always read first among the tactical docs.**
+3. `architecture.md` — decisions and their reasoning (ADR entries).
+4. `key-patterns.md` — conventions, gotchas, testing practice.
+5. `infrastructure.md` — deploy, hosting, data stores, secrets, background jobs.
+6. `completed-features.md` — what already exists, so you do not rebuild it.
+7. `worklog.md` — the running per-change history (or the repo's `CHANGELOG` `[Unreleased]`); skim for what landed recently.
+8. The relevant **area folder** — active plans and research for the thing you are changing.
 
 ## Layout
 
 ```
 docs/claude/
   README.md               this file
-  in-progress.md          ordered queue of active work
+  roadmap.md              canonical overall plan (initiatives, Now/Next/Later)
+  in-progress.md          ordered queue of active work, rolls up into roadmap.md
+  worklog.md              running per-change log (omit if the repo uses CHANGELOG [Unreleased])
   completed-features.md   shipped log, with archive paths
   architecture.md         decisions worth recording (ADRs)
   infrastructure.md       how it runs and deploys
@@ -45,9 +49,11 @@ are the point, not a defect. Newest file wins; earlier ones exist for trend comp
 
 1. **Plan** — copy `_templates/plan.md` into `<area>/<feature>/plan.md`; link it from `in-progress.md`.
 2. **Build** — re-read the plan at the start of each milestone; tick milestones off; record surprises
-   inline with `> **Build note:**` at the moment you find them.
+   inline with `> **Build note:**` at the moment you find them; append a `worklog.md` line (or a
+   `CHANGELOG` `[Unreleased]` line) in the same commit as each landed change.
 3. **Ship** — move the whole `<feature>/` folder into `<area>/completed/`, rename files to describe
-   what shipped, add a row to `completed-features.md`, and remove the item from `in-progress.md`.
+   what shipped, add a row to `completed-features.md`, remove the item from `in-progress.md`, and move
+   the initiative in `roadmap.md` (to Shipped if it was its last plan).
 4. **Promote** — anything durable the build taught you (a decision, a gotcha) graduates out of the
    plan into `architecture.md` or `key-patterns.md`. Plans are archived; those two files are living.
 

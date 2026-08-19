@@ -38,6 +38,9 @@
 | Typecheck / static analysis | `{{TYPECHECK_CMD}}` |
 | Lint | `{{LINT_CMD}}` |
 | Build | `{{BUILD_CMD}}` |
+<!-- MODULE:arch -->
+| Architecture boundary check | `{{ARCH_CHECK_CMD}}` |
+<!-- /MODULE:arch -->
 <!-- MODULE:database -->
 | Generate migration | `{{MIGRATE_GEN_CMD}}` |
 | Apply migration | `{{MIGRATE_APPLY_CMD}}` |
@@ -59,6 +62,11 @@ model will confidently run a command that fails — delete the row instead.
 The rules below are not suggestions. When a rule and a shortcut conflict, the rule wins — or you
 raise the conflict explicitly and let me decide. Read the module that governs what you're touching
 before you touch it.
+
+<!-- Cross-tool agents (Codex, Cursor, Gemini, Copilot, Windsurf, Cline, aider): the provider-neutral
+     hub is AGENTS.md at the repo root — read it first. Claude loads it via the import below, so the
+     onboarding contract, the non-negotiables, and the hard guardrails are in every Claude context too. -->
+@AGENTS.md
 
 ### Architecture — the premise everything else inherits from
 
@@ -106,8 +114,10 @@ of this premise to its own subject.
 
 Team-shared context lives in `docs/claude/` and is committed to git. **Read these when relevant:**
 
+- `docs/claude/roadmap.md` — **the overall plan** — initiatives (Now/Next/Later); read with in-progress.md
 - `docs/claude/in-progress.md` — **start here** — the ordered queue of what's next, with pointers to plan docs
 - `docs/claude/completed-features.md` — what's already been built
+- `docs/claude/worklog.md` — running change log (or the `CHANGELOG` `[Unreleased]`); append one line in the same commit as your change
 - `docs/claude/architecture.md` — key decisions and why they were made
 - `docs/claude/infrastructure.md` — deploy pipeline, hosting, data stores, jobs
 - `docs/claude/key-patterns.md` — dev patterns, gotchas, testing conventions

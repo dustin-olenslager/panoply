@@ -21,6 +21,36 @@ The distinction is not about secrecy, it is about durability: committed docs are
 
 Read the specific files that bear on the task, not all of them every time. But never start non-trivial work without at least `in-progress.md` and the area folder for the thing you are changing.
 
+## The always-current plan & worklog
+
+Four artifacts, four altitudes. Each owns ONE fact-granularity; nothing restates another, so nothing
+drifts. This is the anti-redundancy contract — keep to it and the logs cannot contradict each other.
+
+| Altitude | File | Owns | Granularity |
+|---|---|---|---|
+| Strategic | `docs/claude/roadmap.md` | Initiatives, their band (Now/Next/Later), links down | one initiative |
+| Tactical | `docs/claude/in-progress.md` | The active queue, blocked, parked, per-row Next step | one task/feature |
+| Continuous | `docs/claude/worklog.md` **or** the repo's `CHANGELOG`/`HISTORY` `[Unreleased]` | What actually landed | one change |
+| Durable | `docs/claude/completed-features.md` | What now exists + its archived plan path | one shipped feature |
+
+A fifth surface, `CHANGELOG.md`/`HISTORY.md` release notes, is **user-facing and derived** — curated
+from the worklog at release time, not maintained per-change in parallel. If the repo uses its
+`[Unreleased]` section AS the running worklog, there is no separate `worklog.md` (one running log, never two).
+
+### The same-change update contract (every agent, every provider)
+
+In the SAME commit that lands work — Claude, Codex, Cursor, or any other tool:
+
+1. **Append one worklog line** (to `worklog.md`, or the `[Unreleased]` section) — what changed, where.
+2. **Update the `in-progress.md` row**: its status and its Next-step handoff — or remove the row on ship.
+3. **On ship**, additionally: add the `completed-features.md` entry, MOVE the `roadmap.md` initiative
+   (to Shipped if this was its last plan), and archive the plan folder.
+4. **On a new or reprioritised initiative**: add or move its `roadmap.md` row.
+
+This contract is plain-markdown, enforced by review and `/audit-claude-setup` — never a Claude-only
+permission gate, so it binds a non-Claude agent exactly as much as a Claude one. It is mirrored into
+`AGENTS.md` so every tool reads it. **Shipped-but-unlogged counts as not done** (see below).
+
 ## When to write
 
 - **When a plan is made** — persist it to a file under the area folder, from `docs/claude/_templates/plan.md`, and link it from `in-progress.md`. Plans that live only in chat are erased by compaction.
@@ -48,5 +78,9 @@ Archive, do not delete. The reasoning behind a shipped feature is the context fo
 ## Hygiene
 
 - One fact, one home. If something belongs in `architecture.md`, do not also paste it into a plan file — copies drift, and a reader cannot tell which copy is current.
+- **`completed-features.md` is the feature narrative, not a changelog.** It records what a user or
+  caller can now do, plus the archived plan path. If the repo keeps a `CHANGELOG.md`/`HISTORY.md`,
+  that stays the release/commit line; `completed-features.md` may reference a release but never
+  restates the commit log. One fact, one home — across both files, and across the four altitudes above.
 - Correct stale docs on sight. Finding an out-of-date statement and leaving it there makes you the reason the next person trusts it.
 - Keep entries short and dated. These files are read under context pressure; a wall of prose gets skimmed and misread.
