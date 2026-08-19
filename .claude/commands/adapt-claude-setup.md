@@ -239,11 +239,18 @@ Work in this order; it is the order that avoids leaving orphans.
    `roadmap.md` from the kit template (keep the example row for the user to delete). For the worklog,
    use the Phase 1 decision — if a reusable `CHANGELOG`/`HISTORY` `[Unreleased]` log exists, point the
    contract at it and do NOT create `worklog.md`; otherwise create `worklog.md`.
-9. **Generate the provider-neutral hub.** Copy the kit's `AGENTS.md` template, fill `{{PROJECT_NAME}}`
-   (its only placeholder), then run `sh scripts/sync-agents.sh` to emit the tool mirrors from its
-   `MIRROR` block. If an `AGENTS.md` already existed, MERGE (theirs wins, same as `CLAUDE.md`): keep
-   their content, append the onboarding contract + `MIRROR` block + the sync note, then run the script.
-   Add `@AGENTS.md` to `CLAUDE.md` (Edit 1 of the CLAUDE.md changes).
+9. **Generate the provider-neutral hub — run this LAST, after the rules are filled and pruned (steps
+   1–8).** Copy the kit's `AGENTS.md` template, fill `{{PROJECT_NAME}}` (its only placeholder), keep its
+   `<!-- PANOPLY:RULES:BEGIN/END -->` markers, then run `sh scripts/sync-agents.sh`. The generator emits
+   **self-contained** tool mirrors — each one inlines the `MIRROR` preamble followed by the full body of
+   every surviving `.claude/rules/*.md` module (`.cursor/rules/` gets one `.mdc` per module plus a
+   preamble file; `.github/copilot-instructions.md`, `GEMINI.md`, `CONVENTIONS.md`, `.clinerules/`,
+   `.windsurf/rules/` each get one concatenated file) — and refills `AGENTS.md`'s `PANOPLY:RULES` block
+   with the same bodies, so no tool is left a bare pointer to `.claude/rules/`. Run it AFTER pruning so a
+   deleted module never gets inlined (a stale rule inlined everywhere is worse than a missing one). If an
+   `AGENTS.md` already existed, MERGE (theirs wins, same as `CLAUDE.md`): keep their content, append the
+   onboarding contract + `MIRROR` block + the `PANOPLY:RULES` markers + the sync note, then run the
+   script. Add `@AGENTS.md` to `CLAUDE.md` (Edit 1 of the CLAUDE.md changes).
 10. **Wire the enforcement plane, honestly.** Copy `scripts/templates/ci-verify.yml` and
    `scripts/templates/pre-commit` in place, filling their `<CMD>` slots from the Key Commands table.
    Do NOT enable branch protection or mark checks required — that is a repo-settings action only a human
@@ -276,6 +283,10 @@ Run these and fix what they find. Do not report success on an unverified step.
 - **Provider hub wired.** `AGENTS.md` exists, `{{PROJECT_NAME}}` filled, `CLAUDE.md` contains
   `@AGENTS.md`, and `sh scripts/sync-agents.sh --check` exits clean. `AGENTS.md`'s read-order paths all
   resolve on disk (`roadmap.md`, `in-progress.md`, the worklog target, the rule modules it names).
+- **Mirrors are self-contained, not pointers.** Every generated mirror inlines the full rule bodies —
+  spot-check by grepping a distinctive sentence from `clean-architecture.md` and confirming it appears
+  verbatim in `.github/copilot-instructions.md`, `GEMINI.md`, and a `.cursor/rules/*.mdc`. No mirror
+  should say only "the canonical rules live in `.claude/rules/`" — that is the bug this generator fixes.
 - **Plan artifacts present.** `roadmap.md` exists; the worklog target exists (either `worklog.md` or a
   `CHANGELOG`/`HISTORY` `[Unreleased]` section) — exactly one, never both.
 - **Nothing outside scope changed.** `git status --porcelain` must show changes only under

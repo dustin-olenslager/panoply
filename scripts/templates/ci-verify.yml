@@ -31,6 +31,12 @@ jobs:
       #   with: { node-version-file: '.nvmrc', cache: 'npm' }
       # - run: <INSTALL_CMD>
 
+      # Agent-mirror drift — fails if any tool-native file (.cursor/.clinerules/.windsurf/.github/
+      # copilot-instructions.md, GEMINI.md, CONVENTIONS.md) or the AGENTS.md rules block is stale vs
+      # AGENTS.md + .claude/rules/*.md. This is what keeps every tool's inlined ruleset honest.
+      - name: Agent mirrors in sync
+        run: sh scripts/sync-agents.sh --check
+
       - name: Typecheck
         run: <TYPECHECK_CMD>          # CLAUDE.md → Key Commands
 
