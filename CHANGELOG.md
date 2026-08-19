@@ -51,6 +51,7 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   (layers/ports/DTOs/direction/swap-test), and worklog/roadmap moves in the On-ship step.
 - `docs/claude/in-progress.md` — an Initiative column and the tactical→strategic roll-up note.
 - `docs/claude/README.md` — read order, layout, and doc lifecycle now name roadmap + worklog.
+- docs: describe the install as provider-agnostic (AGENTS.md hub + mirrors + CI), not Claude-only.
 
 ## [1.0.0] — 2026-08-19
 

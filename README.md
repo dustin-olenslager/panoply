@@ -1,10 +1,12 @@
 # Claude Project Template
 
-A drop-in Claude Code configuration kit for any project — new or existing, any language, any stack.
-Copy it in, run one command, and Claude arrives already knowing how you work: Clean Architecture as
-the premise, a change-approval protocol, plan files that survive context compaction, migration
-safety rails, enforced test coverage, and a documentation system that keeps project knowledge in
-the repo instead of in one person's chat history.
+A drop-in agent-governance kit for any project — new or existing, any language, any stack. Built on
+Claude Code's config format, but it binds **every coding agent that touches the repo** — Codex,
+Cursor, Copilot, Windsurf, Cline, aider, Gemini, and Claude alike. Copy it in, run one command, and
+whatever tool works here arrives already knowing how you work: Clean Architecture as the premise, a
+change-approval protocol, plan files that survive context compaction, migration safety rails,
+enforced test coverage, and a documentation system that keeps project knowledge in the repo instead
+of in one person's chat history.
 
 ## Quickstart
 
@@ -25,8 +27,8 @@ Then open Claude Code in the project and run:
 ```
 
 **Existing repo** (drop the kit alongside code you already have): stage it in a temp dir so it never
-clobbers a `CLAUDE.md` you already wrote, then let the adapt command merge — your rules win every
-conflict.
+clobbers a `CLAUDE.md` or `AGENTS.md` you already wrote, then let the adapt command merge — your
+rules win every conflict.
 
 ```
 npx degit dustin-olenslager/panoply .claude-kit-tmp
@@ -38,9 +40,26 @@ Then in Claude Code:
 /adapt-claude-setup
 ```
 
-`/adapt-claude-setup` reads the staged kit, merges `.claude/`, `docs/`, and `CLAUDE.md` into your
-project (renaming the kit's `CLAUDE.md` to `CLAUDE.template.md` when you already have one), fills every
-placeholder, prunes the modules that don't apply, and deletes `.claude-kit-tmp` when it's done.
+`/adapt-claude-setup` reads the staged kit and binds **every agent and tool working in the repo**,
+not just Claude. Three things carry that guarantee, and they are the headline of what the command
+installs:
+
+- **`AGENTS.md`** — the cross-tool hub that Codex, aider, and the rest read on entry. The command
+  merges it into your project's existing `AGENTS.md` (yours wins every conflict), so the onboarding
+  contract and non-negotiables are one shared contract for every tool.
+- **Provider mirrors** — `scripts/sync-agents.sh` generates the tool-native rule files from
+  `AGENTS.md`: `.cursor/rules/` (Cursor), `.github/copilot-instructions.md` (Copilot),
+  `.windsurf/rules/` (Windsurf), `.clinerules/` (Cline), `GEMINI.md` (Gemini), and `CONVENTIONS.md`
+  (aider). One source of truth, mirrored per vendor; `--check` is the drift gate for pre-commit/CI.
+- **CI + pre-commit** — `.github/workflows/verify.yml` plus the pre-commit hook are the enforcement
+  plane that binds the repo regardless of which tool wrote the code.
+
+Claude is one consumer of that shared contract. Its slice — `.claude/` and `CLAUDE.md` — is merged
+in as a sub-point of the broader install: the kit's `CLAUDE.md` is renamed to `CLAUDE.template.md`
+when you already have one, and `.claude/settings.json` deny-rules bind Claude alone. For every other
+tool those same prohibitions ride along as doc-level MUST-NOTs in `AGENTS.md`, backstopped by CI.
+The command also fills every placeholder, prunes the modules that don't apply, and deletes
+`.claude-kit-tmp` when it's done.
 
 Answer at most five questions (each has a default — "accept all" works). The command inspects your
 manifests, scripts, CI config, and directory layout first, and only asks what it genuinely cannot
