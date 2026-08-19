@@ -39,6 +39,7 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
 - docs: ship the /panoply skill + install instructions in README — `skills/panoply/SKILL.md` (the
   natural-language applier skill, now shipped inside the kit) plus a README section covering the
   trigger phrases and the one-time global install to `~/.claude/skills/panoply/SKILL.md`.
+- docs: README now states mirrors are fully self-contained (complete ruleset inlined, zero Claude dependency).
 
 ### Changed
 - Provider mirrors are now **self-contained**: `sync-agents.sh` inlines the full `.claude/rules/*.md`

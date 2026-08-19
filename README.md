@@ -50,7 +50,11 @@ installs:
 - **Provider mirrors** — `scripts/sync-agents.sh` generates the tool-native rule files from
   `AGENTS.md`: `.cursor/rules/` (Cursor), `.github/copilot-instructions.md` (Copilot),
   `.windsurf/rules/` (Windsurf), `.clinerules/` (Cline), `GEMINI.md` (Gemini), and `CONVENTIONS.md`
-  (aider). One source of truth, mirrored per vendor; `--check` is the drift gate for pre-commit/CI.
+  (aider). Each generated file is **fully self-contained** — the **complete ruleset is inlined**,
+  not a pointer to `.claude/rules/` — so Cursor, Copilot, Windsurf, Cline, aider, and Gemini each
+  read the entire governance from their own native file with **zero Claude dependency**, and
+  `AGENTS.md` carries the full rules inline too (no `@`-imports). One source of truth, mirrored per
+  vendor; a CI `sync-agents.sh --check` keeps every mirror in lockstep with the source.
 - **CI + pre-commit** — `.github/workflows/verify.yml` plus the pre-commit hook are the enforcement
   plane that binds the repo regardless of which tool wrote the code.
 
