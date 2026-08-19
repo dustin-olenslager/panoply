@@ -8,21 +8,43 @@ the repo instead of in one person's chat history.
 
 ## Quickstart
 
-1. Copy `.claude/`, `docs/`, and `CLAUDE.md` into your project root — **not this README**, which
-   documents the kit, not your project. If your project already has a `CLAUDE.md`, don't overwrite
-   it: drop the kit's copy in as `CLAUDE.template.md` and the adapt command will merge the two,
-   your rules winning every conflict. (Simplest of all: open Claude Code in your project and say
-   *"copy the kit from &lt;path&gt; and follow its `.claude/commands/adapt-claude-setup.md`"* — it
-   handles the copy, the merge, and the adaptation in one pass.)
-2. Open Claude Code in the project and run:
+The kit lives in a versioned GitHub repo; `degit` copies its file tree with **no upstream git history**
+to entangle with yours. No install, one command.
 
-   ```
-   /adapt-claude-setup
-   ```
+**New project:**
 
-3. Answer at most five questions (each has a default — "accept all" works). The command inspects
-   your manifests, scripts, CI config, and directory layout first, and only asks what it genuinely
-   cannot infer.
+```
+npx degit an organization/panoply my-app
+cd my-app && git init
+```
+
+Then open Claude Code in the project and run:
+
+```
+/adapt-claude-setup
+```
+
+**Existing repo** (drop the kit alongside code you already have): stage it in a temp dir so it never
+clobbers a `CLAUDE.md` you already wrote, then let the adapt command merge — your rules win every
+conflict.
+
+```
+npx degit an organization/panoply .claude-kit-tmp
+```
+
+Then in Claude Code:
+
+```
+/adapt-claude-setup
+```
+
+`/adapt-claude-setup` reads the staged kit, merges `.claude/`, `docs/`, and `CLAUDE.md` into your
+project (renaming the kit's `CLAUDE.md` to `CLAUDE.template.md` when you already have one), fills every
+placeholder, prunes the modules that don't apply, and deletes `.claude-kit-tmp` when it's done.
+
+Answer at most five questions (each has a default — "accept all" works). The command inspects your
+manifests, scripts, CI config, and directory layout first, and only asks what it genuinely cannot
+infer.
 
 That's it. The command fills every placeholder, deletes the modules that don't apply to your
 project, maps the four Clean Architecture layers onto your actual directories, and reports what it

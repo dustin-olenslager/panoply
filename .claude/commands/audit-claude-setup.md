@@ -85,6 +85,15 @@ update the rule, or fix the code — with a recommendation.
 - Area folders that are empty, and active work with no area folder at all.
 - The completed log not mentioning anything from the last several months, which usually means the
   whole lifecycle has quietly stopped being used — worth saying out loud rather than patching.
+- **Shipped-but-unlogged — the log lags reality without being fully dead.** The bullet above catches a
+  lifecycle that fully stopped; this catches the subtler, more common case where features kept
+  shipping but the log fell behind. Diff work merged since the newest `completed-features.md` entry
+  (`--since <ref>` if given) against the completed log and `in-progress.md`, and flag each gap: a
+  feature whose commits merged but has no completed-log entry, or that still sits in `in-progress.md`
+  marked active — name the merging commit/PR for each. Also flag an active `in-progress.md` row or
+  plan item carrying no `Next step`/handoff. This is the after-the-fact backstop for `documentation.md`
+  ("When to write" → handoff-on-pause and "shipped-but-unlogged counts as not done"); a log that lags
+  reality is read as confidently as a true one.
 - **Exempt from all of the above: `docs/claude/reports/`** — the append-only dated archive of
   command-generated reports (`/assess-stack --save` output). Old reports referencing since-removed
   elements are history serving trend comparison, not staleness; never flag, archive, or prune them.

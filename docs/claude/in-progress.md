@@ -3,6 +3,10 @@
 **Read this first.** The ordered queue of what is next. Top of the list is what to pick up now.
 Every item points at a plan doc — if an item has no plan doc, it is not ready to start.
 
+The **Notes** cell of the active row is its handoff: keep the *exact next step* there — the file to
+open, the command to run, the blocker — refreshed whenever you pause, so the next session resumes
+cold. A row with no next step is a row nobody can pick up. (Doctrine: `.claude/rules/documentation.md`.)
+
 When an item ships: remove its row from here, move its folder into `<area>/completed/`, and add an
 entry to `completed-features.md`.
 
@@ -10,7 +14,7 @@ entry to `completed-features.md`.
 
 | # | Item | Area | Plan doc | Status | Notes |
 |---|------|------|----------|--------|-------|
-| 1 | _EXAMPLE — delete this row_ — paginated list view for the records table | `ui` | [`ui/records-list/plan.md`](ui/records-list/plan.md) | In progress — milestone 2 of 4 | Server-side paging landed; filters next. Waiting on sort-order decision. |
+| 1 | _EXAMPLE — delete this row_ — paginated list view for the records table | `ui` | [`ui/records-list/plan.md`](ui/records-list/plan.md) | In progress — milestone 2 of 4 | **Next:** wire the `?sort=` param in `RecordsTable.tsx` `onSort`; server paging landed, filters after. Blocked on the sort-order decision (open Q in plan). |
 | 2 | | | | Not started | |
 | 3 | | | | Not started | |
 

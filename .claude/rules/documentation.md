@@ -25,12 +25,13 @@ Read the specific files that bear on the task, not all of them every time. But n
 
 - **When a plan is made** — persist it to a file under the area folder, from `docs/claude/_templates/plan.md`, and link it from `in-progress.md`. Plans that live only in chat are erased by compaction.
 - **During the build, at the moment of discovery** — when reality contradicts the plan, record it inline with a `> **Build note:**` line. Written later, it is written wrong; written never, the next person rediscovers it the expensive way.
+- **When you pause or hand off** — before you stop, write the *exact next action* where the next session looks first: the `Notes` cell of the active row in `in-progress.md`, or the `Next step` line of the plan doc for a multi-session feature. Not a topic ("continue the auth work") — the file to open, the function to change, the command to run, the blocker. A cold session resumes from this and nothing else, so it is the one note always worth writing: the person who needs it is not you, and cannot reconstruct where you stopped from the code alone.
 - **When a decision is made that a future reader would otherwise question** — add an ADR entry to `architecture.md`. The trigger is "someone will wonder why we did this," not "this was hard."
 - **Always ADR-worthy: anything that moves a layer boundary or introduces a port.** A new port and the adapter behind it, a rule relocated between layers, a Detail swapped out (database, framework, vendor), or a deliberate decision to let one layer know about another. These are precisely what `architecture.md` exists for: the reasoning is invisible in the diff six months later, so without the entry the next person re-litigates a decision that was already made carefully. See `clean-architecture.md`.
 - **When you get burned by a non-obvious behavior** — add it to `key-patterns.md` as a gotcha, with the symptom, not just the fix. The next person will arrive with the symptom.
 - **When infrastructure changes** — update `infrastructure.md` in the same PR as the change. Infra docs that lag the infra are worse than none, because they are trusted.
 
-Update the doc in the same PR as the code it describes. A "docs pass later" never happens.
+Update the doc in the same PR as the code it describes. A "docs pass later" never happens. **Shipped-but-unlogged counts as not done:** if it is live and the log does not show it, the task is unfinished — finish it by writing the record. The first time the log lags reality, every reader stops trusting it and re-reads the code instead, which is the exact cost this whole file exists to avoid.
 
 ## When to archive
 
