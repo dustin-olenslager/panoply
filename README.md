@@ -14,7 +14,7 @@ to entangle with yours. No install, one command.
 **New project:**
 
 ```
-npx degit an organization/panoply my-app
+npx degit dustin-olenslager/panoply my-app
 cd my-app && git init
 ```
 
@@ -29,7 +29,7 @@ clobbers a `CLAUDE.md` you already wrote, then let the adapt command merge — y
 conflict.
 
 ```
-npx degit an organization/panoply .claude-kit-tmp
+npx degit dustin-olenslager/panoply .claude-kit-tmp
 ```
 
 Then in Claude Code:

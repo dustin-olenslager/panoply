@@ -5,7 +5,7 @@
 # Idempotent enough to re-read before running; it stops if a repo already exists.
 set -euo pipefail
 
-REPO_SLUG="an organization/panoply"
+REPO_SLUG="dustin-olenslager/panoply"
 AUTHOR_NAME="the owner"
 AUTHOR_EMAIL="94700316+dustin-olenslager@users.noreply.github.com"
 

@@ -16,8 +16,8 @@ _Nothing yet._
 
 ## [1.0.0] — 2026-08-19
 
-Initial published release of the Panoply kit (`an organization/panoply`), fetched with
-`npx degit an organization/panoply` and wired in by `/adapt-claude-setup`.
+Initial published release of the Panoply kit (`dustin-olenslager/panoply`), fetched with
+`npx degit dustin-olenslager/panoply` and wired in by `/adapt-claude-setup`.
 
 ### Added
 - Initial kit: `CLAUDE.md` spine, `.claude/rules/*`, `.claude/agents/*`,
