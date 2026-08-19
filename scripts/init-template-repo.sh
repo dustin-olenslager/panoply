@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # One-time: put the template under version control and publish it, so degit has something to fetch
 # and semver tags become the version anchor. Run once from the template root.
-#   C:/Users/dusti/Desktop/claude-project-template
 # Idempotent enough to re-read before running; it stops if a repo already exists.
 set -euo pipefail
 
