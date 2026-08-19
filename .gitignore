@@ -1,0 +1,7 @@
+# Personal, machine-local overrides — never publish these
+.claude/settings.local.json
+settings.local.json
+CLAUDE.local.md
+
+# Staging dir for the existing-repo degit + /adapt-claude-setup flow
+.claude-kit-tmp/
