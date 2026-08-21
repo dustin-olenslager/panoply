@@ -17,16 +17,16 @@ or second-guess the adapt logic here — read the kit's file and execute it.
    git history, manifests). This new-vs-existing read is context the adapt step
    uses; note it and pass it along.
 
-2. **Fetch the kit into `<TARGET>/.claude-kit-tmp`.** The repo is PRIVATE, so use
-   an authenticated clone:
+2. **Fetch the kit into `<TARGET>/.claude-kit-tmp`.** The repo is public, so use
+   `degit` (lighter, no upstream git history to entangle with yours):
 
    ```sh
-   git clone --depth 1 https://github.com/dustin-olenslager/panoply "<TARGET>/.claude-kit-tmp"
-   rm -rf "<TARGET>/.claude-kit-tmp/.git"
+   npx degit dustin-olenslager/panoply "<TARGET>/.claude-kit-tmp"
    ```
 
-   (Once the repo is public, `npx degit dustin-olenslager/panoply .claude-kit-tmp`
-   also works and is lighter — but the clone form above works while it is private.)
+   (If `degit` is unavailable, an authenticated clone works too:
+   `git clone --depth 1 https://github.com/dustin-olenslager/panoply "<TARGET>/.claude-kit-tmp"`
+   then `rm -rf "<TARGET>/.claude-kit-tmp/.git"`.)
 
 3. **Read and EXECUTE the kit's adapt command against TARGET.** Open
    `<TARGET>/.claude-kit-tmp/.claude/commands/adapt-claude-setup.md` and follow its
@@ -43,7 +43,9 @@ or second-guess the adapt logic here — read the kit's file and execute it.
      existing `CHANGELOG`/`HISTORY` `[Unreleased]` section);
    - generates the provider mirrors via `scripts/sync-agents.sh` (Copilot, Cursor,
      Cline, Windsurf, Gemini, aider) from the single-source `AGENTS.md`;
-   - installs the CI + pre-commit enforcement plane from `scripts/templates/`.
+   - installs the CI + pre-commit enforcement plane from `scripts/templates/`,
+     including the docs landing gate (`scripts/check-docs.sh`) that fails any
+     commit changing code but not the worklog in the same commit.
 
    Follow the adapt command's own question budget (it asks at most five, or none
    with `--yes`). Do not add or skip its steps.
