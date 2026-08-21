@@ -31,6 +31,15 @@ _Delete the example entry once the first real feature ships._
 
 ---
 
+### Panoply Optimization — Mandatory PR gates, expert review, docs enforcement — 2026-08-21
+- **What shipped:** Full enforcement plane for any project adopting the kit: (1) `scripts/init-repo-protection.sh` — interactive branch protection via `gh` CLI (require PR, require `verify` check, forbid force-push, forbid direct push); (2) `scripts/check-expert-review.sh` — CI gate verifying expert review evidence (plan.md, checklist.md, adr.md new section, ≥2 persona sign-offs) with trivial escape hatches (label "trivial", commit prefix "trivial:", 1-file ≤15-line no-schema); (3) Expert-review policy in `.claude/rules/workflow.md` and `AGENTS.md` (4 default personas: Security, Performance, Maintainability, UX); (4) Updated CI/pre-commit templates with expert-review + docs gates; (5) Kit repo dogfood: `.github/workflows/verify.yml` with all gates; (6) Adapt command Phase 10 updated to wire expert-review gate and report branch protection outcome.
+- **Area:** `governance`
+- **Archived plan:** `governance/completed/plan.md` (master plan), `governance/completed/checklist.md`, `governance/completed/brief.md`, `governance/completed/adr.md` (ADR-0001)
+- **Notable decisions:** Interactive `gh` CLI for branch protection (not auto-API, not CI-fail); grep-based evidence check for expert review (not artifact check); trivial escape hatch prevents ceremony overload; policy in use-case layer (workflow.md), gate in framework layer (CI script) — Clean Architecture honored.
+- **Known gaps:** Branch protection requires `gh` auth (falls back to manual instructions); expert-review evidence can be boilerplate (mitigated by review culture + adversary-review skill); no hosted platform/MCP/self-updating docs.
+
+---
+
 ### Docs-gate — Mechanical landing gate enforcing worklog currency — 2026-08-21
 - **What shipped:** `scripts/check-docs.sh` fails any commit that changes non-markdown files (source, config, schema, scripts, CI) without also updating the worklog target (`CHANGELOG.md`/`HISTORY.md` `[Unreleased]` or `docs/claude/worklog.md`) in the same commit. Runs in required CI and pre-commit hook — provider-neutral, POSIX sh, no runtime deps.
 - **Area:** `governance`

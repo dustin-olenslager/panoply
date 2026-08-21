@@ -46,6 +46,7 @@ into the feature log.
 
 | Initiative | Shipped | Features (`completed-features.md`) |
 |---|---|---|
+| Mandatory PR gates + expert review + docs enforcement | 2026-08-21 | Branch protection init, expert-review CI gate, docs-gate completion, adapt command wiring |
 | Docs you can prove are current | 2026-08-21 | Docs-gate — mechanical landing gate enforcing worklog currency |
 
 <!-- Small project? An initiative and a queue row may be nearly the same thing — that is fine. Keep
