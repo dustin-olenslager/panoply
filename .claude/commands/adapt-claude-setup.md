@@ -258,6 +258,8 @@ Work in this order; it is the order that avoids leaving orphans.
     `verify` check, no force-push, no direct push). It prompts for confirmation and reports success/
     failure. If `gh` is unavailable or unauthenticated, it prints manual instructions and exits 0.
     Include the script's outcome in the Phase 5 report.
+    **The CI template now includes the expert-review gate** (`check-expert-review.sh`) and the docs gate
+    (`check-docs.sh`) by default — verify both jobs are present in the copied workflow.
 11. **Append to `.gitignore`** if missing: `.claude/settings.local.json`, `CLAUDE.local.md`.
 
 ---
@@ -325,10 +327,11 @@ Output, in this order and nothing more:
 7. **Worklog target** — state which was chosen: "reusing `CHANGELOG` `[Unreleased]`" vs "created
    `docs/claude/worklog.md`".
 8. **Provider mirrors** — list the tool files emitted; note the source of truth is `AGENTS.md` and the
-   fix for any drift is `sh scripts/sync-agents.sh` (wire `--check` into pre-commit/CI).
+    fix for any drift is `sh scripts/sync-agents.sh` (wire `--check` into pre-commit/CI).
 9. **Branch protection** — report the outcome of `init-repo-protection.sh`: "configured" / "skipped (no gh)" / "skipped (user declined)" / "failed (reason)". If configured, note that `verify` check is now required on `{{DEFAULT_BRANCH}}`.
-10. **Enforcement status** — if branch protection configured and `verify` check required, enforcement is BINDING. Otherwise, enforcement is ADVISORY: manual step needed to enable branch protection on `{{DEFAULT_BRANCH}}` and mark `ci-verify` checks required. Until then, `.claude/settings.json` binds only Claude and cross-tool guardrails are doc-level prose.
-11. **Architecture gate** — if no boundary linter exists, name it as a recommended setup: the per-stack tool (`clean-architecture.md` → Enforcement) encoding the filled layer map, started in report-only.
+10. **Expert-review gate** — report whether `check-expert-review.sh` is wired into the CI template and pre-commit hook. Note the trivial escape hatches (PR label "trivial", commit prefix "trivial:", 1-file ≤15-line no-schema change).
+11. **Enforcement status** — if branch protection configured and `verify` check required, enforcement is BINDING. Otherwise, enforcement is ADVISORY: manual step needed to enable branch protection on `{{DEFAULT_BRANCH}}` and mark `ci-verify` checks required. Until then, `.claude/settings.json` binds only Claude and cross-tool guardrails are doc-level prose.
+12. **Architecture gate** — if no boundary linter exists, name it as a recommended setup: the per-stack tool (`clean-architecture.md` → Enforcement) encoding the filled layer map, started in report-only.
 
 Close by telling the user to run `/audit-claude-setup` in a few months — a stale rule is read exactly
 as confidently as a true one.
