@@ -50,10 +50,13 @@ In a monorepo the closest `AGENTS.md` to the file you are editing wins; this roo
   touches before you write it. Full rule + review checklist: `.claude/rules/clean-architecture.md`.
 - **Plan before code; verify before commit.** No multi-file change without a persisted plan under
   `docs/claude/`; no commit without a green test / typecheck / lint run in the same session.
-- **The plan and worklog are never stale.** Every change updates `docs/claude/in-progress.md` (its
-  status + Next step), appends one line to the running worklog, and moves the `roadmap.md` initiative
-  when it starts or ships — all in the same commit as the code. Shipped-but-unlogged counts as not
-  done. Full doctrine: `.claude/rules/documentation.md`.
+- **The plan and worklog are never stale — and this is enforced, not just asked.** Every change
+  updates `docs/claude/in-progress.md` (its status + Next step), appends one line to the running
+  worklog, and moves the `roadmap.md` initiative when it starts or ships — all in the same commit as
+  the code. Shipped-but-unlogged counts as not done. **The landing gate `scripts/check-docs.sh` fails
+  any commit that changes code but not the worklog in the same commit** — it runs in required CI, so
+  no agent in any tool can land a code change without its doc update. Full doctrine:
+  `.claude/rules/documentation.md`.
 
 ## Architecture is non-negotiable
 
@@ -555,6 +558,17 @@ In the SAME commit that lands work — Claude, Codex, Cursor, or any other tool:
 This contract is plain-markdown, enforced by review and `/audit-claude-setup` — never a Claude-only
 permission gate, so it binds a non-Claude agent exactly as much as a Claude one. It is mirrored into
 `AGENTS.md` so every tool reads it. **Shipped-but-unlogged counts as not done** (see below).
+
+### The landing gate — mechanical enforcement
+
+The contract's deterministic core is enforced by `scripts/check-docs.sh`, which fails any commit that
+changes a non-markdown file (source, config, schema, scripts, CI) but not the worklog target in the
+same commit. It runs in required CI (`scripts/templates/ci-verify.yml`) and the pre-commit hook, so it
+binds every agent in every tool — the provider-neutral floor. The gate enforces **presence**, not
+**correctness**: a vague or wrong worklog line passes. Correctness is a review problem, not an
+automation problem — the honest limit of any git-native kit. The worklog target is auto-detected
+(`CHANGELOG.md`/`HISTORY.md` `[Unreleased]`, else `docs/claude/worklog.md`), overridable via
+`DOCS_WORKLOG`.
 
 ## When to write
 

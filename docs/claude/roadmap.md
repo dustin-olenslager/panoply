@@ -22,7 +22,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 
 | Initiative | Intent (one line) | Queue rows (`in-progress.md`) | Plan docs |
 |---|---|---|---|
-| _EXAMPLE — delete_ — Records UX overhaul | Make the records table usable at 10k+ rows | #1 paginated list view | [`ui/records-list/plan.md`](ui/records-list/plan.md) |
+| Docs you can prove are current | Make the docs update with every edit, enforced by a landing gate | #1 docs-gate | [`governance/docs-gate/plan.md`](governance/docs-gate/plan.md) |
 
 ## Next — committed, not yet started
 

@@ -51,6 +51,17 @@ This contract is plain-markdown, enforced by review and `/audit-claude-setup` �
 permission gate, so it binds a non-Claude agent exactly as much as a Claude one. It is mirrored into
 `AGENTS.md` so every tool reads it. **Shipped-but-unlogged counts as not done** (see below).
 
+### The landing gate — mechanical enforcement
+
+The contract's deterministic core is enforced by `scripts/check-docs.sh`, which fails any commit that
+changes a non-markdown file (source, config, schema, scripts, CI) but not the worklog target in the
+same commit. It runs in required CI (`scripts/templates/ci-verify.yml`) and the pre-commit hook, so it
+binds every agent in every tool — the provider-neutral floor. The gate enforces **presence**, not
+**correctness**: a vague or wrong worklog line passes. Correctness is a review problem, not an
+automation problem — the honest limit of any git-native kit. The worklog target is auto-detected
+(`CHANGELOG.md`/`HISTORY.md` `[Unreleased]`, else `docs/claude/worklog.md`), overridable via
+`DOCS_WORKLOG`.
+
 ## When to write
 
 - **When a plan is made** — persist it to a file under the area folder, from `docs/claude/_templates/plan.md`, and link it from `in-progress.md`. Plans that live only in chat are erased by compaction.

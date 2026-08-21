@@ -15,6 +15,16 @@ Semver, applied to governance:
 Provider-agnostic governance layer (MINOR — additive; safe to adopt).
 
 ### Added
+- `scripts/check-docs.sh` — the docs landing gate: fails any commit that changes a non-markdown file
+  (source, config, schema, scripts, CI) but not the worklog target in the same commit. Enforces the
+  same-change update contract mechanically, provider-neutrally (runs in required CI + pre-commit), so
+  no agent in any tool can land a code change without its doc update. Worklog target auto-detected
+  (`CHANGELOG.md`/`HISTORY.md`, else `docs/claude/worklog.md`), overridable via `DOCS_WORKLOG`.
+  Wired into `scripts/templates/pre-commit` and `scripts/templates/ci-verify.yml` (`--since origin/main`).
+- `AGENTS.md` — the "plan and worklog are never stale" non-negotiable now names the landing gate as
+  its mechanical enforcement (was: discipline + audit only).
+- `.claude/rules/documentation.md` — new "landing gate" section: the gate enforces presence, not
+  correctness; correctness stays a review problem.
 - `AGENTS.md` — the provider-neutral hub for ANY coding agent (Claude, Codex, Cursor, Gemini, Copilot,
   Windsurf, Cline, aider): the ordered onboarding contract (roadmap → in-progress → worklog → CLAUDE.md
   → rules), the non-negotiables, a first-class Architecture section, a `MIRROR` block (the "if you read

@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history, so the docs gate can diff against the PR base
 
       # --- Set up your toolchain here (node/python/go/…); delete the ones you do not use. ---
       # - uses: actions/setup-node@v4
@@ -36,6 +38,13 @@ jobs:
       # AGENTS.md + .claude/rules/*.md. This is what keeps every tool's inlined ruleset honest.
       - name: Agent mirrors in sync
         run: sh scripts/sync-agents.sh --check
+
+      # Docs landing gate — fails if any commit in this PR changed code but not the worklog.
+      # Uses the PR base SHA (not a hardcoded branch name) so it works on any default branch and
+      # on the first commit; the ref-guard in check-docs.sh fails loudly rather than silently passing.
+      - name: Docs in sync
+        run: sh scripts/check-docs.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
 
       - name: Typecheck
         run: <TYPECHECK_CMD>          # CLAUDE.md → Key Commands

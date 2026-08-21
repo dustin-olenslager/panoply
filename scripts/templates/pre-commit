@@ -20,4 +20,9 @@ if [ -f scripts/sync-agents.sh ]; then
   echo "pre-commit: agent mirrors…"; sh scripts/sync-agents.sh --check
 fi
 
+# Docs landing gate — no code change lands without its worklog line in the same commit.
+if [ -f scripts/check-docs.sh ]; then
+  echo "pre-commit: docs gate…"; sh scripts/check-docs.sh
+fi
+
 echo "pre-commit: OK"
