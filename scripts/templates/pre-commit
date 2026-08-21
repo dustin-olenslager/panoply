@@ -25,4 +25,9 @@ if [ -f scripts/check-docs.sh ]; then
   echo "pre-commit: docs gate…"; sh scripts/check-docs.sh
 fi
 
+# Expert-review gate (local: checks staged change for trivial escape or review evidence).
+if [ -f scripts/check-expert-review.sh ]; then
+  echo "pre-commit: expert review…"; sh scripts/check-expert-review.sh
+fi
+
 echo "pre-commit: OK"

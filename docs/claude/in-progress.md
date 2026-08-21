@@ -18,7 +18,7 @@ entry to `completed-features.md`.
 
 | # | Item | Area | Initiative | Plan doc | Status | Notes |
 |---|------|------|------------|----------|--------|-------|
-| 1 | docs-gate — landing gate enforcing the same-change update contract | `governance` | Docs you can prove are current | [`governance/docs-gate/plan.md`](governance/docs-gate/plan.md) | In progress — M3 of 3 | **Next:** `chmod +x scripts/check-docs.sh`, run `sh scripts/check-docs.sh --since <base>` against the kit repo to prove it fires, then ship (archive plan, completed-features entry, roadmap move). |
+| 1 | | | | | Not started | |
 | 2 | | | | | Not started | |
 | 3 | | | | | Not started | |
 

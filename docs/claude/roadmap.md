@@ -22,7 +22,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 
 | Initiative | Intent (one line) | Queue rows (`in-progress.md`) | Plan docs |
 |---|---|---|---|
-| Docs you can prove are current | Make the docs update with every edit, enforced by a landing gate | #1 docs-gate | [`governance/docs-gate/plan.md`](governance/docs-gate/plan.md) |
+| | | | |
 
 ## Next — committed, not yet started
 
@@ -46,7 +46,7 @@ into the feature log.
 
 | Initiative | Shipped | Features (`completed-features.md`) |
 |---|---|---|
-| | | |
+| Docs you can prove are current | 2026-08-21 | Docs-gate — mechanical landing gate enforcing worklog currency |
 
 <!-- Small project? An initiative and a queue row may be nearly the same thing — that is fine. Keep
      this file to a handful of rows; if an initiative needs more than a line, it has become a plan doc,

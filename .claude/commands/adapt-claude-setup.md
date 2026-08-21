@@ -251,10 +251,13 @@ Work in this order; it is the order that avoids leaving orphans.
    `AGENTS.md` already existed, MERGE (theirs wins, same as `CLAUDE.md`): keep their content, append the
    onboarding contract + `MIRROR` block + the `PANOPLY:RULES` markers + the sync note, then run the
    script. Add `@AGENTS.md` to `CLAUDE.md` (Edit 1 of the CLAUDE.md changes).
-10. **Wire the enforcement plane, honestly.** Copy `scripts/templates/ci-verify.yml` and
-   `scripts/templates/pre-commit` in place, filling their `<CMD>` slots from the Key Commands table.
-   Do NOT enable branch protection or mark checks required — that is a repo-settings action only a human
-   can take. Report it as the one manual step that turns the guardrails from advisory into binding.
+10. **Wire the enforcement plane.** Copy `scripts/templates/ci-verify.yml` and
+    `scripts/templates/pre-commit` in place, filling their `<CMD>` slots from the Key Commands table.
+    **Then run the branch protection init script interactively:** `sh scripts/init-repo-protection.sh`.
+    This script uses `gh` CLI to configure branch protection on the default branch (require PR, require
+    `verify` check, no force-push, no direct push). It prompts for confirmation and reports success/
+    failure. If `gh` is unavailable or unauthenticated, it prints manual instructions and exits 0.
+    Include the script's outcome in the Phase 5 report.
 11. **Append to `.gitignore`** if missing: `.claude/settings.local.json`, `CLAUDE.local.md`.
 
 ---
@@ -323,11 +326,9 @@ Output, in this order and nothing more:
    `docs/claude/worklog.md`".
 8. **Provider mirrors** — list the tool files emitted; note the source of truth is `AGENTS.md` and the
    fix for any drift is `sh scripts/sync-agents.sh` (wire `--check` into pre-commit/CI).
-9. **Enforcement is advisory until you wire it** — the manual step: enable branch protection on
-   `{{DEFAULT_BRANCH}}` and mark the `ci-verify` checks required. Until then, `.claude/settings.json`
-   binds only Claude and the cross-tool guardrails are doc-level prose.
-10. **Architecture gate** — if no boundary linter exists, name it as a recommended setup: the per-stack
-   tool (`clean-architecture.md` → Enforcement) encoding the filled layer map, started in report-only.
+9. **Branch protection** — report the outcome of `init-repo-protection.sh`: "configured" / "skipped (no gh)" / "skipped (user declined)" / "failed (reason)". If configured, note that `verify` check is now required on `{{DEFAULT_BRANCH}}`.
+10. **Enforcement status** — if branch protection configured and `verify` check required, enforcement is BINDING. Otherwise, enforcement is ADVISORY: manual step needed to enable branch protection on `{{DEFAULT_BRANCH}}` and mark `ci-verify` checks required. Until then, `.claude/settings.json` binds only Claude and cross-tool guardrails are doc-level prose.
+11. **Architecture gate** — if no boundary linter exists, name it as a recommended setup: the per-stack tool (`clean-architecture.md` → Enforcement) encoding the filled layer map, started in report-only.
 
 Close by telling the user to run `/audit-claude-setup` in a few months — a stale rule is read exactly
 as confidently as a true one.

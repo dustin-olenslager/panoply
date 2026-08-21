@@ -1,0 +1,21 @@
+- [ ] Phase 1: Create `scripts/init-repo-protection.sh` (interactive gh CLI branch protection setup)
+- [ ] Phase 1: Test script against temp GitHub repo (configure protection, verify settings)
+- [ ] Phase 1: Wire script into adapt command Phase 10 (interactive run, report result)
+- [ ] Phase 2: Create `scripts/check-expert-review.sh` (POSIX sh, grep-based evidence check)
+- [ ] Phase 2: Test script against fixture PRs (pass/fail scenarios)
+- [ ] Phase 2: Wire expert-review job into `scripts/templates/ci-verify.yml`
+- [ ] Phase 3: Update `.claude/rules/workflow.md` with expert-review policy (when, personas, trivial escape, ADR)
+- [ ] Phase 3: Update `AGENTS.md` with expert-review policy (mirrored to all providers)
+- [ ] Phase 3: Run `sh scripts/sync-agents.sh --check` (verify mirrors in sync)
+- [ ] Phase 4: `chmod +x scripts/check-docs.sh`
+- [ ] Phase 4: Run docs-gate against kit repo history (negative + positive cases)
+- [ ] Phase 4: Archive docs-gate plan → `governance/completed/docs-gate.md`
+- [ ] Phase 4: Add completed-features entry, update roadmap (move to Shipped), worklog line
+- [ ] Phase 5: Run `scripts/init-repo-protection.sh` on kit repo (enable branch protection)
+- [ ] Phase 5: Verify GitHub branch protection active (require PR, require verify, no force-push, no direct push)
+- [ ] Phase 5: Push optimization branch with all changes
+- [ ] Phase 5: Verify CI runs: sync-agents, docs-gate, expert-review, typecheck, lint, test, arch-boundary
+- [ ] Phase 5: PR passes all gates, merge to main (operator confirm)
+- [ ] Phase 6: Update adapt command Phase 10 with expert-review gate wiring instructions
+- [ ] Phase 6: Verify fresh project adoption gets full enforcement plane
+- [ ] All: Final roadmap update, completed-features entry, worklog line, plan archive

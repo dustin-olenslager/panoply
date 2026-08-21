@@ -21,35 +21,18 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   no agent in any tool can land a code change without its doc update. Worklog target auto-detected
   (`CHANGELOG.md`/`HISTORY.md`, else `docs/claude/worklog.md`), overridable via `DOCS_WORKLOG`.
   Wired into `scripts/templates/pre-commit` and `scripts/templates/ci-verify.yml` (`--since origin/main`).
-- `AGENTS.md` — the "plan and worklog are never stale" non-negotiable now names the landing gate as
-  its mechanical enforcement (was: discipline + audit only).
-- `.claude/rules/documentation.md` — new "landing gate" section: the gate enforces presence, not
-  correctness; correctness stays a review problem.
-- `AGENTS.md` — the provider-neutral hub for ANY coding agent (Claude, Codex, Cursor, Gemini, Copilot,
-  Windsurf, Cline, aider): the ordered onboarding contract (roadmap → in-progress → worklog → CLAUDE.md
-  → rules), the non-negotiables, a first-class Architecture section, a `MIRROR` block (the "if you read
-  nothing else" essentials), and an honest enforcement note. `CLAUDE.md` bridges to it via `@AGENTS.md`.
-- `scripts/sync-agents.sh` — POSIX-sh DRY mirror generator that emits **self-contained** tool-native
-  files: each mirror inlines the `AGENTS.md` `MIRROR` preamble followed by the full body of every
-  `.claude/rules/*.md` module, so Cursor/Copilot/Windsurf/Cline/Gemini/aider/Codex get the COMPLETE
-  ruleset from their own file — never a `.claude/rules/` pointer they cannot follow. `.cursor/rules/`
-  gets one `alwaysApply` `.mdc` per module (+ a preamble file); `.github/copilot-instructions.md`,
-  `GEMINI.md`, `CONVENTIONS.md`, `.clinerules/`, `.windsurf/rules/` each get one concatenated file. The
-  generator also refills `AGENTS.md`'s `<!-- PANOPLY:RULES:BEGIN/END -->` block with the same bodies so
-  AGENTS.md is self-contained without `@`-imports. `--check` is the drift gate (wired into
-  `ci-verify.yml`) for pre-commit/CI. The kit ships the script, not the per-repo mirrors (they carry an
-  unfilled `{{PROJECT_NAME}}` until `/adapt`).
-- `scripts/templates/ci-verify.yml` + `scripts/templates/pre-commit` — the honest backstop: the one
-  server-side plane (required CI) that binds every tool regardless of vendor, plus a convenience
-  pre-commit hook. `<CMD>` slots filled by `/adapt`; branch-protection remains the one manual human step.
-- `docs/claude/roadmap.md` — the single canonical strategic plan (initiatives in Now/Next/Later),
-  step 2 of the onboarding contract.
-- `docs/claude/worklog.md` — the running per-change history, created only when the repo keeps no
-  `CHANGELOG`/`HISTORY` `[Unreleased]` log (never two parallel logs).
-- docs: ship the /panoply skill + install instructions in README — `skills/panoply/SKILL.md` (the
-  natural-language applier skill, now shipped inside the kit) plus a README section covering the
-  trigger phrases and the one-time global install to `~/.claude/skills/panoply/SKILL.md`.
-- docs: README now states mirrors are fully self-contained (complete ruleset inlined, zero Claude dependency).
+- `scripts/init-repo-protection.sh` — interactive branch protection setup via `gh` CLI: configures
+  default branch to require PR, require `verify` check, forbid force-push, forbid direct push. Prompts
+  for confirmation; falls back to manual instructions if `gh` unavailable. Wired into adapt command
+  Phase 10.
+- `scripts/check-expert-review.sh` — CI gate verifying expert review evidence for non-trivial PRs:
+  plan.md exists, checklist.md has pending items, adr.md has new section since base, PR description
+  has ≥2 persona sign-offs (Security, Performance, Maintainability, UX, or domain-specific). Trivial
+  escape: PR label "trivial", commit prefix "trivial:", or 1-file ≤15-line no-schema change.
+- Expert-review policy in `.claude/rules/workflow.md` and `AGENTS.md`: non-trivial changes require
+  structured review with 4 default personas; evidence checked by `check-expert-review.sh` in CI.
+  Conflict escalation to operator via ADR.
+- Provider mirrors regenerated via `sync-agents.sh` — all mirrors in sync with updated workflow.md.
 
 ### Changed
 - Provider mirrors are now **self-contained**: `sync-agents.sh` inlines the full `.claude/rules/*.md`

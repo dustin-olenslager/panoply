@@ -4,21 +4,13 @@
 # from a Cursor / Codex / Copilot / Windsurf / Cline / aider agent — because it runs on the server,
 # not on anyone's machine, and a required status check cannot be skipped with `--no-verify`.
 #
-# TO MAKE IT REAL (two steps, both done by a human once):
-#   1. Copy this file to .github/workflows/verify.yml and replace each <CMD> with the command from
-#      CLAUDE.md → Key Commands (the same ones your pre-commit gate runs).
-#   2. In repo Settings → Branches, add a branch-protection rule on the default branch that marks
-#      the "verify" check REQUIRED and forbids force-push / direct push. Until you do step 2, this
-#      workflow reports but does not block — see AGENTS.md → "Enforcement — the honest version".
-#
-# Not on GitHub? The same four gates belong in your CI of choice (GitLab CI, CircleCI, Buildkite…);
-# the point is server-side + required, not the vendor.
+# This is the kit repo's own workflow — uses POSIX sh scripts, no runtime deps.
 
 name: verify
 on:
   pull_request:
   push:
-    branches: [main]   # <- your default branch
+    branches: [main]
 
 jobs:
   verify:
@@ -27,11 +19,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # full history, so the docs gate can diff against the PR base
-
-      # --- Set up your toolchain here (node/python/go/…); delete the ones you do not use. ---
-      # - uses: actions/setup-node@v4
-      #   with: { node-version-file: '.nvmrc', cache: 'npm' }
-      # - run: <INSTALL_CMD>
 
       # Agent-mirror drift — fails if any tool-native file (.cursor/.clinerules/.windsurf/.github/
       # copilot-instructions.md, GEMINI.md, CONVENTIONS.md) or the AGENTS.md rules block is stale vs
@@ -46,26 +33,25 @@ jobs:
         run: sh scripts/check-docs.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
-      - name: Typecheck
-        run: <TYPECHECK_CMD>          # CLAUDE.md → Key Commands
-
-      - name: Lint
-        run: <LINT_CMD>
-
-      - name: Test
-        run: <TEST_CMD>
-
-      # Architecture-boundary check — fails on any import that points outward across a layer.
-      # Delete this step only if the repo has no boundary linter wired yet (MODULE:arch dropped).
-      - name: Architecture boundaries
-        run: <ARCH_CHECK_CMD>         # dependency-cruiser / import-linter / ArchUnit / …
-
       # Expert-review gate — fails if non-trivial PR lacks review evidence:
       # plan.md exists, checklist.md has items, adr.md has new section, PR has ≥2 persona sign-offs.
       # Trivial escape: PR label "trivial", commit prefix "trivial:", or 1-file ≤15-line no-schema change.
       - name: Expert review
         run: sh scripts/check-expert-review.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
+
+      # Shell script lint — shellcheck if available
+      - name: Lint (shellcheck)
+        run: |
+          if command -v shellcheck >/dev/null 2>&1; then
+            shellcheck scripts/*.sh .claude/commands/*.md
+          else
+            echo "shellcheck not installed, skipping"
+          fi
+
+      # Architecture-boundary check — not applicable for shell-script kit (no boundary linter)
+      # - name: Architecture boundaries
+      #   run: <ARCH_CHECK_CMD>
 
       # Optional but recommended: a secret scan so a leaked credential fails the PR.
       # - name: Secret scan
