@@ -28,6 +28,8 @@ This carve-out is itself a setting: a project that chose the **strict** protocol
 
 ## Planning Workflow
 
+- **A plan is a roadmap row first, never a new directory.** The moment you start work, add a row to the project's `docs/claude/roadmap.md` (Now/Next/Later) — in the same session, even if that row is the only artifact and the plan dies the same day. A dead roadmap row beats a lost plan. Never create a top-level `<name>-plan/`, `<name>-specs/`, or `scratch_*` plan directory; that scatter is exactly what this rule eliminates. Deeper detail goes in `docs/claude/<area>/<slug>/plan.md` inside the repo, linked from the row.
+
 - **Enter plan mode before any non-trivial or multi-step work.** Any feature, milestone, or task spanning more than a couple of files starts with a plan — use the planning tool, not an informal chat summary, so the plan is an artifact rather than a paragraph that scrolls away.
 - **ALWAYS persist the plan to a file under `docs/claude/`.** A plan that exists only in chat context dies at the next compaction, and you will silently resume with a different plan than the one that was approved. The file is the source of truth; the chat is not.
   - Copy `docs/claude/_templates/plan.md` as the starting point.
