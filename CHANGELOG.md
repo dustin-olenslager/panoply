@@ -35,6 +35,19 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
 - Provider mirrors regenerated via `sync-agents.sh` — all mirrors in sync with updated workflow.md.
 
 ### Fixed
+- **The expert-review gate's own conditions, before it enforces them for the first time.** Because the
+  gate had never run (see below), its checks had never been tested against a real repo — and two of the
+  four were wrong. (a) It demanded a `checklist.md` containing an **unchecked** item; surveyed across
+  nine kit repos, five had no `checklist.md` at all (they keep the checklist inside `plan.md`) and would
+  have been blocked from committing the moment the gate started working, one of them through a live
+  local pre-commit hook. It now accepts a checklist item — checked or unchecked — anywhere under
+  `docs/claude/**`, which is what "review evidence exists" actually means; requiring an OPEN item
+  rewarded unfinished work. (b) The ADR check tested `[ "${1:-}" = "--since" ]` *inside* the function,
+  where `$1` is the label argument, so it could never fire — removed rather than left implying
+  enforcement that does not exist. (c) The persona sign-off check armed itself whenever `gh` happened to
+  be authenticated, so adding a `GH_TOKEN` to any workflow would silently start requiring sign-offs
+  across every kit repo at once; it now requires an explicit `EXPERT_REVIEW_REQUIRE_SIGNOFFS=1`.
+
 - **The `verify` workflow's `Lint (shellcheck)` step had never once passed.** It ran
   `shellcheck scripts/*.sh .claude/commands/*.md` — linting markdown prose as shell, which produced
   SC2148 / SC1036 / SC2215 errors on every run, so the kit's own required check was permanently red and

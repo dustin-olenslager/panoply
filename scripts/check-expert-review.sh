@@ -20,10 +20,9 @@ cd "$ROOT"
 
 # verify_review_evidence <label>
 # Checks for:
-# 1. plan.md exists in feature area
-# 2. checklist.md has items
-# 3. adr.md has new section since base
-# 4. PR description has ≥2 persona sign-offs
+# 1. a plan doc exists under docs/claude/**
+# 2. a checklist item exists somewhere under docs/claude/** (checked or unchecked)
+# 3. (opt-in, EXPERT_REVIEW_REQUIRE_SIGNOFFS=1) the PR body carries >=2 persona sign-offs
 verify_review_evidence() {
   label="$1"
 
@@ -33,24 +32,27 @@ verify_review_evidence() {
     return 1
   fi
 
-  # 2. checklist.md has unchecked items
-  if ! find docs/claude -name "checklist.md" -type f -exec grep -l '^\- \[ \]' {} \; 2>/dev/null | grep -q .; then
-    echo "check-expert-review: $label — no checklist.md with pending items found" >&2
+  # 2. a checklist item exists somewhere under docs/claude/**.
+  #
+  # Deliberately NOT "a checklist.md containing an UNCHECKED item", which is what this used to
+  # demand. That was wrong twice over. It required a separate checklist.md, but every repo
+  # surveyed keeps its checklist inside plan.md; and it required an OPEN item, so a repo that
+  # finished its work — the definition of done — was blocked from committing until someone added
+  # a fake open task. The gate asks whether review evidence EXISTS, not whether work remains.
+  if ! grep -rlE '^[[:space:]]*- \[[ xX]\]' docs/claude 2>/dev/null | grep -q .; then
+    echo "check-expert-review: $label — no checklist item found under docs/claude/**" >&2
+    echo "  add a '- [ ] <step>' list to the plan doc for this work" >&2
     return 1
   fi
 
-  # 3. adr.md has new section since base (only in CI mode with --since)
-  if [ "${1:-}" = "--since" ]; then
-    ref="${2:?}"
-    # Check if any ADR section added since base
-    if ! git diff "$ref"..HEAD -- docs/claude/adr.md 2>/dev/null | grep -q '^+## ADR-'; then
-      echo "check-expert-review: $label — no new ADR section in adr.md since $ref" >&2
-      return 1
-    fi
-  fi
-
-  # 4. PR description has ≥2 persona sign-offs (only in CI with gh)
-  if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  # 3. PR description has >=2 persona sign-offs — OPT-IN ONLY.
+  #
+  # This used to arm itself whenever `gh` happened to be authenticated, which meant adding a
+  # GH_TOKEN to any workflow would silently start requiring sign-offs across every repo carrying
+  # the kit, all at once. Enforcement that switches on as a side effect of a credential is not
+  # enforcement anyone agreed to, so it now needs EXPERT_REVIEW_REQUIRE_SIGNOFFS=1.
+  if [ "${EXPERT_REVIEW_REQUIRE_SIGNOFFS:-0}" = "1" ] \
+     && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
     PR_NUMBER="${GITHUB_PR_NUMBER:-${CI_PR_NUMBER:-}}"
     if [ -n "$PR_NUMBER" ]; then
       body="$(gh pr view "$PR_NUMBER" --json body --jq .body 2>/dev/null || echo "")"
