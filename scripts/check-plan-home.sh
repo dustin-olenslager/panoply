@@ -44,6 +44,9 @@ fi
 # Plan-shaped: a markdown file whose basename reads as a plan/roadmap artifact.
 is_plan_shaped() {
   base="$(basename "$1" | tr '[:upper:]' '[:lower:]')"
+  # A leading dot does not make a plan doc any less of a competing plan doc —
+  # `.plan-specs.md` was found in the wild holding live, blocker-carrying work.
+  base="${base#.}"
   case "$base" in
     *.md) ;;
     *) return 1;;
