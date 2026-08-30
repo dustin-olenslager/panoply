@@ -68,6 +68,16 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   the first time it does.
 
 ### Changed
+- **The queue is one file per task, and the only backlog.** `.claude/rules/documentation.md` now names
+  `docs/claude/in-progress.d/<slug>.md` as the tactical queue — one committed fragment per task —
+  instead of the shared `in-progress.md` table two open PRs collide on (the same reason the worklog
+  moved to per-change fragments). `in-progress.md` becomes a generated view: read it, never edit it,
+  never commit it. The fragment is also written to be DRIVEN: `status` / `order` / `req` / `risk`
+  frontmatter plus a `Next step:` line, so an autonomous driver can dispatch it and a cold session can
+  resume it. This closes the gap where a project carried two backlogs that could not see each other —
+  this kit never mentioned `TASKS.md`, and Phalanx's loop never looked at `in-progress.md`. Phalanx
+  ADR-0004 adopts the same files and the same keys. Mirrors regenerated.
+
 - Provider mirrors are now **self-contained**: `sync-agents.sh` inlines the full `.claude/rules/*.md`
   bodies into every tool file and into `AGENTS.md`'s `PANOPLY:RULES` block (was: a header + `MIRROR`
   block + a pointer to `.claude/rules/` no non-Claude tool could follow). `AGENTS.md` carries the
