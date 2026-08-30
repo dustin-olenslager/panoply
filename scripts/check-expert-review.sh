@@ -18,6 +18,54 @@ set -eu
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# verify_review_evidence <label>
+# Checks for:
+# 1. plan.md exists in feature area
+# 2. checklist.md has items
+# 3. adr.md has new section since base
+# 4. PR description has ≥2 persona sign-offs
+verify_review_evidence() {
+  label="$1"
+
+  # 1. plan.md exists (any area)
+  if ! find docs/claude -name "plan.md" -type f 2>/dev/null | grep -q .; then
+    echo "check-expert-review: $label — no plan.md found in docs/claude/**" >&2
+    return 1
+  fi
+
+  # 2. checklist.md has unchecked items
+  if ! find docs/claude -name "checklist.md" -type f -exec grep -l '^\- \[ \]' {} \; 2>/dev/null | grep -q .; then
+    echo "check-expert-review: $label — no checklist.md with pending items found" >&2
+    return 1
+  fi
+
+  # 3. adr.md has new section since base (only in CI mode with --since)
+  if [ "${1:-}" = "--since" ]; then
+    ref="${2:?}"
+    # Check if any ADR section added since base
+    if ! git diff "$ref"..HEAD -- docs/claude/adr.md 2>/dev/null | grep -q '^+## ADR-'; then
+      echo "check-expert-review: $label — no new ADR section in adr.md since $ref" >&2
+      return 1
+    fi
+  fi
+
+  # 4. PR description has ≥2 persona sign-offs (only in CI with gh)
+  if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+    PR_NUMBER="${GITHUB_PR_NUMBER:-${CI_PR_NUMBER:-}}"
+    if [ -n "$PR_NUMBER" ]; then
+      body="$(gh pr view "$PR_NUMBER" --json body --jq .body 2>/dev/null || echo "")"
+      # Count distinct persona sign-offs: Security, Performance, Maintainability, UX, <domain>
+      signoffs=$(echo "$body" | grep -oE '^>?\s*(Security|Performance|Maintainability|UX|[A-Z][a-z]+):\s*(✓|approved|LGTM|sign.?off)' | sort -u | wc -l | tr -d ' ')
+      if [ "${signoffs:-0}" -lt 2 ]; then
+        echo "check-expert-review: $label — PR #$PR_NUMBER needs ≥2 persona sign-offs in description (found $signoffs)" >&2
+        return 1
+      fi
+    fi
+  fi
+
+  return 0
+}
+
 fail=0
 reason=""
 
@@ -84,51 +132,3 @@ else
   echo "check-expert-review: FAILED — $reason" >&2
 fi
 exit "$fail"
-
-# verify_review_evidence <label>
-# Checks for:
-# 1. plan.md exists in feature area
-# 2. checklist.md has items
-# 3. adr.md has new section since base
-# 4. PR description has ≥2 persona sign-offs
-verify_review_evidence() {
-  label="$1"
-
-  # 1. plan.md exists (any area)
-  if ! find docs/claude -name "plan.md" -type f 2>/dev/null | grep -q .; then
-    echo "check-expert-review: $label — no plan.md found in docs/claude/**" >&2
-    return 1
-  fi
-
-  # 2. checklist.md has unchecked items
-  if ! find docs/claude -name "checklist.md" -type f -exec grep -l '^\- \[ \]' {} \; 2>/dev/null | grep -q .; then
-    echo "check-expert-review: $label — no checklist.md with pending items found" >&2
-    return 1
-  fi
-
-  # 3. adr.md has new section since base (only in CI mode with --since)
-  if [ "${1:-}" = "--since" ]; then
-    ref="${2:?}"
-    # Check if any ADR section added since base
-    if ! git diff "$ref"..HEAD -- docs/claude/adr.md 2>/dev/null | grep -q '^+## ADR-'; then
-      echo "check-expert-review: $label — no new ADR section in adr.md since $ref" >&2
-      return 1
-    fi
-  fi
-
-  # 4. PR description has ≥2 persona sign-offs (only in CI with gh)
-  if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-    PR_NUMBER="${GITHUB_PR_NUMBER:-${CI_PR_NUMBER:-}}"
-    if [ -n "$PR_NUMBER" ]; then
-      body="$(gh pr view "$PR_NUMBER" --json body --jq .body 2>/dev/null || echo "")"
-      # Count distinct persona sign-offs: Security, Performance, Maintainability, UX, <domain>
-      signoffs=$(echo "$body" | grep -oE '^>?\s*(Security|Performance|Maintainability|UX|[A-Z][a-z]+):\s*(✓|approved|LGTM|sign.?off)' | sort -u | wc -l | tr -d ' ')
-      if [ "${signoffs:-0}" -lt 2 ]; then
-        echo "check-expert-review: $label — PR #$PR_NUMBER needs ≥2 persona sign-offs in description (found $signoffs)" >&2
-        return 1
-      fi
-    fi
-  fi
-
-  return 0
-}

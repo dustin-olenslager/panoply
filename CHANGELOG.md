@@ -45,6 +45,14 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   `check-expert-review.sh` now prints the `reason` it had been computing and discarding (SC2034) and
   documents why `grep … | wc -l` is deliberate over `grep -c` (SC2126 — `grep -c` exits 1 on a zero
   count, which under `set -e` would abort the gate on the ordinary "no schema files" case).
+- `scripts/check-expert-review.sh` called `verify_review_evidence` at lines 56 and 69 but defined it at
+  line 86 — after the script's own `exit "$fail"`. A shell reads definitions in execution order, so the
+  function did not exist at either call site and the definition was unreachable dead code: every
+  non-trivial commit died with `verify_review_evidence: not found` and exited 1, in bash exactly as in
+  dash. The definition now sits above its first use (moved verbatim, no logic change). **Every repo
+  already adapted with the kit carries the broken copy and needs this file re-synced** — the gate has
+  never actually run anywhere, so expect it to start enforcing the plan/checklist evidence requirement
+  the first time it does.
 
 ### Changed
 - Provider mirrors are now **self-contained**: `sync-agents.sh` inlines the full `.claude/rules/*.md`
