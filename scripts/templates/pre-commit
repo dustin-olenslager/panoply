@@ -25,6 +25,11 @@ if [ -f scripts/check-docs.sh ]; then
   echo "pre-commit: docs gate…"; sh scripts/check-docs.sh
 fi
 
+# Plan-home gate — a new plan doc may only be added inside docs/claude/ (roadmap row + area folder).
+if [ -f scripts/check-plan-home.sh ]; then
+  echo "pre-commit: plan home…"; sh scripts/check-plan-home.sh --staged
+fi
+
 # Expert-review gate (local: checks staged change for trivial escape or review evidence).
 if [ -f scripts/check-expert-review.sh ]; then
   echo "pre-commit: expert review…"; sh scripts/check-expert-review.sh

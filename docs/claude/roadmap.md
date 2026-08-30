@@ -1,5 +1,12 @@
 # Roadmap — the overall plan
 
+> **SINGLE SOURCE OF TRUTH for this project's plans.** Every agent and contributor reads and edits
+> *this* file. A new plan is a **row here** — never a new doc at the repo root, never a flat file in
+> `docs/claude/`, never a top-level `<name>-plan/` directory. Detail belongs in
+> `docs/claude/<area>/<feature>/plan.md`, linked from its row. Enforced by
+> `scripts/check-plan-home.sh`. If you found a plan somewhere else, it is stale by definition —
+> fold it into a row here and archive it.
+
 The one canonical strategic view: the **initiatives** this project is committed to, in priority order.
 One row is one initiative — a body of work that spawns several plan docs and several `in-progress.md`
 queue rows — **not** a single task.
