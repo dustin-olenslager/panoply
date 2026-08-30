@@ -34,6 +34,18 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   Conflict escalation to operator via ADR.
 - Provider mirrors regenerated via `sync-agents.sh` — all mirrors in sync with updated workflow.md.
 
+### Fixed
+- **The `verify` workflow's `Lint (shellcheck)` step had never once passed.** It ran
+  `shellcheck scripts/*.sh .claude/commands/*.md` — linting markdown prose as shell, which produced
+  SC2148 / SC1036 / SC2215 errors on every run, so the kit's own required check was permanently red and
+  therefore useless as a merge signal. It now lints `scripts/*.sh` only, and the six real findings
+  underneath are fixed: `check-plan-home.sh` dropped two `case` patterns that `*-plan.md` already
+  covers (SC2221/SC2222, one of which could never match); `sync-agents.sh` replaced an
+  `A && B || C` marker check with an explicit `if` (SC2015, where C can run even when A succeeds);
+  `check-expert-review.sh` now prints the `reason` it had been computing and discarding (SC2034) and
+  documents why `grep … | wc -l` is deliberate over `grep -c` (SC2126 — `grep -c` exits 1 on a zero
+  count, which under `set -e` would abort the gate on the ordinary "no schema files" case).
+
 ### Changed
 - Provider mirrors are now **self-contained**: `sync-agents.sh` inlines the full `.claude/rules/*.md`
   bodies into every tool file and into `AGENTS.md`'s `PANOPLY:RULES` block (was: a header + `MIRROR`

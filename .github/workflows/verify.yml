@@ -40,11 +40,13 @@ jobs:
         run: sh scripts/check-expert-review.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
-      # Shell script lint — shellcheck if available
+      # Shell script lint — shellcheck if available. Scripts only: `.claude/commands/*.md` are
+      # markdown, and linting prose as shell produced SC2148/SC1036/SC2215 noise on every run,
+      # which is why this step had never once passed.
       - name: Lint (shellcheck)
         run: |
           if command -v shellcheck >/dev/null 2>&1; then
-            shellcheck scripts/*.sh .claude/commands/*.md
+            shellcheck scripts/*.sh
           else
             echo "shellcheck not installed, skipping"
           fi

@@ -52,7 +52,7 @@ is_plan_shaped() {
     *) return 1;;
   esac
   case "$base" in
-    plan.md|roadmap.md|plans.md|phased-plan.md|*-plan.md|plan-*.md|*-roadmap.md|roadmap-*.md|*-phased-plan.md)
+    plan.md|roadmap.md|plans.md|*-plan.md|plan-*.md|*-roadmap.md|roadmap-*.md)
       return 0;;
     *) return 1;;
   esac

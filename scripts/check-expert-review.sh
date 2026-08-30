@@ -4,6 +4,10 @@
 # Usage: sh scripts/check-expert-review.sh [--since <base-sha>]
 #   --since: check all commits in range (CI mode). Default: check current PR via env.
 
+# `grep ... | wc -l` is deliberate over `grep -c` (SC2126): grep -c exits 1 when the count is
+# zero, and under `set -e` a command substitution that exits non-zero aborts the script — which
+# is exactly the ordinary "this commit touches no schema files" case.
+# shellcheck disable=SC2126
 set -eu
 
 # Trivial escape hatches
@@ -74,7 +78,11 @@ if [ "$is_trivial" -eq 0 ]; then
   fi
 fi
 
-[ "$fail" -eq 0 ] && echo "check-expert-review: OK"
+if [ "$fail" -eq 0 ]; then
+  echo "check-expert-review: OK"
+else
+  echo "check-expert-review: FAILED — $reason" >&2
+fi
 exit "$fail"
 
 # verify_review_evidence <label>

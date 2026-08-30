@@ -147,9 +147,10 @@ fi
 
 # --- AGENTS.md: refill the full rule bodies between the PANOPLY:RULES markers (self-contained, no
 #     @-imports), preserving all hand-authored content outside the block. ---
-grep -q 'PANOPLY:RULES:BEGIN' "$SRC" && grep -q 'PANOPLY:RULES:END' "$SRC" || {
-  echo "AGENTS.md is missing the <!-- PANOPLY:RULES:BEGIN/END --> markers." >&2; exit 1
-}
+if ! grep -q 'PANOPLY:RULES:BEGIN' "$SRC" || ! grep -q 'PANOPLY:RULES:END' "$SRC"; then
+  echo "AGENTS.md is missing the <!-- PANOPLY:RULES:BEGIN/END --> markers." >&2
+  exit 1
+fi
 awk -v rules="$RULESTMP" '
   /PANOPLY:RULES:BEGIN/ { print; print ""; while ((getline line < rules) > 0) print line; print ""; skip=1; next }
   /PANOPLY:RULES:END/   { skip=0; print; next }
