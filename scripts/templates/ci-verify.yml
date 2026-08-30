@@ -46,6 +46,13 @@ jobs:
         run: sh scripts/check-docs.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
+      # Plan-home gate — fails if any plan/roadmap doc lives outside docs/claude/. Keeps one
+      # canonical plan per project (docs/claude/roadmap.md) so an agent picking the repo up can
+      # never read the wrong one. Adopting a repo with a backlog of strays? Fold them first, or
+      # set PLAN_HOME_OFF=1 here until you have.
+      - name: Plan home
+        run: sh scripts/check-plan-home.sh
+
       - name: Typecheck
         run: <TYPECHECK_CMD>          # CLAUDE.md → Key Commands
 

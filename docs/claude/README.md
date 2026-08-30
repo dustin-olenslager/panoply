@@ -40,6 +40,12 @@ docs/claude/
 
 Never create flat files at the top of `docs/claude/` — new work goes in an area folder.
 
+**`roadmap.md` is the single plan doc for the whole project** — one per repo, the file every agent
+reads before planning and edits when planning. Everything else here is subordinate: `in-progress.md`
+is its queue, `<area>/<feature>/plan.md` is its detail. A plan doc found anywhere else (repo root, a
+stray folder) is stale by definition — fold it into a roadmap row and archive it. `scripts/check-plan-home.sh`
+fails CI and pre-commit on any plan doc outside this tree.
+
 `reports/` is the one exception to the lifecycle below: it is an **append-only dated archive** of
 command-generated reports (`/assess-stack --save` and similar). Reports are history — they are
 never moved to `completed/`, never pruned as stale, and old reports naming since-removed things
