@@ -12,6 +12,11 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — queue hygiene: a task's `in-progress.d` fragment is deleted in the same PR that ships
+  the code, and leftovers are retired from PR state with `phalanx-docs-reconcile.sh` (Phalanx
+  ≥ 1.7.30) instead of by hand. Stated in AGENTS.md (mirrors regenerated), `docs/claude/README.md`
+  and `.claude/rules/documentation.md`.
+
 Provider-agnostic governance layer (MINOR — additive; safe to adopt).
 
 ### Added

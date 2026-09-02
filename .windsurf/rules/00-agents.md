@@ -450,7 +450,9 @@ In the SAME commit that lands work — Claude, Codex, Cursor, or any other tool:
 
 1. **Append one worklog line** (to `worklog.md`, or the `[Unreleased]` section) — what changed, where.
 2. **Write your task's own fragment** — `docs/claude/in-progress.d/<slug>.md` — with its status and its
-   Next-step handoff, or **delete the fragment** on ship. Never edit a shared table: the queue is one file
+   Next-step handoff, or **delete the fragment** on ship — in the SAME PR that ships the code, never
+   later (a fragment that outlives its merge is planned against as if still open; leftovers are
+   retired from PR state with `phalanx-docs-reconcile.sh`). Never edit a shared table: the queue is one file
    per task precisely so two open PRs cannot collide on it, the same reason the worklog is one file per
    change. `docs/claude/in-progress.md` is a generated view — do not edit it, and do not commit it.
 3. **On ship**, additionally: add the `completed-features.md` entry, MOVE the `roadmap.md` initiative
