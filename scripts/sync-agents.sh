@@ -4,10 +4,10 @@
 #   * the universal preamble  = the MIRROR block in AGENTS.md (read-order + non-negotiables + guardrails)
 #   * the rule bodies         = the full text of every .claude/rules/*.md module
 # Each mirror INLINES the preamble followed by the complete body of every rule module, so a tool that
-# only loads its own native file (Cursor, Copilot, Windsurf, Cline, Gemini, aider, Codex) gets the WHOLE
+# only loads its own native file (Cursor, Copilot, Windsurf, Cline, Gemini, aider) gets the WHOLE
 # ruleset — never a pointer to .claude/rules/ it cannot follow. AGENTS.md is refilled in place too, between
-# its <!-- PANOPLY:RULES:BEGIN/END --> markers, so AGENTS.md-native tools get the full governance with no
-# @-imports. Never hand-edit a mirror or the AGENTS.md rules block; edit AGENTS.md (preamble) or
+# its <!-- PANOPLY:RULES:BEGIN/END --> markers, so AGENTS.md-native tools (Codex, OpenCode, and any other
+# tool following the AGENTS.md convention) get the full governance with no @-imports and need no mirror. Never hand-edit a mirror or the AGENTS.md rules block; edit AGENTS.md (preamble) or
 # .claude/rules/*.md (bodies) and re-run. POSIX sh, no runtime deps — Git Bash, WSL, macOS, Linux, CI.
 #   sh scripts/sync-agents.sh              # write mirrors + refill AGENTS.md rules block
 #   sh scripts/sync-agents.sh --check      # exit 1 if any mirror / the AGENTS.md block is stale (CI gate)

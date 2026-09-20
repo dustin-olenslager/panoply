@@ -12,6 +12,12 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — coverage wording: OpenCode named as an AGENTS.md-native tool in `README.md` and the
+  `scripts/sync-agents.sh` header. No behavioral change and no new mirror: OpenCode reads the
+  refilled `AGENTS.md` hub natively (verified in the field — the koforje consolidation audit ran
+  under OpenCode bound by workspace AGENTS.md). A proposed `OPENCODE.md` mirror was evaluated and
+  rejected: OpenCode does not load that filename, so the mirror would bind nothing.
+
 ## [1.3.0] — 2026-09-02
 
 - MINOR — queue hygiene: a task's `in-progress.d` fragment is deleted in the same PR that ships

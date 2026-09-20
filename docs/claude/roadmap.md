@@ -29,7 +29,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 
 | Initiative | Intent (one line) | Queue rows (`in-progress.md`) | Plan docs |
 |---|---|---|---|
-| | | | |
+| Every-agent coverage: OpenCode | Name and verify OpenCode as an AGENTS.md-native tool; no new mirror required | row 1 | `governance/opencode-native-coverage/plan.md` |
 
 ## Next — committed, not yet started
 

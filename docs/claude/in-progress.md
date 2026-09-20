@@ -18,7 +18,7 @@ entry to `completed-features.md`.
 
 | # | Item | Area | Initiative | Plan doc | Status | Notes |
 |---|------|------|------------|----------|--------|-------|
-| 1 | | | | | Not started | |
+| 1 | Name + verify OpenCode coverage (AGENTS.md-native, no mirror) | governance | Every-agent coverage: OpenCode | `governance/opencode-native-coverage/plan.md` | In review | PR open on `docs/opencode-native-coverage`; next step = merge, then fold this row per ship convention |
 | 2 | | | | | Not started | |
 | 3 | | | | | Not started | |
 

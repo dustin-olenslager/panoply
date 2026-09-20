@@ -2,7 +2,7 @@
 
 A drop-in agent-governance kit for any project — new or existing, any language, any stack. Built on
 Claude Code's config format, but it binds **every coding agent that touches the repo** — Codex,
-Cursor, Copilot, Windsurf, Cline, aider, Gemini, and Claude alike. Copy it in, run one command, and
+Cursor, Copilot, Windsurf, Cline, aider, Gemini, OpenCode, and Claude alike. Copy it in, run one command, and
 whatever tool works here arrives already knowing how you work: Clean Architecture as the premise, a
 change-approval protocol, plan files that survive context compaction, migration safety rails,
 enforced test coverage, and a documentation system that keeps project knowledge in the repo instead
@@ -44,7 +44,8 @@ Then in Claude Code:
 not just Claude. Three things carry that guarantee, and they are the headline of what the command
 installs:
 
-- **`AGENTS.md`** — the cross-tool hub that Codex, aider, and the rest read on entry. The command
+- **`AGENTS.md`** — the cross-tool hub that AGENTS.md-native tools (Codex, OpenCode, aider, and the
+  rest) read on entry. The command
   merges it into your project's existing `AGENTS.md` (yours wins every conflict), so the onboarding
   contract and non-negotiables are one shared contract for every tool.
 - **Provider mirrors** — `scripts/sync-agents.sh` generates the tool-native rule files from
