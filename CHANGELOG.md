@@ -12,6 +12,13 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+_Nothing unreleased._
+
+## [1.4.0] — 2026-09-26
+
+Agent-readiness doctrine (MINOR — additive; safe to adopt). Pruned automatically by
+`/adapt-claude-setup` where the repo has no agent consumer.
+
 - MINOR — **agent-readiness module** (`.claude/rules/agent-readiness.md`, `MODULE:agent`): dual-mode
   doctrine for apps that must work under a human UI *and* an AI agent — the three required surfaces
   (HTTP API with idempotency keys, MCP server with generated schemas, A2A agent card), BYO-LLM-key
@@ -21,12 +28,39 @@ Semver, applied to governance:
   (`scripts/check-agent-readiness.test.sh`) wired into the kit's own CI — the gate must be seen to
   fail a defective fixture before it is trusted to pass a real repo. `adapt-claude-setup.md` detects
   agent consumption and prunes the module where none exists; `ci-verify.yml` carries the step
-  adopting repos get. Plan: `docs/claude/governance/agent-readiness-doctrine/plan.md`.
+  adopting repos get. Plan (archived): `docs/claude/governance/completed/agent-readiness-module.md`.
+- PATCH — canary hardening: removed the SC2015 `A && B || C` shape from the canary so it passes
+  shellcheck on both 0.11 and the older version CI runs (local silence is not CI silence); canary 3
+  now asserts warn mode still *reports* rather than only that it stops blocking.
 - PATCH — coverage wording: OpenCode named as an AGENTS.md-native tool in `README.md` and the
   `scripts/sync-agents.sh` header. No behavioral change and no new mirror: OpenCode reads the
   refilled `AGENTS.md` hub natively (verified in the field — the koforje consolidation audit ran
   under OpenCode bound by workspace AGENTS.md). A proposed `OPENCODE.md` mirror was evaluated and
   rejected: OpenCode does not load that filename, so the mirror would bind nothing.
+
+### Added
+- `.claude/rules/agent-readiness.md` (`MODULE:agent`) — the doctrine. Premise: **the UI is a client
+  of the API, never the owner of a capability**, so a screen-only action is a capability the app does
+  not have. Three required surfaces, all Interface Adapters holding zero business rules: HTTP API
+  (idempotency keys, retry/fix/give-up error codes, cursor pagination, published schemas), MCP server
+  (thin adapter over the same use cases, schemas generated from the API's validation schemas), A2A
+  agent card (`/.well-known/agent-card.json`, stateful tasks, human-in-the-loop pauses). Plus BYO-key
+  LLM config, scoped non-human principals, the visibility+reversibility trust rule, and a
+  prompt-injection guardrail at the boundary.
+- `scripts/check-agent-readiness.sh` — the mechanical floor: card present *and actually served*,
+  idempotency on mutations, generated MCP schemas, no vendor endpoint/SDK outside its adapter,
+  scoped non-human principal, and a `--since` surface-drift check. POSIX sh; `AGENT_READINESS_ENFORCE=warn`
+  for mid-adoption; JSON checks SKIP loudly without jq/python3/node rather than passing silently.
+- `scripts/check-agent-readiness.test.sh` — canary self-test, wired into the kit's own CI. Builds a
+  fixture carrying every defect the gate claims to catch plus a compliant one; asserts fail-then-pass,
+  plus warn and `--since` modes.
+
+### Note for adopters
+The kit's `verify.yml` runs the **self-test**, not the gate — panoply is a shell/doc template with no
+agent surface of its own, so the gate would fail every kit PR. Adopting repos get the real step via
+`scripts/templates/ci-verify.yml`. Static detection proves *presence*, not correctness: that an
+idempotency mechanism exists, not that it dedupes. The judgement parts stay in the module's review
+checklist and the agent-perspective smoke test it requires.
 
 ## [1.3.0] — 2026-09-02
 

@@ -1,9 +1,9 @@
-# Plan: Agent-readiness module + gate
+# Shipped: Agent-readiness module + gate (dual-mode apps)
 
-- **Area:** `governance`  ·  **Started:** 2026-09-26  ·  **Status:** In review
+- **Area:** `governance`  ·  **Started:** 2026-09-26  ·  **Shipped:** 2026-09-26 (PR #6, squash `f58e936`)
 - **Owner:** the owner (driven by Hermes)
-- **Next step:** merge the PR, then apply the module to Pilot app (`an organization/pilot-app`) as the pilot — recon report at `<scratch>/`, gap list drives its own plan doc in that repo.
-- **Roadmap initiative:** Agent-readiness doctrine (Now)
+- **Next step (follow-up, separate repo):** apply the module to Pilot app (`an organization/pilot-app`) as the pilot — its gap list drives a plan doc in that repo, not here.
+- **Roadmap initiative:** Agent-readiness doctrine (Shipped)
 
 ## Goal
 
@@ -34,6 +34,7 @@ Panoply already governs Clean Architecture, doc currency, and expert review with
 - [x] **M3 — canary self-test** — `scripts/check-agent-readiness.test.sh`: builds a defective fixture and a compliant fixture in `$TMPDIR`, asserts the gate fails the first and passes the second, and that warn + `--since` modes work. Wired into the kit's own CI.
 - [x] **M4 — kit wiring** — module registered in `CLAUDE.md` (`MODULE:agent` fence), `scripts/sync-agents.sh` ORDER, `README.md` module table, `adapt-claude-setup.md` (detection + prune/keep guidance), `scripts/templates/ci-verify.yml` (the step adopting repos get). Mirrors regenerated.
 - [x] **M5 — verify** — shellcheck clean on the new scripts (baseline also clean); `sync-agents.sh --check` passes; canary suite green.
+- [x] **M6 — CI hardening** — removed the SC2015 `A && B || C` shape the CI runner's older shellcheck rejected (local 0.11.0 was silent); strengthened canary 3 to assert warn mode still reports. Landed via squash-merge so `main` carries one commit with code + docs together (the docs gate flagged the standalone fix commit).
 
 ## Build notes
 
@@ -43,10 +44,18 @@ Panoply already governs Clean Architecture, doc currency, and expert review with
 
 > **Build note:** 2026-09-26 — JSON validation degrades to a loud SKIP when neither `jq`, `python3`, nor `node` is available, rather than passing silently. Same doctrine as `check-docs.sh`: the gate enforces presence, not correctness, and says so.
 
+> **Build note:** 2026-09-26 — shellcheck versions disagree. Local 0.11.0 is silent on SC2015 (`A && B || C`) in the canary; the CI runner's older shellcheck failed the PR on three instances. Removed the shape entirely (a `run_gate` helper using an `if` assignment) instead of suppressing the warning — suppression would leave the next contributor to hit the same version split. Lesson: verify shell scripts against the shellcheck version CI actually runs, not just the local one. Strengthened while in there: canary 3 now asserts warn mode still *reports* (previously a warn mode that silenced everything would have passed).
+
+> **Build note:** 2026-09-26 — the docs gate caught this change's own fix commit: it touched `.sh` files without a CHANGELOG line, because the CHANGELOG entry lived in the earlier commit. Landed via squash-merge so `main` carries one commit with code + docs together (verified green by building the squashed tree locally and running every gate against it before merging). No history rewritten, nothing force-pushed.
+
 ## Open questions
 
 - None blocking. For adopting repos: whether to sign A2A agent cards (only needed for cross-organization delegation) is a per-app decision, recorded in that app's plan doc.
 
 ## On ship
 
-Move this folder into `governance/completed/`, rename to `agent-readiness-module.md`, add an entry to `../../completed-features.md`, append the worklog line, remove the `in-progress.md` row, and move the roadmap initiative to Shipped — same commit.
+**Done 2026-09-26.** This folder moved into `governance/completed/` and the plan renamed to
+`agent-readiness-module.md`; entry added to `completed-features.md`; worklog line appended to the
+CHANGELOG `[Unreleased]`; the `in-progress.md` row removed; the `roadmap.md` initiative moved to
+Shipped — all in the same commit as the fold. Durable lessons (canary-with-every-pattern-gate,
+shellcheck version split) promoted into the `panoply-governance` skill.
