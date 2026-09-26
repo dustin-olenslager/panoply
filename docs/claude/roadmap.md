@@ -30,6 +30,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 | Initiative | Intent (one line) | Queue rows (`in-progress.md`) | Plan docs |
 |---|---|---|---|
 | Every-agent coverage: OpenCode | Name and verify OpenCode as an AGENTS.md-native tool; no new mirror required | row 1 | `governance/opencode-native-coverage/plan.md` |
+| Agent-readiness doctrine | Make every adapted app dual-mode — human UI *and* agent-drivable over API/MCP/A2A, plus standalone on one LLM key — enforced by a CI gate | row 2 | `governance/agent-readiness-doctrine/plan.md` |
 
 ## Next — committed, not yet started
 

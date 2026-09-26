@@ -51,6 +51,15 @@ jobs:
             echo "shellcheck not installed, skipping"
           fi
 
+      # Gate self-test — the kit ships gates that adapted repos depend on, so a gate that silently
+      # stops detecting anything is a defect in the kit, not in the adopting repo. This asserts
+      # check-agent-readiness.sh still fails a repo seeded with every defect it claims to catch and
+      # still passes a compliant one. (The agent-readiness gate itself is NOT run against the kit:
+      # this repo is a shell/doc template with no agent surface of its own — MODULE:agent is pruned
+      # at adapt time. The self-test is what proves the gate works.)
+      - name: Agent-readiness gate self-test
+        run: sh scripts/check-agent-readiness.test.sh
+
       # Architecture-boundary check — not applicable for shell-script kit (no boundary linter)
       # - name: Architecture boundaries
       #   run: <ARCH_CHECK_CMD>

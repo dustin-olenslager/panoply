@@ -109,6 +109,15 @@ origin`, then to the current branch. Do not assume `main`.
 styled-components/emotion, vanilla CSS, a component library (shadcn/ui `components.json`, MUI,
 Chakra), and the icon library. No UI ⇒ delete `MODULE:frontend` and `MODULE:design-system`.
 
+**Agent consumption.** Does anything other than a human-in-the-UI consume this app — an AI agent
+harness, an automation, another service's agent? Look for an existing MCP server or
+`@modelcontextprotocol` dependency, an `/.well-known/agent-card.json`, an API-key/service-principal
+auth path, and whether LLM config (if any) is env-driven and OpenAI-compatible rather than
+vendor-hardcoded. No agent consumer and none planned ⇒ delete `MODULE:agent` and
+`scripts/check-agent-readiness.sh` (and its CI step). Present or planned ⇒ keep the module, record
+the current gap list honestly in the plan doc rather than claiming readiness the repo does not have,
+and set `AGENT_READINESS_ENFORCE=warn` in CI until the gaps close — then remove the override.
+
 **Linters, formatters, hooks.** ESLint/Biome/Prettier/Ruff/Black/gofmt/rustfmt/RuboCop configs,
 `.editorconfig`, and pre-commit hooks (`.husky/`, `lefthook.yml`, `.pre-commit-config.yaml`).
 Whatever a hook already enforces does not need to be a rule.
@@ -176,7 +185,7 @@ Phase 5 report so the user can audit what they auto-accepted.
 Work in this order; it is the order that avoids leaving orphans.
 
 1. **Resolve every module fence.** Grep the tree for `MODULE:` to enumerate the ids actually present
-   (`database`, `frontend`, `api`, `ai`, `monorepo`, `design-system`, `project-conventions`,
+   (`database`, `frontend`, `api`, `ai`, `agent`, `monorepo`, `design-system`, `project-conventions`,
    `project-layers`, and any others). For each id that does not apply, remove the
    `<!-- MODULE:x --> … <!-- /MODULE:x -->` block — content *and* both comment markers — everywhere
    it appears. **For each module you keep, strip the two marker comments too and keep only the

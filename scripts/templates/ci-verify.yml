@@ -67,6 +67,15 @@ jobs:
       - name: Architecture boundaries
         run: <ARCH_CHECK_CMD>         # dependency-cruiser / import-linter / ArchUnit / …
 
+      # Agent-readiness gate — the mechanical floor for dual-mode apps (.claude/rules/agent-readiness.md).
+      # Checks the agent card exists + is served, mutations are idempotent, MCP schemas are generated
+      # not hand-written, no vendor LLM endpoint is hardcoded outside its adapter, and a scoped
+      # non-human principal exists. Delete this step if MODULE:agent was pruned.
+      # Mid-adoption? set AGENT_READINESS_ENFORCE: warn here TEMPORARILY and track the gap in
+      # docs/claude/in-progress.md — it reports without blocking, and leaving it on is a silent gate.
+      - name: Agent readiness
+        run: sh scripts/check-agent-readiness.sh --since "${{ github.event.pull_request.base.sha }}"
+
       # Expert-review gate — fails if non-trivial PR lacks review evidence:
       # plan.md exists, checklist.md has items, adr.md has new section, PR has ≥2 persona sign-offs.
       # Trivial escape: PR label "trivial", commit prefix "trivial:", or 1-file ≤15-line no-schema change.

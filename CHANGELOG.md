@@ -12,6 +12,16 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **agent-readiness module** (`.claude/rules/agent-readiness.md`, `MODULE:agent`): dual-mode
+  doctrine for apps that must work under a human UI *and* an AI agent — the three required surfaces
+  (HTTP API with idempotency keys, MCP server with generated schemas, A2A agent card), BYO-LLM-key
+  config via `LLM_BASE_URL`/`LLM_API_KEY`/`LLM_MODEL`, scoped non-human principals, and the trust
+  rule that agent writes are attributable in the UI and reversible. Enforced by
+  `scripts/check-agent-readiness.sh` (warn mode for mid-adoption) with a canary self-test
+  (`scripts/check-agent-readiness.test.sh`) wired into the kit's own CI — the gate must be seen to
+  fail a defective fixture before it is trusted to pass a real repo. `adapt-claude-setup.md` detects
+  agent consumption and prunes the module where none exists; `ci-verify.yml` carries the step
+  adopting repos get. Plan: `docs/claude/governance/agent-readiness-doctrine/plan.md`.
 - PATCH — coverage wording: OpenCode named as an AGENTS.md-native tool in `README.md` and the
   `scripts/sync-agents.sh` header. No behavioral change and no new mirror: OpenCode reads the
   refilled `AGENTS.md` hub natively (verified in the field — the koforje consolidation audit ran

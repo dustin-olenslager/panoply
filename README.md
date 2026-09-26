@@ -137,6 +137,12 @@ CLAUDE.md                        The spine. Short on purpose — it loads into e
     code-style.md  testing.md  error-handling.md
     database.md  data-modeling.md  api-design.md
     frontend.md  design-system.md  ai-features.md
+    agent-readiness.md           DUAL-MODE: the app is usable by a human in its UI *and*
+                                 drivable by an AI agent. The three surfaces (HTTP API,
+                                 MCP server, A2A agent card), idempotency for retrying
+                                 agents, BYO-LLM-key config, scoped agent identity, and
+                                 the trust rule that agent writes are visible + reversible.
+                                 Pairs with scripts/check-agent-readiness.sh.
   agents/                        A library of specialist subagents (architect, reviewer,
                                  security, database, UI/UX...) — see agents/README.md.
 docs/claude/                     The project-knowledge system, pre-scaffolded:

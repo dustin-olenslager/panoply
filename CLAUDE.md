@@ -110,6 +110,11 @@ of this premise to its own subject.
 @.claude/rules/ai-features.md
 <!-- /MODULE:ai -->
 
+<!-- MODULE:agent -->
+### Agent readiness — being called BY an agent (API/MCP/A2A, dual-mode)
+@.claude/rules/agent-readiness.md
+<!-- /MODULE:agent -->
+
 ## Project Knowledge
 
 Team-shared context lives in `docs/claude/` and is committed to git. **Read these when relevant:**
