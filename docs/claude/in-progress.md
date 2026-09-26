@@ -19,7 +19,7 @@ entry to `completed-features.md`.
 | # | Item | Area | Initiative | Plan doc | Status | Notes |
 |---|------|------|------------|----------|--------|-------|
 | 1 | Name + verify OpenCode coverage (AGENTS.md-native, no mirror) | governance | Every-agent coverage: OpenCode | `governance/opencode-native-coverage/plan.md` | In review | PR open on `docs/opencode-native-coverage`; next step = merge, then fold this row per ship convention |
-| 2 | Agent-readiness module + gate + canary self-test | governance | Agent-readiness doctrine | `governance/agent-readiness-doctrine/plan.md` | In review | All 5 milestones done; gate canary-verified (fails a defective fixture, passes a compliant one, shellcheck clean, mirrors in sync). Next step = open the PR, merge, then fold this row per ship convention and apply the module to Pilot app as the pilot. |
+| 2 | | | | | Not started | |
 | 3 | | | | | Not started | |
 
 **Status vocabulary:** `Not started` · `In progress — milestone N of M` · `Blocked — <on what>` ·
