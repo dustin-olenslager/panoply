@@ -23,3 +23,4 @@ Append-only, never pruned. On ship: promote the durable entry to `completed-feat
 <!-- new lines below, newest first -->
 
 - 2026-01-01 · _EXAMPLE — delete this line_ — wire server-side paging into the records query · `ui/records-list` · Records UX overhaul
+- 2026-09-29 · add the kit's machine surface — `scripts/panoply.sh` (check/apply/stamp/version) + `scripts/panoply.test.sh` canary: the kit could only be applied by a Claude Code slash-command prompt and never recorded which version a repo received, so 'not applied' and 'applied in July' were indistinguishable to any non-Claude agent; check exits 0/10/11/12/13/14 (current/absent/partial/stale/placeholders/drifted) and the canary proves all six plus the escape hatch and the non-git passthrough · `scripts/panoply.sh` · Always-on kit adoption

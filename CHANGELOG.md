@@ -12,6 +12,14 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **the kit gains a machine surface** (`scripts/panoply.sh` + `scripts/panoply.test.sh`):
+  `check` reports current / absent / partial / stale / unadapted / mirrors-drifted with distinct exit
+  codes (0/10/11/12/13/14) so ANY harness — Hermes, Codex, Cursor, CI, a pre-commit hook — can gate on
+  it, and `apply` seeds the deterministic half idempotently and writes a `.panoply-version` stamp
+  recording which kit version the repo received. `.panoply-version` is new: previously the kit stamped
+  nothing into an adapted repo, so a stale adoption was indistinguishable from a current one. The
+  canary asserts all six states plus the `PANOPLY_OFF` escape hatch and the not-a-git-tree passthrough.
+
 - MINOR — **locked dev-workflow policy encoded in the rules** (`.claude/rules/git-workflow.md`,
   `.claude/rules/workflow.md`, `.claude/rules/quality-bar.md` + regenerated mirrors): the 2026-09-29
   owner-locked flow is now doctrine every agent and every mirror carries — pre-flight before any

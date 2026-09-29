@@ -60,6 +60,12 @@ jobs:
       - name: Agent-readiness gate self-test
         run: sh scripts/check-agent-readiness.test.sh
 
+      # Panoply doctor self-test — the doctor decides whether a repo has adopted the kit, so a
+      # regression that makes it report "current" for everything (or nothing) would silently stop
+      # every gate downstream. Same doctrine as the self-test above: prove the gate detects.
+      - name: Panoply doctor self-test
+        run: sh scripts/panoply.test.sh
+
       # Architecture-boundary check — not applicable for shell-script kit (no boundary linter)
       # - name: Architecture boundaries
       #   run: <ARCH_CHECK_CMD>
