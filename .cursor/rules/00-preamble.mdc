@@ -24,6 +24,27 @@ alwaysApply: true
 - **Clean Architecture is mandatory:** dependencies point inward only; business rules import no
   framework / ORM / HTTP / SDK; external concerns sit behind a port with an edge adapter.
 
+### First touch — adopt the kit before you modify anything
+
+**If this repository does not carry the Panoply kit, adopting it IS the first batch of work — never
+skip it and never work around it.** Detect it with the kit's own machine surface, which any harness
+can run (Hermes, Codex, Cursor, CI — not just Claude):
+
+    sh scripts/panoply.sh check          # 0 current · 10 not applied · 11 partial · 12 stale
+                                         # 13 unadapted (placeholders left) · 14 mirrors drifted
+
+A non-zero result means stop and adopt:
+
+    sh scripts/panoply.sh apply          # deterministic seeding + the agent checklist
+    sh scripts/sync-agents.sh            # regenerate every tool mirror
+    sh scripts/panoply.sh check          # must exit 0 before other work begins
+
+Do the judgement half the checklist names (fill every `{{TOKEN}}` from this project's OWN manifests,
+prune the `MODULE:` blocks that do not apply, merge — never overwrite — a pre-existing
+`CLAUDE.md`/`AGENTS.md`). A half-applied kit fails its own doc gate and looks like a doc bug, so
+finish it or revert it; do not leave it partial. `PANOPLY_OFF=1` exists for a deliberate exception —
+say plainly that you used it, so the choice is reviewed rather than assumed.
+
 ### MUST NOT — hard guardrails
 
 For Claude Code these are enforced by `.claude/settings.json`. **That permission gate binds only

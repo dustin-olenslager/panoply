@@ -12,6 +12,8 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **first-touch rule added to the MIRROR preamble** (`AGENTS.md`): an agent that finds a repo without the kit is told to adopt it as its first batch, with the `panoply.sh check` exit-code table and the apply/verify sequence. Living in the MIRROR block means every generated tool mirror carries it. Fixes the placeholder scan matching the kit's own convention metasyntax and flagging correctly-adopted repos as unadapted.
+
 - MINOR — **the kit gains a machine surface** (`scripts/panoply.sh` + `scripts/panoply.test.sh`):
   `check` reports current / absent / partial / stale / unadapted / mirrors-drifted with distinct exit
   codes (0/10/11/12/13/14) so ANY harness — Hermes, Codex, Cursor, CI, a pre-commit hook — can gate on

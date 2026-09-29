@@ -83,10 +83,15 @@ _inspect() {
       ;;
   esac
   if [ "$_status" = "current" ] && [ "$_self" != "1" ]; then
-    _ph="$(grep -rl '{{[A-Z_][A-Z0-9_]*}}' AGENTS.md CLAUDE.md docs/claude .claude/rules 2>/dev/null | head -5 || true)"
+    # Only ADAPT-TIME tokens count. The kit's docs legitimately discuss its own convention using the
+    # metasyntax ({{DOUBLE_BRACES}}, {{TOKEN}}, {{PROJECT_NAME}} in prose), so matching any run of
+    # capital letters flags every correctly-adopted repo as unadapted — the always-red failure the
+    # canary caught. An unfilled token is a NAME-like placeholder; prose metasyntax is not.
+    _ph="$(grep -rlE '\{\{(PROJECT_NAME|ONE_LINE_DESCRIPTION|CORE_PILLARS|DEFAULT_BRANCH|PKG_MANAGER|LANGUAGE_RUNTIME|INSTALL_CMD|DEV_CMD|BUILD_CMD|TEST_CMD|LINT_CMD|FORMAT_CMD|TYPECHECK_CMD|COVERAGE_CHECK_CMD|CLIENT_STACK|SERVER_STACK|DATABASE_STACK|MONOREPO_LAYOUT|PROJECT_STRUCTURE|TEST_DIR|ENDPOINT_SRC_DIR|DOMAIN_DIR|USECASE_DIR|ADAPTER_DIR|INFRA_DIR|UI_PRIMITIVES_DIR|DOMAIN_COMPONENTS_DIR|PAGES_DIR|SCHEMA_FILE|MIGRATE_GEN_CMD|MIGRATE_APPLY_CMD|EXPORT_STYLE|FILE_NAMING|IMPORT_ALIAS|SHARED_CONSTANTS_PATH|API_WRAPPER|DATA_ACCESS_LAYER|DATA_FETCH_LIB|UI_FRAMEWORK|STYLING_SYSTEM|ICON_LIBRARY|ICON_SIZE|DESIGN_REFERENCE|AESTHETIC_FAMILY|CHROME_WEIGHT|PALETTE_STRATEGY|DENSITY|MOTION_INTENSITY|DEFAULT_TEXT_SIZE|SECTION_HEADER|FIELD_LABEL|FIELD_VALUE|SECTION_PADDING|ELEMENT_GAP|BORDER_TREATMENT|ARCH_CHECK_CMD|MIGRATE_[A-Z_]+|[A-Z_]*_CMD)\}\}' \
+      AGENTS.md CLAUDE.md docs/claude .claude/rules 2>/dev/null | head -5 || true)"
     if [ -n "$_ph" ]; then
       _status="placeholders"
-      _reason="unfilled placeholders in: $(printf '%s' "$_ph" | tr '\n' ' ')"
+      _reason="unfilled adapt tokens in: $(printf '%s' "$_ph" | tr '\n' ' ')"
     fi
   fi
 
