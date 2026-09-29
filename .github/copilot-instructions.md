@@ -199,14 +199,24 @@ Run against any diff. Each item is pointable: a reviewer can highlight a line an
 > **Applies when:** always — this is the baseline collaboration protocol for every project.
 > **Delete this file (and its `@` import in CLAUDE.md) if:** never. If you disagree with a rule, edit it; do not delete the module.
 
+## Pre-flight — before any proposal
+
+You cannot propose a change to a repo whose state you have not read. Before planning anything:
+
+- `git fetch --prune`, then survey branches, worktrees, and open PRs (`git branch -a`, `git worktree list`, `gh pr list --state open`).
+- Read the central plan doc (`docs/claude/roadmap.md` in kit repos; the repo's one plan doc where the adapt has set a lighter one), the running worklog, and only then the code you are about to change.
+- **Carry forward in-flight work** — continue the queued task or the open PR; never open a parallel track for work already in progress. (Full mechanics: `git-workflow.md` → Pre-flight.)
+
 ## Change Approval
 
 - **Describe your proposed changes and get approval before editing code.** State what you plan to change, which files, and why — then stop and wait for confirmation. Editing first and explaining after removes the user's only cheap moment to redirect you.
+- **Write the plan into the plan doc and present it before code.** The plan states the goal in one sentence, the phases, and the exit criteria, and it is presented to the owner for an explicit yes/no — in plain language, written for a non-technical reader. A plan that lives only in the chat summary was never approved.
 - **This applies to bug fixes exactly as much as to features.** "It's just a fix" is the most common excuse for skipping approval, and fixes are where wrong assumptions do the most damage.
 - **Never assume the root cause. State your hypothesis and let the user confirm or redirect.** Say "I believe X is happening because Y — do you want me to fix it there?" rather than silently fixing what you guessed. The user usually knows something about the system you cannot see from the code, and a confident wrong diagnosis costs a full rewrite.
 - **Name the layers the change touches** — Entities/Domain, Use Cases/Application, Interface Adapters, Frameworks & Drivers (see `clean-architecture.md`). A proposal written as a list of file paths hides the one thing worth catching early: which way the new dependencies point.
 - **If the change would point a dependency outward, raise it before you write it, not after.** At proposal time it is a sentence and a redesign; once the code exists and works, nobody rewrites working code to fix an import direction, and the violation becomes permanent.
 - When you find a second problem while fixing the first, surface it — do not fold it into the current change without asking. Scope creep smuggled into an approved change is unreviewable.
+- **When the decision is genuinely the owner's, present it as two options plus a recommendation — never as a prose block.** Tappable, decidable in one read: what each option is, what it costs now and later, and which one you recommend and why (`quality-bar.md`). Do not start on either option while the question is open.
 
 ### What counts as trivial (no approval needed)
 
@@ -225,9 +235,9 @@ This carve-out is itself a setting: a project that chose the **strict** protocol
 ## Planning Workflow
 
 - **A plan is a roadmap row first, never a new directory.** The moment you start work, add a row to the project's `docs/claude/roadmap.md` (Now/Next/Later) — in the same session, even if that row is the only artifact and the plan dies the same day. A dead roadmap row beats a lost plan. Never create a top-level `<name>-plan/`, `<name>-specs/`, or `scratch_*` plan directory; that scatter is exactly what this rule eliminates. Deeper detail goes in `docs/claude/<area>/<slug>/plan.md` inside the repo, linked from the row.
-- **`docs/claude/roadmap.md` is the SINGLE plan doc every agent reads and edits.** There is exactly one per project. Before planning anything, read it; when you plan anything, write there. If you find a plan doc anywhere else — repo root, flat in `docs/claude/`, a stray folder — it is stale by definition: fold it into a roadmap row and archive it under `docs/claude/<area>/completed/` rather than continuing to edit it in place. Two live plan docs means the next agent reads the wrong one. `scripts/check-plan-home.sh` enforces this in CI and pre-commit (`PLAN_HOME_ALLOW` for a legitimate exception, `PLAN_HOME_OFF=1` while adopting a repo with a backlog).
+- **The plan doc is the SINGLE place every agent reads and edits plans.** A kit repo's plan home is the `docs/claude/` spine: `roadmap.md` (the single canonical plan doc) with per-task fragments under `docs/claude/in-progress.d/` or area plan docs linked from it. A project too small for that spine may keep ONE lightweight `docs/PLAN.md` (a status table + the worklog) as its plan home — same rule, fewer pieces. What is never the plan home: a root-level `PLAN.md` (that is the stray `check-plan-home.sh` exists to reject), a second parallel plan doc, and **GitHub Issues** — an issue is a note that gets folded into the plan doc, never the doc itself. Before planning anything, read it; when you plan anything, write there. `scripts/check-plan-home.sh` enforces this in CI and pre-commit (`PLAN_HOME_ALLOW` for a legitimate exception, `PLAN_HOME_OFF=1` while adopting a repo with a backlog).
 
-- **Enter plan mode before any non-trivial or multi-step work.** Any feature, milestone, or task spanning more than a couple of files starts with a plan — use the planning tool, not an informal chat summary, so the plan is an artifact rather than a paragraph that scrolls away.
+- **Enter plan mode before any non-trivial or multi-step work.** Any feature, milestone, or task spanning more than a couple of files starts with a plan — use the planning tool, not an informal chat summary, so the plan is an artifact rather than a paragraph that scrolls away. Present it to the owner (plain language, above) and let the plan — not the chat memory — be what was approved.
 - **ALWAYS persist the plan to a file under `docs/claude/`.** A plan that exists only in chat context dies at the next compaction, and you will silently resume with a different plan than the one that was approved. The file is the source of truth; the chat is not.
   - Copy `docs/claude/_templates/plan.md` as the starting point.
   - Write it into the relevant area folder, not flat in `docs/claude/` — e.g. `docs/claude/<area>/<feature>/plan.md`. See `docs/claude/_templates/feature-area/README.md` for the folder convention.
@@ -246,6 +256,7 @@ you propose it.
 ## Expert Review (non-trivial changes)
 
 - **Every non-trivial change requires structured expert review before merge.** Trivial changes (per the list above, plus: single file, ≤15 lines added, no schema/API/interface change, or PR labeled `trivial` / commit prefixed `trivial:`) skip this gate.
+- **An agent's self-report is not review evidence.** "Tests pass," "done," and "it works" from the agent that wrote the change verify nothing — authorship and evidence must be independent. Non-trivial work is re-reviewed independently (by a second reviewer or a review agent reading only the diff), and the gate below exists because that requirement is easy to claim and easy to skip.
 - **Four default personas must be considered:** Security, Performance, Maintainability, UX. Domain-specific personas may be added per project.
 - **Review evidence required (checked by `scripts/check-expert-review.sh` in CI):**
   1. `plan.md` exists for the feature area (persisted under `docs/claude/<area>/...`).
@@ -255,7 +266,6 @@ you propose it.
 - **Process:** Author drafts plan → opens PR → requests review from relevant personas → each persona comments with sign-off → CI gate passes → merge.
 - **Conflict escalation:** If personas disagree on a fundamental trade-off, the ADR records both positions and the decision; the operator (human) breaks ties.
 - **No rubber stamps:** A sign-off without reading the diff is a process violation. The adversary-review skill (§16) provides the grading rubric.
-
 ---
 
 # Long-Term Quality Bar
@@ -294,14 +304,21 @@ The path of least resistance is not neutral: it spends someone else's time later
 
 ## Present two options and let the user decide
 
-When the decision is genuinely a judgement call, do not decide silently. Present it like this:
+When the decision is genuinely a judgement call, do not decide silently — and remember the owner is
+non-technical: plain language, one short line per option. Present it like this:
 
 1. **Option A** — one line on what it is; what it costs now; what it costs later.
 2. **Option B** — same.
 3. **What differs that actually matters** — the one or two axes the choice turns on.
 4. **Your recommendation, and why.**
 
-Then stop and wait. Do not start implementing either option while the question is open. Two well-drawn options with honest tradeoffs is a better deliverable than a confident single answer that quietly closed off the alternative.
+Then stop and wait. Do not start implementing either option while the question is open.
+
+- **Present it as tappable choices wherever the surface supports them** (an option picker, an
+  interactive prompt, one line per option in the PR description) — not as a wall of prose the reader
+  must mine. A decision the owner cannot act on with one tap did not get presented; it got deferred.
+- Two well-drawn options with honest tradeoffs is a better deliverable than a confident single
+  answer that quietly closed off the alternative.
 
 ## Applies to
 
@@ -328,12 +345,27 @@ It is not a licence to gold-plate. It does not authorize building for imagined r
 > **Applies when:** the project is version-controlled with git and changes land through pull requests.
 > **Delete this file (and its `@` import in CLAUDE.md) if:** the project is not in git, or has no PR/review process at all.
 
+## Pre-flight — before any work or planning (always first)
+
+No agent plans or writes code before knowing the repo's current state. In order:
+
+- **`git fetch --prune` first.** Stale refs lie about what exists: a branch deleted on the remote still looks live locally, and someone else's new branch is invisible until fetched.
+- **Then survey the repo:** `git status --porcelain` (whose work is in the tree?), `git branch -a` and `git worktree list` (what branches and worktrees exist), and `gh pr list --state open` (what is already in flight).
+- **Then read, in order: the central plan doc (the roadmap under `docs/claude/`), the running worklog, then the code you are about to change.** Planning from memory of a repo you know is planning from a repo that has since moved.
+- **Carry forward in-flight work.** If the task is already queued in the plan doc, or an open branch/PR already covers it, continue that work — never open a parallel track for something already in progress. One open PR per repo at a time (see Merging), so new work waits behind what is open.
+
+## Plan first — presented before code
+
+- **Every non-trivial change starts with a plan written into the plan doc and presented to the owner BEFORE any code exists.** Goal in one sentence, phases, exit criteria, files it touches, what it deliberately does not cover. Full planning doctrine: `workflow.md`.
+- **The plan is written for a non-technical owner in plain language** — they must be able to say yes or no from what they read. Technical choices inside the plan are settled by evidence in the plan; only genuinely owner-level decisions are routed back to them, as two options plus a recommendation (`quality-bar.md`), never as a prose block.
+
 ## Commits
 
 - Use conventional commit prefixes: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `docs:`. They make the history greppable and let release tooling derive changelogs without human curation.
 - **Keep commits atomic — one logical change per commit.** A commit that does two things cannot be reverted, cherry-picked, or bisected without dragging the other one along.
 - **Do not mix a domain change and an infrastructure change in one commit.** A commit that alters a business rule *and* swaps an adapter, ORM call, or vendor client leaves the reviewer no way to tell which half changed the behaviour — and if it has to be reverted, both halves go. Split them along the layer boundary (see `clean-architecture.md`); the domain commit is the one that needs real scrutiny.
 - **Never push directly to `{{DEFAULT_BRANCH}}`.** All work lands via a branch and a PR, so every change has a reviewable diff and a revert point.
+- **Code and its docs ride in the same commit.** A commit that changes code also updates the plan-doc row and the worklog in that same commit — never a follow-up "docs later" commit. A multi-commit PR can fail the docs gate on an intermediate commit (`check-docs.sh --since` walks every commit in the range), so keep each batch code+docs atomic, and let the squash-merge leave one combined commit on `{{DEFAULT_BRANCH}}`.
 - **Remind the user to commit at the end of each feature or milestone** — they forget, and uncommitted work is the one kind of work that a crashed machine or a bad `git checkout` can delete outright.
 
 ## Pre-commit gates (both, every time)
@@ -351,9 +383,18 @@ It is not a licence to gold-plate. It does not authorize building for imagined r
 - If a change alters query structure, response shapes, or call ordering, update the corresponding test fixtures and mocks in the same commit — see "Sequentially-consumed mocks go stale" in `testing.md` for the failure mode and how to spot it.
 - Both gates run before the commit, not before the push. A local commit you have not verified is a commit you will push at 6pm without rechecking.
 
+### The STANDARD gate — before any merge, unfiltered
+
+Merging is gated, and the gate is the same in every repo, for every agent, in every tool:
+
+- **Full tests + full typecheck + lint + the architecture-boundary check (where one exists), run unfiltered, in the same session that merges.** Never a filtered run, never a cached "green from earlier" — rerun in the session that merges.
+- **Non-trivial changes get an independent re-review before merge** — by a second reviewer, or by a review agent reading the diff without the author's framing. **An agent's self-report is a claim, not evidence:** "done" and "tests pass" are verified from the artifact or the gate output, never accepted on the author's word.
+- **CI green on the PR is required.** The PR must carry a green required status check (`scripts/templates/ci-verify.yml`); a local pass does not substitute for it.
+
 ## Branching
 
-- **Always branch from an up-to-date `{{DEFAULT_BRANCH}}`.** Fetch first: `git fetch origin && git switch -c <branch> origin/{{DEFAULT_BRANCH}}`. Branching from a stale local copy imports every conflict that landed since you last pulled.
+- **One branch per batch, always cut fresh from an up-to-date `{{DEFAULT_BRANCH}}`.** Name the branch for the batch (`fix/<slug>`, `feat/<slug>`, `chore/<slug>`), and a branch lives only while its work is live — not as a storage area for finished work. Fetch first: `git fetch origin && git switch -c <branch> origin/{{DEFAULT_BRANCH}}`. Branching from a stale local copy imports every conflict that landed since you last pulled.
+- **Parallel writers get one worktree (or fresh clone) EACH — never two agents writing in one checkout.** Two mutating agents in one tree corrupt each other's index and stashes no matter how careful each one is; a private checkout is the only isolation git actually provides.
 - **Do not branch from another feature branch or an open PR's branch (no stacked PRs) — the default with exactly one exception, below.** PRs are squash-merged, which rewrites the base PR's commits into a single new SHA. The stacked branch still carries the *original* commits, so after the base merges, your branch will conflict with its own already-merged changes — a conflict that looks impossible and wastes an afternoon.
 - If new work depends on an unmerged PR, the rule is: wait for it to merge, then branch fresh from `{{DEFAULT_BRANCH}}`. The one exception: you are truly blocked and waiting is not an option — then stack, flag it prominently in the PR description so the reviewer knows the base is moving, and expect to run the recovery below after the base squash-merges.
 
@@ -383,6 +424,12 @@ A branch showing commits "ahead" of `{{DEFAULT_BRANCH}}` is *not* proof it holds
 - Rebase before requesting review, so the reviewer reads the diff that will actually merge.
 - After rebasing a pushed branch, force-push with `git push --force-with-lease` — never a bare `--force`, which will silently discard a collaborator's commits pushed since your last fetch.
 
+## Merging
+
+- **Squash-merge to `{{DEFAULT_BRANCH}}` only — and the branch is deleted in the same operation (delete-branch-on-merge).** One compact commit per PR on main; the full commits, diff, review, and check run remain on the PR page. Never a merge commit, never a rebase-merge: per-commit history on the default branch is noise at review time, and rebase-merging recreates the stacked-branch conflict described above. Squash-only is repo-level policy, set centrally on the repository (including on forked/adapted copies); do not flip it per PR, and never work around it with a merge commit.
+- **One open PR per repo at a time; no stacked PRs.** Parallel reviewable units land serially, so each merges against a stable base and reviewable size. The only exception is when the owner explicitly grants it — and the grant is recorded in the plan doc, so a later session does not read the exception as the rule.
+- **Push each batch as the batch completes.** A PR that arrives once, complete, is one unreviewable dump; incremental pushes show the plan progress as it lands, and review can start on the first batch.
+
 ## Repo hygiene & credentials
 
 - **Verify commit identity before the first commit in a fresh clone.** A freshly reset or provisioned machine has empty git identity, so the first commit lands under the wrong author. Before committing in any new clone, confirm `git config user.name` and `git config user.email` match the identity this repo declares it commits under (in `CLAUDE.md`/`AGENTS.md`); set them **repo-locally** (`git config user.email …`, never `--global`) if they do not. The check is portable even though the value is per-project — the author the repo commits under is declared in-repo.
@@ -399,7 +446,6 @@ A branch showing commits "ahead" of `{{DEFAULT_BRANCH}}` is *not* proof it holds
 - The PR description states what changed and why, and links the plan doc under `docs/claude/` when there is one.
 - Keep the PR scoped to the approved change. Unrelated drive-by fixes belong in their own PR, where they can be reviewed on their own merits.
 - Never merge your own PR past a failing CI job by re-running it until it goes green — a flaky test is a bug report, not an obstacle.
-
 ---
 
 # Documentation & Memory

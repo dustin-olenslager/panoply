@@ -19,7 +19,7 @@ entry to `completed-features.md`.
 | # | Item | Area | Initiative | Plan doc | Status | Notes |
 |---|------|------|------------|----------|--------|-------|
 | 1 | Name + verify OpenCode coverage (AGENTS.md-native, no mirror) | governance | Every-agent coverage: OpenCode | `governance/opencode-native-coverage/plan.md` | In review | PR open on `docs/opencode-native-coverage`; next step = merge, then fold this row per ship convention |
-| 2 | | | | | Not started | |
+| 2 | Encode the locked dev-workflow policy (points 1–10) in rules + every mirror | governance | Locked dev-workflow policy | `governance/dev-workflow-locked-policy/plan.md` | In review | PR open on `chore/dev-workflow-rules`; next step = owner review + squash-merge — do NOT open parallel rule edits |
 | 3 | | | | | Not started | |
 
 **Status vocabulary:** `Not started` · `In progress — milestone N of M` · `Blocked — <on what>` ·

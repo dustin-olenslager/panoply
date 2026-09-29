@@ -12,7 +12,18 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
-_Nothing unreleased._
+- MINOR — **locked dev-workflow policy encoded in the rules** (`.claude/rules/git-workflow.md`,
+  `.claude/rules/workflow.md`, `.claude/rules/quality-bar.md` + regenerated mirrors): the 2026-09-29
+  owner-locked flow is now doctrine every agent and every mirror carries — pre-flight before any
+  work or planning; plan presented to the owner before code; the `docs/claude/` spine as the single
+  plan home (one lightweight `docs/PLAN.md` allowed in small non-kit repos; root `PLAN.md` and
+  GitHub Issues never); one branch per batch off fresh main, parallel writers one worktree each;
+  push each batch as it completes; the STANDARD gate before merge (tests + typecheck + lint + arch
+  check unfiltered in the same session, independent re-review of non-trivial work, CI green — a
+  subagent self-report is not evidence); squash-merge only with delete-branch-on-merge; one open PR
+  per repo at a time with owner exceptions recorded in the plan doc; code + worklog in the same
+  commit; owner decisions presented as two tappable options plus a recommendation. Mirrors were
+  regenerated with `scripts/sync-agents.sh`, not hand-edited.
 
 ## [1.4.0] — 2026-09-26
 
