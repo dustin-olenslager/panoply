@@ -128,6 +128,34 @@ else
   _bad "copied doctor reports the kit version" "local gave '$_v_local', kit is '$_v_kit'"
 fi
 
+# --- case 12: apply must NEVER silently clobber a locally-edited script -------------------------
+# Why: a pilot repo's check-docs.sh carries a conflict-marker sweep the kit template lacks. apply cp'd the
+# template over it with no NOTE at all — an unreported capability regression, and the same hazard for
+# sync-agents.sh / check-plan-home.sh (any repo-local edit). Rule modules already reported divergence;
+# scripts did not. The contract is now: install when absent, KEEP and report when it differs, and
+# replace only under an explicit --force-scripts.
+R="$(_new_repo scriptclobber)"
+( cd "$R" && sh "$DOC" apply ) >/dev/null 2>&1
+printf '\n# LOCAL CUSTOMIZATION MARKER\n' >> "$R/scripts/check-docs.sh"
+_out="$( cd "$R" && sh "$DOC" apply 2>&1 )"
+if grep -q 'LOCAL CUSTOMIZATION MARKER' "$R/scripts/check-docs.sh"; then
+  _ok "apply preserves a locally-edited script"
+else
+  _bad "apply preserves a locally-edited script" "the local edit was clobbered silently"
+fi
+if printf '%s' "$_out" | grep -q 'KEPT scripts/check-docs.sh'; then
+  _ok "apply reports the kept script (not silent)"
+else
+  _bad "apply reports the kept script" "no KEPT note in apply output"
+fi
+# and the explicit opt-in must actually replace it
+( cd "$R" && sh "$DOC" apply --force-scripts ) >/dev/null 2>&1
+if grep -q 'LOCAL CUSTOMIZATION MARKER' "$R/scripts/check-docs.sh"; then
+  _bad "--force-scripts replaces the script" "marker survived the forced refresh"
+else
+  _ok "--force-scripts replaces the script"
+fi
+
 echo
 if [ "$fail" = 0 ]; then printf 'PANOPLY.TEST: all green (%d checks)\n' "$pass"; exit 0; fi
 printf 'PANOPLY.TEST: FAILED (%d ok, %d failed)\n' "$pass" "$fail"; exit 1

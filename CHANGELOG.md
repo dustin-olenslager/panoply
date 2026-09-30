@@ -12,6 +12,9 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — `apply` installs a script only when absent, KEEPS and reports a repo's own edited copy
+  instead of overwriting it, and replaces one only under an explicit `--force-scripts`.
+
 - PATCH — `apply` seeds `AGENTS.md` (template only, never clobbering the repo's own hub) and installs
   `panoply.sh` + `panoply.test.sh` into the adopted repo so it can self-check; the copied doctor
   resolves the kit version from the canonical clone rather than the adopter's unrelated tags — and
