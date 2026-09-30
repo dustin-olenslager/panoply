@@ -12,6 +12,11 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — `apply` seeds `AGENTS.md` (template only, never clobbering the repo's own hub) and installs
+  `panoply.sh` + `panoply.test.sh` into the adopted repo so it can self-check; the copied doctor
+  resolves the kit version from the canonical clone rather than the adopter's unrelated tags — and
+  falls back to the stamp, never the adopter's tags, when no canonical clone exists (a CI runner).
+
 - MINOR — **first-touch rule added to the MIRROR preamble** (`AGENTS.md`): an agent that finds a repo without the kit is told to adopt it as its first batch, with the `panoply.sh check` exit-code table and the apply/verify sequence. Living in the MIRROR block means every generated tool mirror carries it. Fixes the placeholder scan matching the kit's own convention metasyntax and flagging correctly-adopted repos as unadapted.
 
 - MINOR — **the kit gains a machine surface** (`scripts/panoply.sh` + `scripts/panoply.test.sh`):

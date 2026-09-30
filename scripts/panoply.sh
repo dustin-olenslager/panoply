@@ -23,7 +23,41 @@ set -eu
 # reports another project's version). Falls back to the latest tag, then "unreleased".
 _kit_root() { cd "$(dirname "$0")/.." && pwd; }
 
+# A canonical kit clone, used when this script has been COPIED into an adopted repo.
+_canonical_kit_root() {
+  for _c in "${PANOPLY_KIT_ROOT:-}" "${HOME:-}/.panoply" "${HOME:-}/.cache/panoply" "${HOME:-}/panoply" "<kit>"; do
+    [ -n "$_c" ] || continue
+    if [ -f "$_c/scripts/panoply.sh" ]; then printf '%s' "$_c"; return 0; fi
+  done
+  return 1
+}
+
+# True when this script is a COPY living inside an adopted repo rather than the kit source itself.
+# `apply` copies the doctor into the repo so the repo can self-check; the tell is a stamp sitting
+# next to us (the kit source never carries one — it IS the source).
+_is_copied_doctor() { [ -f "$(_kit_root)/$(printf '.panoply-version')" ]; }
+
+# The repo whose tags define the KIT's version. From a copied doctor, `$0`'s directory is the
+# ADOPTER, whose tags are unrelated to the kit's: resolving from it made a compliant repo mismatch
+# its own product tag against the stamp and report "stale" forever — an always-red gate. The
+# canonical clone is the only correct source; when it is not present (a CI runner, a fresh machine)
+# we must NOT fall back to the adopter's tags, so the caller uses the stamp instead.
+_kit_source_root() { _canonical_kit_root; }
+
 _kit_version() {
+  if _is_copied_doctor; then
+    _r="$(_kit_source_root || true)"
+    if [ -n "$_r" ]; then
+      v="$(git -C "$_r" describe --tags --abbrev=0 2>/dev/null || true)"
+      [ -n "$v" ] || v="$(git -C "$_r" tag --sort=-v:refname 2>/dev/null | head -1 || true)"
+      [ -n "$v" ] && { printf '%s' "$v"; return 0; }
+    fi
+    # No canonical clone: believe the stamp. Never the adopter's own tags — that is the bug.
+    v="$(sed -n 's/^kit_version:[[:space:]]*//p' "$(_kit_root)/$(printf '.panoply-version')" 2>/dev/null | head -1)"
+    [ -n "$v" ] || v="unreleased"
+    printf '%s' "$v"
+    return 0
+  fi
   _r="$(_kit_root)"
   v="$(git -C "$_r" describe --tags --abbrev=0 2>/dev/null || true)"
   [ -n "$v" ] || v="$(git -C "$_r" tag --sort=-v:refname 2>/dev/null | head -1 || true)"
@@ -31,7 +65,15 @@ _kit_version() {
   printf '%s' "$v"
 }
 
-_kit_sha() { _r="$(_kit_root)"; git -C "$_r" rev-parse --short HEAD 2>/dev/null || printf 'unknown'; }
+_kit_sha() {
+  _r="$(_kit_source_root || true)"
+  if [ -n "$_r" ]; then git -C "$_r" rev-parse --short HEAD 2>/dev/null && return 0; fi
+  if _is_copied_doctor; then
+    sed -n 's/^kit_sha:[[:space:]]*//p' "$(_kit_root)/$(printf '.panoply-version')" 2>/dev/null | head -1
+    return 0
+  fi
+  printf 'unknown'
+}
 
 # ---------------------------------------------------------------- markers ----
 # The triad. Absent = never applied. Partial = a half-applied kit, which the kit's own docs call out
@@ -212,8 +254,23 @@ cmd_apply() {
     fi
   done
 
+  # 2b. The agent hub itself. Seed the TEMPLATE only when the repo has no hub of its own — its
+  # tokens stay in place on purpose, which is what makes the next check report "unadapted" (13)
+  # rather than "half-applied (missing AGENTS.md)" (11). Without this, apply can never reach a
+  # state the agent can finish from: every adoption would stall until someone hand-wrote a hub
+  # from scratch. A repo with its own AGENTS.md or CLAUDE.md is left completely alone here; the
+  # agent merges the kit's structure into it as checklist step 3.
+  if [ ! -f AGENTS.md ] && [ ! -f CLAUDE.md ] && [ -f "$_src/AGENTS.md" ]; then
+    cp "$_src/AGENTS.md" AGENTS.md
+    printf '    seeded AGENTS.md (kit template — fill its {{TOKENS}})\n'
+  fi
+
   # 3. Gates + mirror generator.
-  for _s in sync-agents.sh check-docs.sh check-plan-home.sh; do
+  # panoply.sh is installed into the repo so the repo can SELF-CHECK against the version it pinned
+  # (the gate resolves a repo-local doctor first, exactly so an adopted repo is judged by its own
+  # copy rather than by whatever the canonical clone has drifted to). Without this the runbook's
+  # final `sh scripts/panoply.sh check` cannot run in the repo at all.
+  for _s in panoply.sh panoply.test.sh sync-agents.sh check-docs.sh check-plan-home.sh; do
     [ -f "$_src/scripts/$_s" ] && cp "$_src/scripts/$_s" "scripts/$_s" && chmod +x "scripts/$_s"
   done
 

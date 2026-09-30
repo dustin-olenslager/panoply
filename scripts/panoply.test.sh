@@ -90,6 +90,44 @@ if [ "$_off" = 0 ]; then _ok "PANOPLY_OFF escape hatch (exit 0)"; else _bad "PAN
 # --- case 9: not a git tree must never block ---------------------------------------------------
 R="$WORK/nogit"; mkdir -p "$R";     assert_exit "non-git dir is not blocked" 0 "$R"
 
+# --- case 10: apply must reach a state the agent can FINISH -------------------------------------
+# Why this case exists: apply originally seeded the spine and the rule modules but never AGENTS.md,
+# so every adoption stalled at exit 11 ("half-applied — missing AGENTS.md") with no file to fill.
+# apply could not reach a state an agent could complete from, which made the runbook a dead end.
+# The check here is the CONTRACT, not the mechanism: after apply, the repo must be reportable as
+# unadapted (13) — i.e. hub present with tokens to fill — and must never be back at 11.
+R="$(_new_repo applies)"
+( cd "$R" && sh "$DOC" apply ) >/dev/null 2>&1
+_apply_rc=$?
+if [ "$_apply_rc" = 0 ]; then _ok "apply exits 0"; else _bad "apply exits 0" "got $_apply_rc"; fi
+if [ -f "$R/AGENTS.md" ]; then _ok "apply seeds an AGENTS.md hub"; else _bad "apply seeds an AGENTS.md hub" "absent"; fi
+assert_exit "post-apply is unadapted, not half-applied" 13 "$R"
+# A repo with its OWN hub must be left untouched by apply (the judgement half merges it).
+R="$(_new_repo ownhub)"
+printf '# my own hub\nno tokens here\n' > "$R/AGENTS.md"
+( cd "$R" && sh "$DOC" apply ) >/dev/null 2>&1
+if grep -q 'my own hub' "$R/AGENTS.md" && ! grep -q '{{\|PANOPLY:RULES' "$R/AGENTS.md"; then
+  _ok "apply never clobbers an existing AGENTS.md"
+else
+  _bad "apply never clobbers an existing AGENTS.md" "hub was replaced by the kit template"
+fi
+
+# --- case 11: the COPY-OF-THE-DOCTOR must resolve the KIT's version, not the adopter's -----------
+# Why this case exists: `apply` copies panoply.sh into the adopted repo so it can self-check. Once
+# copied, `$0` resolves to the ADOPTER, so version resolution read the adopter's own git tags. A
+# repo with any unrelated tag (e.g. its own v1.0.0 product release) then never matched the kit's
+# stamp and reported "stale" forever — an always-red gate on a perfectly compliant repo.
+R="$(_new_repo copydoctor)"
+( cd "$R" && sh "$DOC" apply ) >/dev/null 2>&1
+( cd "$R" && git tag v9.9.9-product-release ) >/dev/null 2>&1   # an unrelated adopter tag
+_v_local="$( cd "$R" && sh scripts/panoply.sh version 2>/dev/null )"
+_v_kit="$("$DOC" version)"
+if [ "$_v_local" = "$_v_kit" ]; then
+  _ok "copied doctor reports the kit version ($_v_local), not the adopter's tag"
+else
+  _bad "copied doctor reports the kit version" "local gave '$_v_local', kit is '$_v_kit'"
+fi
+
 echo
 if [ "$fail" = 0 ]; then printf 'PANOPLY.TEST: all green (%d checks)\n' "$pass"; exit 0; fi
 printf 'PANOPLY.TEST: FAILED (%d ok, %d failed)\n' "$pass" "$fail"; exit 1
