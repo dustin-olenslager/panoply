@@ -12,6 +12,9 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — `panoply.test.sh` skips loudly instead of false-redding when run outside the kit
+  template (it derives its kit root from `$0`, so an adopter became its own 'kit').
+
 - PATCH — `apply` installs a script only when absent, KEEPS and reports a repo's own edited copy
   instead of overwriting it, and replaces one only under an explicit `--force-scripts`.
 
