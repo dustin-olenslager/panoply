@@ -39,28 +39,38 @@ _is_copied_doctor() { [ -f "$(_kit_root)/$(printf '.panoply-version')" ]; }
 
 # The repo whose tags define the KIT's version. From a copied doctor, `$0`'s directory is the
 # ADOPTER, whose tags are unrelated to the kit's: resolving from it made a compliant repo mismatch
-# its own product tag against the stamp and report "stale" forever — an always-red gate. The
-# canonical clone is the only correct source; when it is not present (a CI runner, a fresh machine)
-# we must NOT fall back to the adopter's tags, so the caller uses the stamp instead.
+# its own product tag against the stamp and report "stale" forever — an always-red gate. So the
+# copied doctor never reads tags at all — see _kit_version.
 _kit_source_root() { _canonical_kit_root; }
 
+# The KIT's version. ONE question, answered the same way in both trees: **what release does this
+# checkout correspond to?**
+#
+# The bug this replaces: the source answered "what release is this?" with `git describe --tags
+# --abbrev=0`, while a copied doctor answered "what is the nearest ancestor tag?" from a canonical
+# clone. Those are different questions, and they disagree whenever the kit sits between releases —
+# a checkout 14 commits past `v1.4.0` describes as `v1.4.0-14-gc0dee04`, which the guard below then
+# reported as a version rather than `unreleased`, while the same commit in the canonical clone
+# (where `--abbrev=0` strips the `-14-g` suffix) reported the bare `v1.4.0`. `apply` therefore
+# stamped one value and the copied doctor reported another.
+#
+# The divergence only appeared where a canonical clone existed — a local-only false red in the one
+# gate adopters are told to run, and invisible on a fresh CI runner. Fixing it by making the source
+# mirror the clone's behaviour would have propagated the wrong question; instead a version comes
+# from a TAG ONLY WHEN HEAD IS EXACTLY AT IT (`--exact-match`), so an untagged checkout is
+# `unreleased` in every tree. Tagged releases are unaffected.
 _kit_version() {
   if _is_copied_doctor; then
-    _r="$(_kit_source_root || true)"
-    if [ -n "$_r" ]; then
-      v="$(git -C "$_r" describe --tags --abbrev=0 2>/dev/null || true)"
-      [ -n "$v" ] || v="$(git -C "$_r" tag --sort=-v:refname 2>/dev/null | head -1 || true)"
-      [ -n "$v" ] && { printf '%s' "$v"; return 0; }
-    fi
-    # No canonical clone: believe the stamp. Never the adopter's own tags — that is the bug.
+    # A copied doctor does not read tags at all. The stamp was written by the kit source at apply
+    # time using the rule below, so it is the authoritative answer, and reading the canonical
+    # clone's tags here is what produced the mismatch.
     v="$(sed -n 's/^kit_version:[[:space:]]*//p' "$(_kit_root)/$(printf '.panoply-version')" 2>/dev/null | head -1)"
     [ -n "$v" ] || v="unreleased"
     printf '%s' "$v"
     return 0
   fi
   _r="$(_kit_root)"
-  v="$(git -C "$_r" describe --tags --abbrev=0 2>/dev/null || true)"
-  [ -n "$v" ] || v="$(git -C "$_r" tag --sort=-v:refname 2>/dev/null | head -1 || true)"
+  v="$(git -C "$_r" describe --tags --exact-match 2>/dev/null || true)"
   [ -n "$v" ] || v="unreleased"
   printf '%s' "$v"
 }

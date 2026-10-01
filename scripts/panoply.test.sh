@@ -152,6 +152,50 @@ else
   _bad "copied doctor reports the kit version" "local gave '$_v_local', kit is '$_v_kit'"
 fi
 
+# --- case 11b: the copy must agree with the SOURCE when the kit sits BETWEEN releases ------------
+# Why this case exists: version resolution asked two different questions depending on which tree
+# answered it. From the kit SOURCE it asked "what release is this?" (`git describe --tags --abbrev=0`
+# on a checkout with untagged commits since the last tag yields `v1.4.0-14-gc0dee04`, and the
+# `[ -n "$v" ]` guard then reads that as a version — not `unreleased`). From a CANONICAL CLONE it
+# asked "what is the nearest ancestor tag?", which is a different question with a different answer.
+# So `apply` stamped one value and the copied doctor reported another, and the mismatch only appeared
+# for whoever happened to have a canonical clone on the machine — a local-only false red in the one
+# gate adopters are told to run.
+#
+# The bug hides on a machine with no canonical clone (`_canonical_kit_root` fails, the stamp is
+# believed, both agree) and on a tagged kit checkout. It shows up exactly when the kit has untagged
+# commits AND a clone exists. Force BOTH conditions here, or this case passes for the wrong reason.
+R="$(_new_repo copydoctor-between)"
+( cd "$R" && sh "$DOC" apply ) >/dev/null 2>&1
+_canon="$WORK/canon-between"
+if git -C "$KIT" rev-parse --verify HEAD >/dev/null 2>&1; then
+  git clone -q "$KIT" "$_canon" >/dev/null 2>&1 || _canon=""
+fi
+# NOTE: gating on _at_tag made this case SKIP under mutation — reintroducing the bug (`--abbrev=0`)
+# makes the source report a tag, so the guard judged "source is tagged" and disabled the very case
+# meant to catch it. A canary that skips when the defect is present proves nothing. So the gate is
+# on the RAW tree state (does this checkout carry a reachable tag at HEAD?), never on the value the
+# code under test produces.
+if [ -n "$_canon" ]; then
+  _faketop="$WORK/fakehome"
+  mkdir -p "$_faketop/.cache"
+  _origin="$(git -C "$KIT" remote get-url origin 2>/dev/null || true)"
+  if [ -n "$_origin" ] && git clone -q "$_origin" "$_faketop/.cache/panoply" >/dev/null 2>&1; then
+    _v_local2="$( cd "$R" && env -u PANOPLY_KIT_ROOT HOME="$_faketop" sh scripts/panoply.sh version 2>/dev/null )"
+    _v_kit2="$( sh "$DOC" version 2>/dev/null )"
+    if [ "$_v_local2" = "$_v_kit2" ]; then
+      _ok "copied doctor agrees with the source ($_v_local2)"
+    else
+      _bad "copied doctor agrees with the source" \
+           "copy said '$_v_local2', source said '$_v_kit2' — version resolution asks two questions"
+    fi
+  else
+    _ok "copied-doctor canonical-clone case skipped (no canonical clone could be staged)"
+  fi
+else
+  _ok "copied-doctor canonical-clone case skipped (source worktree has no remote)"
+fi
+
 # --- case 12: apply must NEVER silently clobber a locally-edited script -------------------------
 # Why: a pilot repo's check-docs.sh carries a conflict-marker sweep the kit template lacks. apply cp'd the
 # template over it with no NOTE at all — an unreported capability regression, and the same hazard for

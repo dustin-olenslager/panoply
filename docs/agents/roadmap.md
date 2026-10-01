@@ -30,6 +30,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 | Initiative | Intent (one line) | Queue rows (`in-progress.md`) | Plan docs |
 |---|---|---|---|
 | Locked dev-workflow policy | Encode the 2026-09-29 owner-locked dev-workflow policy (points 1–10) into the rule modules and regenerate every tool-native mirror | row 2 | `governance/dev-workflow-locked-policy/plan.md` |
+| Version resolution answers one question | `panoply.sh version` must agree between the kit source and the doctor copied into an adopted repo, so the canary is green on a developer machine too — not only on a clean CI runner | row 4 | `governance/version-resolution-one-question/plan.md` |
 | The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 3 | `governance/execution-algorithm/plan.md` |
 | Every-agent coverage: the agent | Name and verify the agent as an AGENTS.md-native tool; no new mirror required | row 1 | `governance/opencode-native-coverage/plan.md` |
 

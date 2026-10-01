@@ -12,6 +12,17 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — **version resolution asks one question, in every tree.** `scripts/panoply.sh version` disagreed with
+  itself: the kit source reported `unreleased` for a checkout 14 commits past its last tag, while the doctor
+  `apply` copies into an adopted repo reported that tag (`v1.4.0`) because it read a canonical clone's
+  *nearest ancestor* tag instead. `apply` stamped one value and the copy reported another, so `panoply.test.sh`
+  failed on any machine holding a canonical clone and passed on a clean CI runner — a local-only false red in
+  the one gate adopters are told to run. A version now comes from a tag only when HEAD is exactly at it
+  (`describe --tags --exact-match`), so an untagged checkout is `unreleased` everywhere, and a copied doctor
+  reads its own stamp instead of consulting tags at all. Tagged releases are unaffected. The canary gains a
+  case that stages a canonical clone and asserts the copy agrees with the source; it is mutation-tested (the
+  divergence was reintroduced and the case went red). 18/18 checks.
+
 - MINOR — **Rejections are first-class in the step-2 list.** The plan doc's *Deletion candidates* section
   is now also the **rejections ledger**: a proposal considered and turned down is recorded there, at the
   moment the decision is made, with **what we do instead** — the one thing that stops the same idea being
