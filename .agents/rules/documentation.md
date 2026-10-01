@@ -1,7 +1,7 @@
 # Documentation & Memory
 
 > **Applies when:** always — this defines where project knowledge lives and how it survives context compaction.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. If the project keeps its knowledge base elsewhere, retarget the paths rather than dropping the module.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. If the project keeps its knowledge base elsewhere, retarget the paths rather than dropping the module.
 
 ## Two tiers of memory
 
@@ -39,7 +39,7 @@ from the worklog at release time, not maintained per-change in parallel. If the 
 
 ### The same-change update contract (every agent, every provider)
 
-In the SAME commit that lands work — Claude, Codex, Cursor, or any other tool:
+In the SAME commit that lands work — any agent:
 
 1. **Append one worklog line** (to `worklog.md`, or the `[Unreleased]` section) — what changed, where.
 2. **Write your task's own fragment** — `docs/agents/in-progress.d/<slug>.md` — with its status and its
@@ -52,8 +52,8 @@ In the SAME commit that lands work — Claude, Codex, Cursor, or any other tool:
    (to Shipped if this was its last plan), and archive the plan folder.
 4. **On a new or reprioritised initiative**: add or move its `roadmap.md` row.
 
-This contract is plain-markdown, enforced by review and `/audit-agents-setup` — never a Claude-only
-permission gate, so it binds a non-Claude agent exactly as much as a Claude one. It is mirrored into
+This contract is plain-markdown, enforced by review and `/audit-agents-setup` — never a tool-only
+permission gate, so it binds a non-agent exactly as much as a the agent one. It is mirrored into
 `AGENTS.md` so every tool reads it. **Shipped-but-unlogged counts as not done** (see below).
 
 ### The queue is the ONLY backlog — autonomous drivers included
@@ -86,7 +86,7 @@ from the code alone.
 
 This is the same contract Phalanx's autonomous loop adopted in its ADR-0004, so a task seeded by the
 loop and a task written by hand are the same file. A committed queue is also the only kind a reviewer,
-a diff, or a non-Claude agent can see at all.
+a diff, or a non-agent can see at all.
 
 ### The landing gate — mechanical enforcement
 

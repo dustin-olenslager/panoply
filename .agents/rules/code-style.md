@@ -1,7 +1,7 @@
 # Code Style & Patterns
 
-> **Applies when:** always — any project in which Claude reads, writes, or edits source code.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. Trim individual rules instead.
+> **Applies when:** always — any project in which an agent reads, writes, or edits source code.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. Trim individual rules instead.
 
 ## Before you write code
 

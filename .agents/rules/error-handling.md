@@ -1,7 +1,7 @@
 # Error Handling
 
 > **Applies when:** always — any project that accepts input, performs I/O, or shows results to a user.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. Trim individual rules instead.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. Trim individual rules instead.
 
 ## Validate at the boundaries
 

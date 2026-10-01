@@ -22,8 +22,8 @@ before**: a mechanical gate that fails the commit/CI when code changed but the d
   to preserve. The agent writes docs *in-context*; the gate enforces that it did.
 - **Deriving docs from code** — impossible generically for a language-agnostic kit.
 - **Hosted platform / MCP / search index** — violates the no-hosted-dependency premise.
-- **The Claude-only precondition hook** (blocking an edit before it is typed) — a separate, later,
-  opt-in decision; it is the one mechanism that cannot be mirrored to non-Claude agents.
+- **The tool-only precondition hook** (blocking an edit before it is typed) — a separate, later,
+  opt-in decision; it is the one mechanism that cannot be mirrored to non-agents.
 
 ## Context
 
@@ -85,8 +85,8 @@ problem, not an automation problem, and it is the honest limit of any git-native
 ## Build notes
 
 > **Build note:** 2026-08-21 — the "before code is touched" precondition is not literally achievable
-> provider-neutrally; the earliest enforceable point for non-Claude agents is the commit. The landing
-> gate is the provider-neutral floor; a Claude-only `PreToolUse` precondition is a later opt-in.
+> provider-neutrally; the earliest enforceable point for non-agents is the commit. The landing
+> gate is the provider-neutral floor; a tool-only `PreToolUse` precondition is a later opt-in.
 
 ## On ship
 

@@ -101,7 +101,7 @@ rebuilding any existing skill or gate.
   positive control, exemption, escape hatch, no-plan, deny→remedy→allow round trip);
   `scripts/sync-agents.sh` ORDER gains `algorithm`; `panoply.sh` installs the two new scripts and its
   checklist names the CI/pre-commit wiring; `verify.yml` runs the gate and its self-test.
-- [x] **M3 — Mirrors + docs spine**: all 5 concatenated mirrors + 3 edited Cursor `.mdc` + the AGENTS.md
+- [x] **M3 — Mirrors + docs spine**: all 5 concatenated mirrors + 3 edited the agent `.mdc` + the AGENTS.md
   rules block regenerated (never hand-edited); this plan doc, roadmap row, queue row, CHANGELOG entry.
 - [ ] **M4 — Hermes injection plugin** (`execution-algorithm`): the pass in the system prompt AND on the
   `pre_llm_call` context channel (the only channel that reaches subagents), plus the opt-in

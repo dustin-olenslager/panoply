@@ -1,7 +1,7 @@
 # API & Event Payload Design
 
 > **Applies when:** the project exposes an API, RPC surface, or event/socket stream that another process or client consumes.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no server-to-client or service-to-service boundary of its own.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no server-to-client or service-to-service boundary of its own.
 
 ## Where this surface sits
 

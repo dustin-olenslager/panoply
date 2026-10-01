@@ -3,7 +3,7 @@
 **Intent:** Optimize the Panoply agent-governance kit by adding mandatory PR gates, provider-neutral documentation enforcement, and a structured expert-review process — while preserving its language-agnostic, zero-hosted-dependency premise.
 
 **Constraints:**
-- Must remain provider-neutral (Cursor, Codex, Copilot, Windsurf, Cline, aider, Gemini, Claude)
+- Must remain provider-neutral (any agent)
 - Must remain language-agnostic (no runtime deps, POSIX sh only)
 - Must keep "prune don't leave blanks" — no half-filled modules
 - Must keep Clean Architecture as the premise, not a module
@@ -15,7 +15,7 @@
 2. Documentation updates are mechanically enforced at commit/CI (the docs-gate already in progress completes this)
 3. A structured expert-review process exists for non-trivial changes, with named personas and escalation rules
 4. The optimization plan itself ships using the same gates it proposes
-5. No new hosted dependencies, no vendor lock-in, no Claude-only features in the shared contract
+5. No new hosted dependencies, no vendor lock-in, no tool-only features in the shared contract
 
 **Scope:**
 - Phase 1: Harden the CI/pre-commit templates to require branch protection + required checks (not just provide them)
@@ -27,5 +27,5 @@
 **Out of scope:**
 - Hosted platform / MCP / search index
 - Agent-authored self-updating docs
-- Claude-only PreToolUse preconditions (provider-neutral floor only)
+- tool-only PreToolUse preconditions (provider-neutral floor only)
 - Any change that makes the kit opinionated about a specific language/framework beyond what clean-architecture.md already requires

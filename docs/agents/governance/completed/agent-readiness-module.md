@@ -7,7 +7,7 @@
 
 ## Goal
 
-Every an organization app becomes **dual-mode**: usable by a human in its own UI *and* drivable by an AI agent — either by an external harness (Hermes, OpenClaw, Claude Code) or autonomously with nothing but an LLM API key. After this ships, the kit carries a rules module stating what that requires and a CI gate that mechanically enforces the checkable part, so any repo adopting the kit inherits both.
+Every an organization app becomes **dual-mode**: usable by a human in its own UI *and* drivable by an AI agent — either by an external harness (Hermes, OpenClaw, the agent) or autonomously with nothing but an LLM API key. After this ships, the kit carries a rules module stating what that requires and a CI gate that mechanically enforces the checkable part, so any repo adopting the kit inherits both.
 
 Success = an agent picking up an adapted repo learns the three required surfaces from `AGENTS.md`, and a PR that removes idempotency or hardcodes a vendor endpoint fails CI.
 
@@ -32,7 +32,7 @@ Panoply already governs Clean Architecture, doc currency, and expert review with
 - [x] **M1 — doctrine module** — `.agents/rules/agent-readiness.md`: the premise (UI is a client of the API), the three surfaces, Clean Architecture placement, BYO-LLM-key config, agent identity/scopes/audit, review checklist, anti-patterns.
 - [x] **M2 — enforcement gate** — `scripts/check-agent-readiness.sh`: agent card present + served, idempotency on mutations, generated MCP schemas, no vendor lock outside the adapter, scoped non-human principal, `--since` surface-drift check. Warn mode for mid-adoption repos.
 - [x] **M3 — canary self-test** — `scripts/check-agent-readiness.test.sh`: builds a defective fixture and a compliant fixture in `$TMPDIR`, asserts the gate fails the first and passes the second, and that warn + `--since` modes work. Wired into the kit's own CI.
-- [x] **M4 — kit wiring** — module registered in `CLAUDE.md` (`MODULE:agent` fence), `scripts/sync-agents.sh` ORDER, `README.md` module table, `adapt-claude-setup.md` (detection + prune/keep guidance), `scripts/templates/ci-verify.yml` (the step adopting repos get). Mirrors regenerated.
+- [x] **M4 — kit wiring** — module registered in the generated agent hub (`MODULE:agent` fence), `scripts/sync-agents.sh` ORDER, `README.md` module table, `adapt-agents-setup.md` (detection + prune/keep guidance), `scripts/templates/ci-verify.yml` (the step adopting repos get). Mirrors regenerated.
 - [x] **M5 — verify** — shellcheck clean on the new scripts (baseline also clean); `sync-agents.sh --check` passes; canary suite green.
 - [x] **M6 — CI hardening** — removed the SC2015 `A && B || C` shape the CI runner's older shellcheck rejected (local 0.11.0 was silent); strengthened canary 3 to assert warn mode still reports. Landed via squash-merge so `main` carries one commit with code + docs together (the docs gate flagged the standalone fix commit).
 

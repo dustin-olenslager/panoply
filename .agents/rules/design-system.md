@@ -3,7 +3,7 @@
 # UI Design System
 
 > **Applies when:** the project ships screens a human looks at (web app, desktop app, mobile app, or a styled docs/marketing surface).
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no user interface — a library, CLI, service, or job runner. Nothing here applies to terminal output.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no user interface — a library, CLI, service, or job runner. Nothing here applies to terminal output.
 
 ## Design reference
 

@@ -1,7 +1,7 @@
 # Data Modeling
 
 > **Applies when:** the project designs its own persistent data model and expects to query, aggregate, or report on that data.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project stores no durable data of its own.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project stores no durable data of its own.
 
 Model for the queries you will have to answer later, not just the screen you are building today. Reshaping a data model after it holds production data is the most expensive refactor there is.
 

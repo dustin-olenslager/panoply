@@ -41,8 +41,8 @@ or second-guess the adapt logic here — read the kit's file and execute it.
      project's own files win and are never overwritten;
    - seeds `docs/agents/roadmap.md` and the worklog (fresh `worklog.md`, or an
      existing `CHANGELOG`/`HISTORY` `[Unreleased]` section);
-   - generates the provider mirrors via `scripts/sync-agents.sh` (Copilot, Cursor,
-     Cline, Windsurf, Gemini, aider) from the single-source `AGENTS.md`;
+   - generates the provider-neutral mirrors via `scripts/sync-agents.sh` from the
+     single-source `AGENTS.md` + `.agents/rules/*.md`;
    - installs the CI + pre-commit enforcement plane from `scripts/templates/`,
      including the docs landing gate (`scripts/check-docs.sh`) that fails any
      commit changing code but not the worklog in the same commit.

@@ -98,7 +98,9 @@ sed -i 's/^kit_version: .*/kit_version: v0.0.1/' "$R/.panoply-version"
                                     assert_exit "stale (old version)"    12 "$R"
 # --- case 6: drifted mirrors -------------------------------------------------------------------
 R="$(_new_repo drifted)"; _make_adopted "$R"
-printf '\nhand edit that bypasses the generator\n' >> "$R/GEMINI.md"
+# Generate at least one tool-native mirror so --check has something to compare, then corrupt it.
+( cd "$R" && PANOPLY_SELF=0 sh scripts/sync-agents.sh ) >/dev/null 2>&1
+printf '\nhand edit that bypasses the generator\n' >> "$R/CONVENTIONS.md"
                                     assert_exit "drifted mirrors"        14 "$R"
 # --- case 7: current ---------------------------------------------------------------------------
 R="$(_new_repo current)"; _make_adopted "$R"

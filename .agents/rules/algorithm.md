@@ -2,7 +2,7 @@
 
 > **Applies when:** always — a five-step pass run **in order** on any requirement, part, process, or
 > tool before it is built, optimized, or automated, and re-run on anything already running.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. If a step is wrong for a project,
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. If a step is wrong for a project,
 > say which step and why in the plan doc; do not delete the pass.
 
 ## Why the order is the rule

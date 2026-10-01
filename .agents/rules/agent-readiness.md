@@ -1,9 +1,9 @@
-<!-- MODULE:agent — KEEP IF the app should be usable by an AI agent (a harness such as Hermes, OpenClaw, Claude Code, Cursor) as well as by a human in its own UI. DELETE otherwise. -->
+<!-- MODULE:agent — KEEP IF the app should be usable by an AI agent (a harness such as Hermes, OpenClaw, any agent) as well as by a human in its own UI. DELETE otherwise. -->
 
 # Agent Readiness (dual-mode apps)
 
 > **Applies when:** the app is expected to work both under a human in its own UI *and* under an AI agent — either driven by an external harness, or autonomously with nothing but an LLM API key.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the app is a human-only surface with no programmatic consumer and none planned.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the app is a human-only surface with no programmatic consumer and none planned.
 
 ## The premise
 
@@ -51,7 +51,7 @@ The mechanical consequences:
 - **Full parity with the UI.** Every action the UI can perform is an endpoint. A screen-only action is a capability the app does not have. Audit by walking the UI's command surface and naming the endpoint for each; the gaps are the work.
 - **Idempotency keys on every mutation.** Agents retry — on timeout, on ambiguous error, on a model deciding to try again. Without idempotency a retry is a duplicate record, a double charge, a second send. Accept a client-supplied key (`Idempotency-Key` header or an explicit field), persist it with the result, and return the original result on replay rather than re-executing. This is the single highest-value rule in this module: it is the difference between an agent that can be trusted with writes and one that cannot.
 - **Structured errors an agent can act on.** A stable machine-readable code, a human message, and — critically for agents — enough signal to distinguish *retry* from *fix your input* from *give up*. A bare 500 with a stack trace costs an agent a full reasoning loop to interpret; `{"code":"validation_failed","fields":[{"name":"due_date","issue":"past_date"}]}` costs it nothing. Inherit the typed error shape from `api-design.md` and `error-handling.md`; never return 200 with an error body.
-- **Machine-readable pagination, filtering, and sorting on every collection.** An agent cannot scroll and cannot see "Load more". Cursor-based paging with a stable next-token, plus declared filter/sort parameters, so an agent can enumerate a whole collection deterministically.
+- **Machine-readable pagination, filtering, and sorting on every collection.** An agent cannot scroll and cannot see "Load more". the agent-based paging with a stable next-token, plus declared filter/sort parameters, so an agent can enumerate a whole collection deterministically.
 - **Schema-published responses.** Types generated from the same validation schemas that enforce them, so the documented contract cannot disagree with the running code. This is also what lets the MCP layer generate its tool schemas instead of hand-writing a second copy.
 
 ### The MCP server

@@ -1,16 +1,15 @@
 # AGENTS.md — {{PROJECT_NAME}}
 
 Canonical, provider-neutral instructions for ANY coding agent or LLM working in this repo
-(Claude Code, OpenAI Codex, Cursor, Gemini, GitHub Copilot, Windsurf, Cline, aider, …).
-`AGENTS.md` is the canonical hub; `CLAUDE.md` is the generated mirror for Claude Code and imports this file if you use Claude.
+(any agent).
+`AGENTS.md` is the canonical hub; the generated agent hub imports this file.
 
-The tool-native files (`.cursor/rules/`, `.clinerules/`, `.windsurf/rules/`,
-`.github/copilot-instructions.md`, `GEMINI.md`, `CONVENTIONS.md`) are **generated** and
+The tool-native generated mirrors are **generated** and
 **self-contained**: `scripts/sync-agents.sh` inlines the `MIRROR` block below (the universal preamble)
 followed by the full body of every `.agents/rules/*.md` module, so each tool gets the COMPLETE ruleset
 from its own native file — never a pointer it cannot follow. This file is self-contained too: the same
 rule bodies are inlined at the bottom, between the `PANOPLY:RULES` markers, for AGENTS.md-native tools
-(Codex, …) that cannot follow `@`-imports. Do not edit the generated files or the marked block; edit
+(the agent, …) that cannot follow `@`-imports. Do not edit the generated files or the marked block; edit
 `AGENTS.md` (preamble) or `.agents/rules/*.md` (bodies) and run `sh scripts/sync-agents.sh`.
 
 ## Start here — onboarding contract (read in this order, before writing anything)
@@ -28,8 +27,8 @@ work fit**.
 4. **The running worklog** — `docs/agents/worklog.md`, or this repo's `CHANGELOG.md` / `HISTORY.md`
    `[Unreleased]` section if it keeps one instead. Skim what landed recently. You will append one line
    here in the same change as your work (see Non-negotiables).
-5. **`AGENTS.md` / `CLAUDE.md`** — project overview, tech stack, the real command table, and the directory map. `AGENTS.md` is canonical; `CLAUDE.md` is the generated Claude mirror.
-   Plain markdown; read it even if you are not Claude. It lists the rule modules as `@.agents/rules/*.md`.
+5. **`AGENTS.md`** — project overview, tech stack, the real command table, and the directory map. `AGENTS.md` is canonical; the generated agent hub.
+   Plain markdown; read it even if you are not the agent. It lists the rule modules as `@.agents/rules/*.md`.
 6. **`.agents/rules/clean-architecture.md`** — the architecture premise every change obeys (below).
 7. **The `.agents/rules/` module governing what you are about to touch** — `testing.md`, `database.md`,
    `api-design.md`, `frontend.md`, `error-handling.md`, etc. Plain markdown; open the one that applies.
@@ -82,7 +81,7 @@ declared in the use-case layer) implemented by an **adapter** at the edge.
   the architecture-boundary check fails the build
   on an outward import. That check binds every contributor equally **only once it runs in required
   CI** — a client-side pre-commit hook is skippable with `--no-verify`, so CI is the plane that
-  actually holds against a non-Claude agent. See "Enforcement — the honest version" below.
+  actually holds against a non-agent. See "Enforcement — the honest version" below.
 
 <!-- MIRROR:start — this block is copied verbatim into every tool-native file by scripts/sync-agents.sh. Edit here only; it is the "if you read nothing else" contract for tools that do not open AGENTS.md. -->
 ## If you read nothing else in this repo
@@ -103,7 +102,7 @@ declared in the use-case layer) implemented by an **adapter** at the edge.
 
 **If this repository does not carry the Panoply kit, adopting it IS the first batch of work — never
 skip it and never work around it.** Detect it with the kit's own machine surface, which any harness
-can run (Hermes, Codex, Cursor, CI — not just Claude):
+can run (Hermes, any agent, CI — not just the agent):
 
     sh scripts/panoply.sh check          # 0 current · 10 not applied · 11 partial · 12 stale
                                          # 13 unadapted (placeholders left) · 14 mirrors drifted
@@ -122,8 +121,8 @@ say plainly that you used it, so the choice is reviewed rather than assumed.
 
 ### MUST NOT — hard guardrails
 
-For Claude Code these are enforced by `.agents/policy.md`. **That permission gate binds only
-Claude** — for every other tool these are advisory doctrine, and the only cross-tool enforcement is
+For the agent these are enforced by `.agents/policy.md`. **That permission gate binds only
+the agent** — for every other tool these are advisory doctrine, and the only cross-tool enforcement is
 whatever the repo has wired server-side (branch protection + required CI). Honor them as absolute:
 
 - **NEVER** force-push, `git reset --hard` a shared branch, delete branches/tags, or rewrite published
@@ -164,8 +163,8 @@ agent can open. This file is the index, the onboarding order, and the guardrail;
 Be clear-eyed about what actually stops a bad change, because half of these tools have no permission
 model at all:
 
-- **`.agents/policy.md`** is a real gate, but it binds **only Claude Code**. It does nothing to a
-  Cursor, Codex, Copilot, Windsurf, Cline, or aider agent.
+- **`.agents/policy.md`** is a real gate, but it binds **only the agent**. It does nothing to a
+  any agent.
 - For every other tool, the guardrails above are **doc-level MUST-NOT prose** — always in context (the
   `MIRROR` block is mirrored into each tool's native rules file), but advisory. A determined or
   confused agent can still run the command.
@@ -174,13 +173,13 @@ model at all:
   typecheck, lint, the architecture-boundary check, secret scan) that block a merge regardless of tool.
   This repo ships a starter CI workflow at `scripts/templates/ci-verify.yml` and a pre-commit sample
   at `scripts/templates/pre-commit`; **turn them on and mark the CI checks required** — until you do,
-  the only backstop against a non-Claude agent is the prose above. Do not assume a gate you have not
+  the only backstop against a non-agent is the prose above. Do not assume a gate you have not
   wired.
 
 ## The rules, in full — inlined for AGENTS.md-native tools
 
 The complete text of every `.agents/rules/` module is reproduced below by `scripts/sync-agents.sh`, so a
-tool that reads AGENTS.md but cannot follow `@`-imports (Codex and others) still gets the
+tool that reads AGENTS.md but cannot follow `@`-imports (any agent) still gets the
 entire ruleset from this one file. The bodies live once under `.agents/rules/`; this block is a generated
 rendering of them. **Do not edit between the markers** — edit the modules and re-run `sh
 scripts/sync-agents.sh` (`--check` fails CI if this block drifts).
@@ -191,7 +190,7 @@ scripts/sync-agents.sh` (`--check` fails CI if this block drifts).
 
 > **Applies when:** always — a five-step pass run **in order** on any requirement, part, process, or
 > tool before it is built, optimized, or automated, and re-run on anything already running.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. If a step is wrong for a project,
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. If a step is wrong for a project,
 > say which step and why in the plan doc; do not delete the pass.
 
 ## Why the order is the rule
@@ -336,7 +335,7 @@ is reviewed rather than assumed — an undocumented bypass is a rule nobody can 
 # Clean Architecture
 
 > **Applies when:** always — this is the premise of every coding effort in this project, and the module every other rules module inherits from.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. Adapt the directory map below to the project instead.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. Adapt the directory map below to the project instead.
 
 ## The premise
 
@@ -449,7 +448,7 @@ src/platform/                         server, db client, config, wiring
 The review checklist below is the human pass. Dependency direction is *also* checked **mechanically**,
 so a violation fails a command instead of resting on a reviewer noticing it. This is the one guardrail
 that binds every contributor equally — a human, or any AI agent in any tool — but **only once it runs
-in required CI**: a client-side pre-commit hook is skippable with `--no-verify` and a non-Claude agent
+in required CI**: a client-side pre-commit hook is skippable with `--no-verify` and a non-agent
 may never run it, so CI is the plane that actually holds.
 
 - **The tool, per stack (name it, do not hand-roll it):** JS/TS → dependency-cruiser (`forbidden`
@@ -489,7 +488,7 @@ Run against any diff. Each item is pointable: a reviewer can highlight a line an
 # Workflow: Change Approval & Planning
 
 > **Applies when:** always — this is the baseline collaboration protocol for every project.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. If you disagree with a rule, edit it; do not delete the module.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. If you disagree with a rule, edit it; do not delete the module.
 
 ## Pre-flight — before any proposal
 
@@ -574,7 +573,7 @@ you propose it.
 # Long-Term Quality Bar
 
 > **Applies when:** always — before proposing any approach, and before any structural decision that is hard to reverse.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. This is the rule that stops the easy path from winning by default.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. This is the rule that stops the easy path from winning by default.
 
 ## The self-check
 
@@ -656,7 +655,7 @@ It is not a licence to gold-plate. It does not authorize building for imagined r
 # Git Workflow: Commits, PRs, Branching
 
 > **Applies when:** the project is version-controlled with git and changes land through pull requests.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project is not in git, or has no PR/review process at all.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project is not in git, or has no PR/review process at all.
 
 ## Pre-flight — before any work or planning (always first)
 
@@ -690,7 +689,7 @@ No agent plans or writes code before knowing the repo's current state. In order:
   import that points outward across a layer boundary (`clean-architecture.md`). A dependency-direction
   violation caught here is a one-line move; caught after the code ships, nobody rewrites working code
   to fix an import direction and the violation becomes permanent. *This local run is convenience, not
-  enforcement — it is `--no-verify`-skippable and a non-Claude agent may never run it; the binding
+  enforcement — it is `--no-verify`-skippable and a non-agent may never run it; the binding
   copy is the same check as a **required CI status** (`scripts/templates/ci-verify.yml`).*
 <!-- /MODULE:arch -->
 - If a change alters query structure, response shapes, or call ordering, update the corresponding test fixtures and mocks in the same commit — see "Sequentially-consumed mocks go stale" in `testing.md` for the failure mode and how to spot it.
@@ -745,13 +744,12 @@ A branch showing commits "ahead" of `{{DEFAULT_BRANCH}}` is *not* proof it holds
 
 ## Repo hygiene & credentials
 
-- **Verify commit identity before the first commit in a fresh clone.** A freshly reset or provisioned machine has empty git identity, so the first commit lands under the wrong author. Before committing in any new clone, confirm `git config user.name` and `git config user.email` match the identity this repo declares it commits under (in `AGENTS.md` (and `the generated agent hub (e.g., `CLAUDE.md` for Claude Code)` if using Claude)); set them **repo-locally** (`git config user.email …`, never `--global`) if they do not. The check is portable even though the value is per-project — the author the repo commits under is declared in-repo.
+- **Verify commit identity before the first commit in a fresh clone.** A freshly reset or provisioned machine has empty git identity, so the first commit lands under the wrong author. Before committing in any new clone, confirm `git config user.name` and `git config user.email` match the identity this repo declares it commits under (in `AGENTS.md`); set them **repo-locally** (`git config user.email …`, never `--global`) if they do not. The check is portable even though the value is per-project — the author the repo commits under is declared in-repo.
 - **Never put a credential in the remote URL, and never commit a secret.** Keep secrets in env or a secret store; keep git auth in a credential helper (`git config credential.helper`, `~/.git-credentials`, or the OS keychain) so the remote stays `https://github.com/<owner>/<repo>.git` — never `https://<user>:<token>@github.com/...`. A token in the URL leaks through `git remote -v`, shell history, CI logs, and the reflog, and removing it does not un-expose it: if one was ever embedded, **rotate it.**
-- **The `.agents/policy.md` deny-list binds only Claude Code.** It does nothing to a Cursor,
-  Codex, Copilot, Windsurf, Cline, or aider agent. The tool-agnostic guardrail is **server-side**:
+- **The `.agents/policy.md` deny-list binds only the agent.** It does nothing for other agents. The tool-agnostic guardrail is **server-side**:
   branch protection on `{{DEFAULT_BRANCH}}` (blocks force-push and direct pushes no matter who typed
   them) plus **required status checks** (`scripts/templates/ci-verify.yml`). Turn both on — that is
-  what actually stops a non-Claude agent, and the cross-tool `MUST NOT` list in `AGENTS.md` is advisory
+  what actually stops a non-agent, and the cross-tool `MUST NOT` list in `AGENTS.md` is advisory
   prose until you do.
 
 ## Pull requests
@@ -764,7 +762,7 @@ A branch showing commits "ahead" of `{{DEFAULT_BRANCH}}` is *not* proof it holds
 # Documentation & Memory
 
 > **Applies when:** always — this defines where project knowledge lives and how it survives context compaction.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. If the project keeps its knowledge base elsewhere, retarget the paths rather than dropping the module.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. If the project keeps its knowledge base elsewhere, retarget the paths rather than dropping the module.
 
 ## Two tiers of memory
 
@@ -802,7 +800,7 @@ from the worklog at release time, not maintained per-change in parallel. If the 
 
 ### The same-change update contract (every agent, every provider)
 
-In the SAME commit that lands work — Claude, Codex, Cursor, or any other tool:
+In the SAME commit that lands work — any agent:
 
 1. **Append one worklog line** (to `worklog.md`, or the `[Unreleased]` section) — what changed, where.
 2. **Write your task's own fragment** — `docs/agents/in-progress.d/<slug>.md` — with its status and its
@@ -815,8 +813,8 @@ In the SAME commit that lands work — Claude, Codex, Cursor, or any other tool:
    (to Shipped if this was its last plan), and archive the plan folder.
 4. **On a new or reprioritised initiative**: add or move its `roadmap.md` row.
 
-This contract is plain-markdown, enforced by review and `/audit-agents-setup` — never a Claude-only
-permission gate, so it binds a non-Claude agent exactly as much as a Claude one. It is mirrored into
+This contract is plain-markdown, enforced by review and `/audit-agents-setup` — never a tool-only
+permission gate, so it binds a non-agent exactly as much as a the agent one. It is mirrored into
 `AGENTS.md` so every tool reads it. **Shipped-but-unlogged counts as not done** (see below).
 
 ### The queue is the ONLY backlog — autonomous drivers included
@@ -849,7 +847,7 @@ from the code alone.
 
 This is the same contract Phalanx's autonomous loop adopted in its ADR-0004, so a task seeded by the
 loop and a task written by hand are the same file. A committed queue is also the only kind a reviewer,
-a diff, or a non-Claude agent can see at all.
+a diff, or a non-agent can see at all.
 
 ### The landing gate — mechanical enforcement
 
@@ -900,8 +898,8 @@ Archive, do not delete. The reasoning behind a shipped feature is the context fo
 
 # Code Style & Patterns
 
-> **Applies when:** always — any project in which Claude reads, writes, or edits source code.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. Trim individual rules instead.
+> **Applies when:** always — any project in which an agent reads, writes, or edits source code.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. Trim individual rules instead.
 
 ## Before you write code
 
@@ -970,7 +968,7 @@ Before deleting, search the whole repo for the symbol (including string referenc
 # Testing
 
 > **Applies when:** the project has an automated test suite, or is about to get one.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no test runner and none is planned.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no test runner and none is planned.
 
 ## Testability is a design signal, not a fixture problem
 
@@ -1052,7 +1050,7 @@ Many mocking styles queue results and hand them out **in call order**. So when y
 # Error Handling
 
 > **Applies when:** always — any project that accepts input, performs I/O, or shows results to a user.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. Trim individual rules instead.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. Trim individual rules instead.
 
 ## Validate at the boundaries
 
@@ -1112,7 +1110,7 @@ This counter-rule matters as much as the rules above. Defensive code between you
 # Database & Migrations
 
 > **Applies when:** the project owns a database schema and a migration history.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no database of its own, or only reads from a schema another team owns.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no database of its own, or only reads from a schema another team owns.
 
 ## The database is a Detail
 
@@ -1168,7 +1166,7 @@ Each check is a plain script over the migrations directory. Add them once; they 
 # Data Modeling
 
 > **Applies when:** the project designs its own persistent data model and expects to query, aggregate, or report on that data.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project stores no durable data of its own.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project stores no durable data of its own.
 
 Model for the queries you will have to answer later, not just the screen you are building today. Reshaping a data model after it holds production data is the most expensive refactor there is.
 
@@ -1217,7 +1215,7 @@ Use one only when all three hold: the payload is opaque or third-party-shaped, y
 # API & Event Payload Design
 
 > **Applies when:** the project exposes an API, RPC surface, or event/socket stream that another process or client consumes.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no server-to-client or service-to-service boundary of its own.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no server-to-client or service-to-service boundary of its own.
 
 ## Where this surface sits
 
@@ -1269,7 +1267,7 @@ Use one only when all three hold: the payload is opaque or third-party-shaped, y
 # Front-End Engineering
 
 > **Applies when:** the project builds a client-side application (`{{UI_FRAMEWORK}}` components, views, routes, and client state).
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no user interface — a library, CLI, service, or job runner. Pair it with `design-system.md`, which covers how the UI should *look*; this file covers how it should be *built*.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no user interface — a library, CLI, service, or job runner. Pair it with `design-system.md`, which covers how the UI should *look*; this file covers how it should be *built*.
 
 ## The UI is a Detail
 
@@ -1344,7 +1342,7 @@ Deleting a button is never the whole change. When you remove the last entry poin
 # UI Design System
 
 > **Applies when:** the project ships screens a human looks at (web app, desktop app, mobile app, or a styled docs/marketing surface).
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no user interface — a library, CLI, service, or job runner. Nothing here applies to terminal output.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no user interface — a library, CLI, service, or job runner. Nothing here applies to terminal output.
 
 ## Design reference
 
@@ -1430,7 +1428,7 @@ Run this against any new or changed screen before calling it done:
 # AI Features & Data Enrichment
 
 > **Applies when:** the project calls a language model, or fills in record fields from third-party data sources.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project does neither.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project does neither.
 
 ## Design for the next model, not this one
 
@@ -1476,12 +1474,12 @@ Run this against any new or changed screen before calling it done:
 
 ---
 
-<!-- MODULE:agent — KEEP IF the app should be usable by an AI agent (a harness such as Hermes, OpenClaw, Claude Code, Cursor) as well as by a human in its own UI. DELETE otherwise. -->
+<!-- MODULE:agent — KEEP IF the app should be usable by an AI agent (a harness such as Hermes, OpenClaw, any agent) as well as by a human in its own UI. DELETE otherwise. -->
 
 # Agent Readiness (dual-mode apps)
 
 > **Applies when:** the app is expected to work both under a human in its own UI *and* under an AI agent — either driven by an external harness, or autonomously with nothing but an LLM API key.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the app is a human-only surface with no programmatic consumer and none planned.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the app is a human-only surface with no programmatic consumer and none planned.
 
 ## The premise
 
@@ -1529,7 +1527,7 @@ The mechanical consequences:
 - **Full parity with the UI.** Every action the UI can perform is an endpoint. A screen-only action is a capability the app does not have. Audit by walking the UI's command surface and naming the endpoint for each; the gaps are the work.
 - **Idempotency keys on every mutation.** Agents retry — on timeout, on ambiguous error, on a model deciding to try again. Without idempotency a retry is a duplicate record, a double charge, a second send. Accept a client-supplied key (`Idempotency-Key` header or an explicit field), persist it with the result, and return the original result on replay rather than re-executing. This is the single highest-value rule in this module: it is the difference between an agent that can be trusted with writes and one that cannot.
 - **Structured errors an agent can act on.** A stable machine-readable code, a human message, and — critically for agents — enough signal to distinguish *retry* from *fix your input* from *give up*. A bare 500 with a stack trace costs an agent a full reasoning loop to interpret; `{"code":"validation_failed","fields":[{"name":"due_date","issue":"past_date"}]}` costs it nothing. Inherit the typed error shape from `api-design.md` and `error-handling.md`; never return 200 with an error body.
-- **Machine-readable pagination, filtering, and sorting on every collection.** An agent cannot scroll and cannot see "Load more". Cursor-based paging with a stable next-token, plus declared filter/sort parameters, so an agent can enumerate a whole collection deterministically.
+- **Machine-readable pagination, filtering, and sorting on every collection.** An agent cannot scroll and cannot see "Load more". the agent-based paging with a stable next-token, plus declared filter/sort parameters, so an agent can enumerate a whole collection deterministically.
 - **Schema-published responses.** Types generated from the same validation schemas that enforce them, so the documented contract cannot disagree with the running code. This is also what lets the MCP layer generate its tool schemas instead of hand-writing a second copy.
 
 ### The MCP server

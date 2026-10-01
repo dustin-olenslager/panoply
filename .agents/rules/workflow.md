@@ -1,7 +1,7 @@
 # Workflow: Change Approval & Planning
 
 > **Applies when:** always — this is the baseline collaboration protocol for every project.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. If you disagree with a rule, edit it; do not delete the module.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. If you disagree with a rule, edit it; do not delete the module.
 
 ## Pre-flight — before any proposal
 

@@ -1,7 +1,7 @@
 # Clean Architecture
 
 > **Applies when:** always — this is the premise of every coding effort in this project, and the module every other rules module inherits from.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. Adapt the directory map below to the project instead.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. Adapt the directory map below to the project instead.
 
 ## The premise
 
@@ -114,7 +114,7 @@ src/platform/                         server, db client, config, wiring
 The review checklist below is the human pass. Dependency direction is *also* checked **mechanically**,
 so a violation fails a command instead of resting on a reviewer noticing it. This is the one guardrail
 that binds every contributor equally — a human, or any AI agent in any tool — but **only once it runs
-in required CI**: a client-side pre-commit hook is skippable with `--no-verify` and a non-Claude agent
+in required CI**: a client-side pre-commit hook is skippable with `--no-verify` and a non-agent
 may never run it, so CI is the plane that actually holds.
 
 - **The tool, per stack (name it, do not hand-roll it):** JS/TS → dependency-cruiser (`forbidden`

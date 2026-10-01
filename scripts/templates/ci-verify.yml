@@ -1,8 +1,8 @@
 # Starter CI workflow — the ONE plane that binds every agent, in any tool.
 #
-# .agents/policy.md only fences Claude Code. This workflow is what actually blocks a bad merge
-# from a Cursor / Codex / Copilot / Windsurf / Cline / aider agent — because it runs on the server,
-# not on anyone's machine, and a required status check cannot be skipped with `--no-verify`.
+# .agents/policy.md only fences the agent that reads it. This workflow is what actually blocks a bad merge
+# from any agent — because it runs on the server, not on anyone's machine, and a required status check
+# cannot be skipped with `--no-verify`.
 #
 # TO MAKE IT REAL (two steps, both done by a human once):
 #   1. Copy this file to .github/workflows/verify.yml and replace each <CMD> with the command from
@@ -33,8 +33,7 @@ jobs:
       #   with: { node-version-file: '.nvmrc', cache: 'npm' }
       # - run: <INSTALL_CMD>
 
-      # Agent-mirror drift — fails if any tool-native file (.cursor/.clinerules/.windsurf/.github/
-      # copilot-instructions.md, GEMINI.md, CONVENTIONS.md) or the AGENTS.md rules block is stale vs
+      # Agent-mirror drift — fails if any tool-native generated mirror or the AGENTS.md rules block is stale vs
       # AGENTS.md + .agents/rules/*.md. This is what keeps every tool's inlined ruleset honest.
       - name: Agent mirrors in sync
         run: sh scripts/sync-agents.sh --check

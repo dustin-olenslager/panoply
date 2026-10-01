@@ -13,6 +13,7 @@ CLAUDE.md
 .github/copilot-instructions.md
 GEMINI.md
 CONVENTIONS.md
+*.mdc
 
 # Staging dir for the existing-repo degit + /adapt-agents-setup flow
 .agents-kit-tmp/

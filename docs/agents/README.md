@@ -1,6 +1,6 @@
 # docs/agents — project knowledge base
 
-Committed, team-shared context for both humans and Claude Code. Everything here is written to be
+Committed, team-shared context for both humans and the agent. Everything here is written to be
 read under context pressure: short, dated, and specific. Personal preferences and machine-local
 setup do **not** belong here — those live in your own `~/.agents/` memory.
 

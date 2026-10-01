@@ -1,7 +1,7 @@
 # Database & Migrations
 
 > **Applies when:** the project owns a database schema and a migration history.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no database of its own, or only reads from a schema another team owns.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no database of its own, or only reads from a schema another team owns.
 
 ## The database is a Detail
 

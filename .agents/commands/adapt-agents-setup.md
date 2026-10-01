@@ -1,30 +1,29 @@
 ---
-description: Inspect this repository and adapt the dropped-in Claude config kit to it — fill placeholders, prune modules that do not apply, and ask at most five questions.
+description: Inspect this repository and adapt the dropped-in Panoply governance kit to it — fill placeholders, prune modules that do not apply, and ask at most five questions.
 argument-hint: "[--yes to accept all defaults] [--strict|--relaxed] [subdir if the project root is not cwd]"
 ---
 
-# Adapt this Claude setup to this project
+# Adapt this the agent setup to this project
 
-You are wiring a generic Claude Code configuration kit into a real repository. Your job is to **infer
+You are wiring a Panoply governance kit into a real repository. Your job is to **infer
 almost everything and ask almost nothing**. A question you could have answered by reading a lockfile
 is a bug.
 
 ## Hard rules (read before doing anything)
 
-- **This command edits configuration only.** In scope: the generated agent hub (e.g., `CLAUDE.md` for Claude Code), `.agents/**`, and `docs/agents/**`,
+- **This command edits configuration only.** In scope: the generated agent hub, `.agents/**`, and `docs/agents/**`,
   `.gitignore` (append-only). In scope also: `AGENTS.md`, and the generated tool mirrors it emits —
-  `.github/copilot-instructions.md`, `.cursor/rules/`, `.clinerules/`, `.windsurf/rules/`, `GEMINI.md`,
-  `CONVENTIONS.md` — plus `scripts/` (the `sync-agents.sh` mechanism and `scripts/templates/`).
+  generated tool mirrors — plus `scripts/` (the `sync-agents.sh` mechanism and `scripts/templates/`).
   Out of scope, always: application source, tests, schema, CI configs,
   `package.json`/`pyproject.toml`/etc. If adapting seems to require a source change, report it in
   Phase 5 instead of doing it. Sole exception: if the user accepts the coverage scaffold (Q6), you
   may **create** the two new tooling files it names — never modify existing source, manifests, or CI.
-- **A pre-existing `AGENTS.md` or generated agent hub (e.g., `CLAUDE.md` for Claude Code) is the user's, not yours.** Merge into it; never
+- **A pre-existing `AGENTS.md` or generated agent hub is the user's, not yours.** Merge into it; never
   overwrite. Their rule wins on every conflict, and every conflict gets reported in Phase 5.
 - **Never leave an unfilled `{{PLACEHOLDER}}`.** An unfillable rule is worse than a deleted rule: it
   teaches the model that this file contains noise, and it starts skimming the rules that *are* real.
   If you cannot fill a token with a verified value, delete the bullet, the block, or the whole file.
-- **Make no claim you have not checked.** Every command you write into the generated agent hub (e.g., `CLAUDE.md` for Claude Code) must be one you
+- **Make no claim you have not checked.** Every command you write into the generated agent hub must be one you
   found in the project's own script/task table, or one you ran to confirm it exists.
 
 ---
@@ -122,8 +121,8 @@ and set `AGENT_READINESS_ENFORCE=warn` in CI until the gaps close — then remov
 `.editorconfig`, and pre-commit hooks (`.husky/`, `lefthook.yml`, `.pre-commit-config.yaml`).
 Whatever a hook already enforces does not need to be a rule.
 
-**Existing memory files and docs home.** `AGENTS.md`, any generated agent hub (e.g., `CLAUDE.md` for Claude Code), `.agents/local/`, `.cursorrules`,
-`.github/copilot-instructions.md`, any `.agents/` or `.claude/` that predates the kit — these are inputs to a merge,
+**Existing memory files and docs home.** `AGENTS.md`, any generated agent hub, `.agents/local/`, `.cursorrules`,
+`AGENTS.md`, any generated mirror, and any `.agents/` directory that predates the kit — these are inputs to a merge,
 never things to overwrite. Also check whether `docs/` already has a convention worth folding into
 rather than scaffolding a fresh `docs/agents/` tree beside it.
 
@@ -132,8 +131,7 @@ rather than scaffolding a fresh `docs/agents/` tree beside it.
 running log is REUSED as the worklog; only a repo with none gets a fresh `docs/agents/worklog.md`.
 Never create a second parallel log.
 
-**Existing provider files.** `AGENTS.md`, `.cursor/rules/`, `.clinerules/`, `.windsurf/rules/`,
-`.github/copilot-instructions.md`, `GEMINI.md`, `CONVENTIONS.md`. A pre-existing `AGENTS.md` is a
+**Existing provider files.** `AGENTS.md` and generated tool mirrors. A pre-existing `AGENTS.md` is a
 merge input (theirs wins), never an overwrite — same doctrine as the generated agent hub.
 
 ---
@@ -239,7 +237,7 @@ Work in this order; it is the order that avoids leaving orphans.
    one-line wiring the user must do themselves (script-table entry, CI job). If Q6 was declined,
    rewrite the coverage block into target-mode wording so it describes the intended discipline without
    asserting CI machinery that is not there — a rule claiming a check that does not run is a bluff.
-6. **Merge, if a generated agent hub (e.g., `CLAUDE.md` for Claude Code) already existed.** Keep their file as the spine and their section order.
+6. **Merge, if a generated agent hub already existed.** Keep their file as the spine and their section order.
    Append kit sections that add something new. Where a kit rule and a theirs cover the same ground,
    keep theirs verbatim and record the difference for the report. Never delete a line they wrote.
 7. **Scaffold `docs/agents/`** only if absent: the in-progress queue, the completed log, and area
@@ -252,14 +250,12 @@ Work in this order; it is the order that avoids leaving orphans.
    1–8).** Copy the kit's `AGENTS.md` template, fill `{{PROJECT_NAME}}` (its only placeholder), keep its
    `<!-- PANOPLY:RULES:BEGIN/END -->` markers, then run `sh scripts/sync-agents.sh`. The generator emits
    **self-contained** tool mirrors — each one inlines the `MIRROR` preamble followed by the full body of
-   every surviving `.agents/rules/*.md` module (`.cursor/rules/` gets one `.mdc` per module plus a
-   preamble file; `.github/copilot-instructions.md`, `GEMINI.md`, `CONVENTIONS.md`, `.clinerules/`,
-   `.windsurf/rules/` each get one concatenated file) — and refills `AGENTS.md`'s `PANOPLY:RULES` block
+   every surviving `.agents/rules/*.md` module — and refills `AGENTS.md`'s `PANOPLY:RULES` block
    with the same bodies, so no tool is left a bare pointer to `.agents/rules/`. Run it AFTER pruning so a
    deleted module never gets inlined (a stale rule inlined everywhere is worse than a missing one). If an
    `AGENTS.md` already existed, MERGE (theirs wins, same as the generated agent hub): keep their content, append the
    onboarding contract + `MIRROR` block + the `PANOPLY:RULES` markers + the sync note, then run the
-   script. Ensure the generated agent hub imports `AGENTS.md` (e.g., for Claude Code: add `@AGENTS.md` to `CLAUDE.md`).
+   script. Ensure the generated agent hub imports `AGENTS.md` (ensure `@AGENTS.md` is present).
 10. **Wire the enforcement plane.** Copy `scripts/templates/ci-verify.yml` and
     `scripts/templates/pre-commit` in place, filling their `<CMD>` slots from the Key Commands table.
     **Then run the branch protection init script interactively:** `sh scripts/init-repo-protection.sh`.
@@ -277,7 +273,7 @@ Work in this order; it is the order that avoids leaving orphans.
 
 Run these and fix what they find. Do not report success on an unverified step.
 
-- **No surviving tokens.** Grep for `{{` and for `MODULE:` across the generated agent hub (e.g., `CLAUDE.md`), `.agents/rules/`,
+- **No surviving tokens.** Grep for `{{` and for `MODULE:` across the generated agent hub, `.agents/rules/`,
   `.agents/personas/`, and `docs/` — **explicitly excluding `.agents/commands/`**, whose files describe
   the conventions and so legitimately contain both strings. Both greps must return zero hits: fences
   are stripped from kept modules too (Phase 3 step 1), so zero genuinely means done. Any hit is a
@@ -294,19 +290,18 @@ Run these and fix what they find. Do not report success on an unverified step.
   illustration layouts in `clean-architecture.md` have been deleted. Under "adopt as target", a
   planned-but-absent directory gets its row marked `target:` so the map never claims a directory
   that is not there — **never create directories**; that is a source change and out of scope.
-- **Provider hub wired.** `AGENTS.md` exists, `{{PROJECT_NAME}}` filled, the generated agent hub (e.g., `CLAUDE.md` for Claude Code) contains
+- **Provider hub wired.** `AGENTS.md` exists, `{{PROJECT_NAME}}` filled, the generated agent hub contains
   `@AGENTS.md`, and `sh scripts/sync-agents.sh --check` exits clean. `AGENTS.md`'s read-order paths all
   resolve on disk (`roadmap.md`, `in-progress.md`, the worklog target, the rule modules it names).
 - **Mirrors are self-contained, not pointers.** Every generated mirror inlines the full rule bodies —
   spot-check by grepping a distinctive sentence from `clean-architecture.md` and confirming it appears
-  verbatim in `.github/copilot-instructions.md`, `GEMINI.md`, and a `.cursor/rules/*.mdc`. No mirror
+  verbatim in generated tool mirrors. No mirror
   should say only "the canonical rules live in `.agents/rules/`" — that is the bug this generator fixes.
 - **Plan artifacts present.** `roadmap.md` exists; the worklog target exists (either `worklog.md` or a
   `CHANGELOG`/`HISTORY` `[Unreleased]` section) — exactly one, never both.
 - **Nothing outside scope changed.** `git status --porcelain` must show changes only under
-  the generated agent hub (e.g., `CLAUDE.md`), `.agents/`, `docs/agents/`, `.gitignore`, `AGENTS.md`, the generated tool-mirror paths
-  (`.github/copilot-instructions.md`, `.cursor/`, `.clinerules/`, `.windsurf/`, `GEMINI.md`,
-  `CONVENTIONS.md`), and `scripts/`. If anything else is dirty and you touched it, revert it and say so.
+  the generated agent hub, `.agents/`, `docs/agents/`, `.gitignore`, `AGENTS.md`, the generated tool-mirror paths
+  (generated tool mirrors), and `scripts/`. If anything else is dirty and you touched it, revert it and say so.
 - **Length discipline.** The generated agent hub stays under ~120 lines; it loads into every context window.
   If it is longer, move depth into a rules module rather than trimming the "why" from rules.
 

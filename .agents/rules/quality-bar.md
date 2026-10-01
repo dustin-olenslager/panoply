@@ -1,7 +1,7 @@
 # Long-Term Quality Bar
 
 > **Applies when:** always — before proposing any approach, and before any structural decision that is hard to reverse.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** never. This is the rule that stops the easy path from winning by default.
+> **Delete this file (and its `@` import in the generated agent hub) if:** never. This is the rule that stops the easy path from winning by default.
 
 ## The self-check
 

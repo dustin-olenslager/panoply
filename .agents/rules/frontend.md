@@ -3,7 +3,7 @@
 # Front-End Engineering
 
 > **Applies when:** the project builds a client-side application (`{{UI_FRAMEWORK}}` components, views, routes, and client state).
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no user interface — a library, CLI, service, or job runner. Pair it with `design-system.md`, which covers how the UI should *look*; this file covers how it should be *built*.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no user interface — a library, CLI, service, or job runner. Pair it with `design-system.md`, which covers how the UI should *look*; this file covers how it should be *built*.
 
 ## The UI is a Detail
 

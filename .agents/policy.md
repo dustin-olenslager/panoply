@@ -1,7 +1,7 @@
 # Agent policy
 
 This file is the agent-agnostic home for the guardrails that were previously expressed as a
-Claude-specific `.agents/policy.md` permission list. Because the project must work with any agent
+Tool-specific `.agents/policy.md` permission list. Because the project must work with any agent
 or LLM platform, these are written as MUST-NOT doctrine and safe-default guidance, not as a tool-
 specific permission file. If your tool supports its own permission model, translate this file into
 that format locally — but keep this file as the single source of truth.

@@ -45,14 +45,14 @@ _Delete the example entry once the first real feature ships._
 - **Area:** `governance`
 - **Archived plan:** `governance/completed/docs-gate.md`
 - **Notable decisions:** Enforces presence, not correctness — a garbage worklog line passes; correctness is a review problem. Worklog target auto-detected, overridable via `DOCS_WORKLOG`. Doc files exempt by default (ext `md`).
-- **Known gaps:** No agent-authored self-updating docs; no hosted platform/MCP; no Claude-only PreToolUse precondition.
+- **Known gaps:** No agent-authored self-updating docs; no hosted platform/MCP; no tool-only PreToolUse precondition.
 
 ---
 
 <!-- New entries go directly below this line, newest first. -->
 
 ### Agent-readiness module + CI gate (dual-mode apps) — 2026-09-26
-- **What shipped:** any repo adopting the kit can require that its app be *dual-mode* — usable by a human in its own UI **and** drivable by an AI agent (a harness such as Hermes/OpenClaw/Claude Code, or autonomously with only an LLM API key). An agent picking up an adapted repo learns the three required surfaces from `AGENTS.md`, and a PR that removes idempotency or hardcodes a vendor endpoint fails CI.
+- **What shipped:** any repo adopting the kit can require that its app be *dual-mode* — usable by a human in its own UI **and** drivable by an AI agent (a harness such as Hermes/OpenClaw/the agent, or autonomously with only an LLM API key). An agent picking up an adapted repo learns the three required surfaces from `AGENTS.md`, and a PR that removes idempotency or hardcodes a vendor endpoint fails CI.
 - **Area:** `governance`
 - **Archived plan:** `governance/completed/agent-readiness-module.md`
 - **Notable decisions:** Premise is *the UI is a client of the API, never the owner of a capability* — so a screen-only action is a capability the app does not have. Three surfaces are the non-negotiable minimum: **HTTP API** (every mutation idempotency-keyed because agents retry; error codes that distinguish retry / fix-input / give-up; cursor pagination), **MCP server** (a thin adapter over the *same* use cases, schemas **generated** from the API's validation schemas — never hand-written, since a second source of truth drifts silently), **A2A agent card** (`/.well-known/agent-card.json`, served unauthenticated; long-running work as stateful tasks with human-in-the-loop pauses). All three are **Interface Adapters with zero business rules**, which is what keeps this cheap instead of a rewrite. LLM config solely via `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` so one code path serves a raw vendor key, a LiteLLM-style gateway, or a harness-provided endpoint. Agents are **distinct scoped principals**, never a browser session, enforced in the use case because a second entrypoint skips the route. Trust rule: agent writes are **attributable in the human UI and reversible** — invisibility is why integrations get switched off. `MODULE:agent` is pruned by `/adapt` where no agent consumer exists; `AGENT_READINESS_ENFORCE=warn` covers mid-adoption repos.

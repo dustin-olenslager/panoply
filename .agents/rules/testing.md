@@ -1,7 +1,7 @@
 # Testing
 
 > **Applies when:** the project has an automated test suite, or is about to get one.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project has no test runner and none is planned.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project has no test runner and none is planned.
 
 ## Testability is a design signal, not a fixture problem
 

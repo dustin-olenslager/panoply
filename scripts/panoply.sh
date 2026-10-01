@@ -1,11 +1,11 @@
 #!/usr/bin/env sh
 # panoply.sh — the Panoply kit's machine surface: detect, report, and seed.
 #
-# Why this exists: the kit could only be applied by a Claude Code slash-command prompt
+# Why this exists: the kit could only be applied by a slash-command prompt
 # (`.agents/commands/adapt-agents-setup.md`), and nothing recorded WHICH kit version a repo
-# received. So "not applied" and "applied in July" were indistinguishable to every agent that was
-# not Claude, and kit drift was invisible. This script is the check/apply entry point any agent or
-# CI can run: Hermes, Codex, Cursor, a cron, a pre-commit hook.
+# received. So "not applied" and "applied in July" were indistinguishable to every agent, and kit
+# drift was invisible. This script is the check/apply entry point any agent or CI can run: Hermes,
+# any agent, a cron, a pre-commit hook.
 #
 #   sh scripts/panoply.sh check [--quiet]   exit 0 = current, non-zero = action needed
 #   sh scripts/panoply.sh apply [--yes]     seed/refresh the DETERMINISTIC half of the kit
@@ -257,7 +257,7 @@ cmd_apply() {
   # 2b. The agent hub itself. Seed the TEMPLATE only when the repo has no hub of its own — its
   # tokens stay in place on purpose, which is what makes the next check report "unadapted" (13)
   # rather than "half-applied (missing AGENTS.md)" (11). Without this, apply can never reach a
-  # state the agent can finish from: every adoption would stall until someone hand-wrote a hub
+  # state an agent can finish from: every adoption would stall until someone hand-wrote a hub
   # from scratch. A repo with its own AGENTS.md is left completely alone here; the agent merges the
   # kit's structure into it as checklist step 3.
   if [ ! -f AGENTS.md ] && [ -f "$_src/AGENTS.md" ]; then

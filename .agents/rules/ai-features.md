@@ -3,7 +3,7 @@
 # AI Features & Data Enrichment
 
 > **Applies when:** the project calls a language model, or fills in record fields from third-party data sources.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project does neither.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project does neither.
 
 ## Design for the next model, not this one
 

@@ -9,7 +9,7 @@
 ## Goal
 
 The kit's coverage claims name OpenCode, and the mechanism is recorded: OpenCode is bound by the
-refilled `AGENTS.md` hub natively, exactly like Codex — it needs no generated mirror file. After
+refilled `AGENTS.md` hub natively, exactly like the agent — it needs no generated mirror file. After
 this ships, a reader of README/sync-agents.sh knows OpenCode is covered and why. We know it worked
 when `sync-agents.sh --check` still passes (comment-only change) and no adapted repo needs a
 re-sync for coverage.
@@ -27,7 +27,7 @@ this: OpenCode reads repo-root `AGENTS.md` natively (live proof: the audit sessi
 in OpenCode under AGENTS.md-derived instructions), and the script already refills AGENTS.md
 inline between the `PANOPLY:RULES:BEGIN/END` markers "so AGENTS.md-native tools get the full
 governance with no @-imports" (sync-agents.sh header). The real gap was documentation: the
-README's tool list and the script header named Codex among mirror-file tools and never named
+README's tool list and the script header named the agent among mirror-file tools and never named
 OpenCode, leaving an AGENTS.md-native reader unable to tell whether OpenCode was covered.
 
 ## Architecture

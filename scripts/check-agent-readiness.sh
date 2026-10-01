@@ -78,20 +78,38 @@ console.log(Object.keys(d).join("\n"));' "$f" 2>/dev/null ;;
 # pattern they look for as string literals, so without this the script passes itself and reports
 # MCP + scoped-auth as present in a repo that has neither. Any file whose job is to name these
 # patterns (this script, other gates) must stay out of the corpus.
-SELF_EXCLUDE='check-agent-readiness\.sh$|/scripts/check-|agent-readiness\.md$|/\.agents/rules/|/\.clinerules/|copilot-instructions\.md$|/\.cursor/rules/|/\.windsurf/rules/|^GEMINI\.md$|^CONVENTIONS\.md$|^AGENTS\.md$|^CLAUDE\.md$'
+#
+# Generated tool mirrors are excluded too, but NOT by naming tools here: they are gitignored, and
+# rg honours .gitignore natively. For the grep fallback (no rg on the box) we ask git which paths
+# are ignored and drop them from the results — so the exclusion follows the repo's own .gitignore
+# rather than a hardcoded vendor list that silently rots when a new mirror is added.
+SELF_EXCLUDE='check-agent-readiness\.sh$|/scripts/check-|agent-readiness\.md$|/\.agents/rules/|^AGENTS\.md$'
+
+_ignored_paths() {  # repo-relative paths git considers ignored; empty when git is unavailable
+  git ls-files --others --ignored --exclude-standard 2>/dev/null || true
+}
 
 grep_tree() {
   pattern="$1"; shift
+  local_hits=""
   if command -v rg >/dev/null 2>&1; then
-    rg -l --no-messages -g '!node_modules' -g '!dist' -g '!.next' -g '!build' -g '!vendor' \
+    # rg already skips .gitignore'd paths, so generated mirrors never enter the corpus here
+    local_hits="$(rg -l --no-messages -g '!node_modules' -g '!dist' -g '!.next' -g '!build' -g '!vendor' \
        -g '!.git' -g '!*.lock' -g '!pnpm-lock.yaml' -e "$pattern" "${@:-.}" 2>/dev/null \
-       | grep -Ev "$SELF_EXCLUDE" || true
+       | grep -Ev "$SELF_EXCLUDE" || true)"
   else
-    grep -rlE --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist \
+    local_hits="$(grep -rlE --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist \
          --exclude-dir=.next --exclude-dir=build --exclude-dir=vendor \
          -e "$pattern" "${@:-.}" 2>/dev/null \
-         | grep -Ev "$SELF_EXCLUDE" || true
+         | grep -Ev "$SELF_EXCLUDE" || true)"
+    # grep has no .gitignore support: subtract the ignored set by hand
+    _ign="$(_ignored_paths)"
+    if [ -n "$_ign" ]; then
+      local_hits="$(printf '%s\n' "$local_hits" | sed 's|^\./||' \
+        | grep -vxF "$_ign" || true)"
+    fi
   fi
+  printf '%s\n' "$local_hits" | grep -v '^$' || true
 }
 
 # --- 1. agent card ---------------------------------------------------------

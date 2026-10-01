@@ -3,7 +3,7 @@
 # lefthook / pre-commit. Replace each <CMD> with the command from AGENTS.md → Key Commands.
 #
 # HONEST NOTE: a client-side hook is convenience, not enforcement — any agent can bypass it with
-# `git commit --no-verify`, and a non-Claude agent may not run it at all. The binding plane is
+# `git commit --no-verify`, and a non-agent tool may not run it at all. The binding plane is
 # required CI (scripts/templates/ci-verify.yml). This hook just catches problems a few seconds
 # earlier for the people who keep it installed.
 set -eu

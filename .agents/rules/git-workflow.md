@@ -1,7 +1,7 @@
 # Git Workflow: Commits, PRs, Branching
 
 > **Applies when:** the project is version-controlled with git and changes land through pull requests.
-> **Delete this file (and its `@` import in the generated agent hub (e.g., `CLAUDE.md` for Claude Code)) if:** the project is not in git, or has no PR/review process at all.
+> **Delete this file (and its `@` import in the generated agent hub) if:** the project is not in git, or has no PR/review process at all.
 
 ## Pre-flight — before any work or planning (always first)
 
@@ -35,7 +35,7 @@ No agent plans or writes code before knowing the repo's current state. In order:
   import that points outward across a layer boundary (`clean-architecture.md`). A dependency-direction
   violation caught here is a one-line move; caught after the code ships, nobody rewrites working code
   to fix an import direction and the violation becomes permanent. *This local run is convenience, not
-  enforcement — it is `--no-verify`-skippable and a non-Claude agent may never run it; the binding
+  enforcement — it is `--no-verify`-skippable and a non-agent may never run it; the binding
   copy is the same check as a **required CI status** (`scripts/templates/ci-verify.yml`).*
 <!-- /MODULE:arch -->
 - If a change alters query structure, response shapes, or call ordering, update the corresponding test fixtures and mocks in the same commit — see "Sequentially-consumed mocks go stale" in `testing.md` for the failure mode and how to spot it.
@@ -90,13 +90,12 @@ A branch showing commits "ahead" of `{{DEFAULT_BRANCH}}` is *not* proof it holds
 
 ## Repo hygiene & credentials
 
-- **Verify commit identity before the first commit in a fresh clone.** A freshly reset or provisioned machine has empty git identity, so the first commit lands under the wrong author. Before committing in any new clone, confirm `git config user.name` and `git config user.email` match the identity this repo declares it commits under (in `AGENTS.md` (and `the generated agent hub (e.g., `CLAUDE.md` for Claude Code)` if using Claude)); set them **repo-locally** (`git config user.email …`, never `--global`) if they do not. The check is portable even though the value is per-project — the author the repo commits under is declared in-repo.
+- **Verify commit identity before the first commit in a fresh clone.** A freshly reset or provisioned machine has empty git identity, so the first commit lands under the wrong author. Before committing in any new clone, confirm `git config user.name` and `git config user.email` match the identity this repo declares it commits under (in `AGENTS.md`); set them **repo-locally** (`git config user.email …`, never `--global`) if they do not. The check is portable even though the value is per-project — the author the repo commits under is declared in-repo.
 - **Never put a credential in the remote URL, and never commit a secret.** Keep secrets in env or a secret store; keep git auth in a credential helper (`git config credential.helper`, `~/.git-credentials`, or the OS keychain) so the remote stays `https://github.com/<owner>/<repo>.git` — never `https://<user>:<token>@github.com/...`. A token in the URL leaks through `git remote -v`, shell history, CI logs, and the reflog, and removing it does not un-expose it: if one was ever embedded, **rotate it.**
-- **The `.agents/policy.md` deny-list binds only Claude Code.** It does nothing to a Cursor,
-  Codex, Copilot, Windsurf, Cline, or aider agent. The tool-agnostic guardrail is **server-side**:
+- **The `.agents/policy.md` deny-list binds only the agent.** It does nothing for other agents. The tool-agnostic guardrail is **server-side**:
   branch protection on `{{DEFAULT_BRANCH}}` (blocks force-push and direct pushes no matter who typed
   them) plus **required status checks** (`scripts/templates/ci-verify.yml`). Turn both on — that is
-  what actually stops a non-Claude agent, and the cross-tool `MUST NOT` list in `AGENTS.md` is advisory
+  what actually stops a non-agent, and the cross-tool `MUST NOT` list in `AGENTS.md` is advisory
   prose until you do.
 
 ## Pull requests
