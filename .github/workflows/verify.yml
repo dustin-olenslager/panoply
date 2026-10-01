@@ -51,6 +51,12 @@ jobs:
             echo "shellcheck not installed, skipping"
           fi
 
+      # Algorithm gate — fails a structural change whose plan carries no step-2 (deletion) artifact.
+      # Requires the plan doc's "Deletion candidates" section; docs-only changes are exempt.
+      - name: Algorithm pass
+        run: sh scripts/check-algorithm.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
+
       # Gate self-test — the kit ships gates that adapted repos depend on, so a gate that silently
       # stops detecting anything is a defect in the kit, not in the adopting repo. This asserts
       # check-agent-readiness.sh still fails a repo seeded with every defect it claims to catch and
@@ -59,6 +65,13 @@ jobs:
       # at adapt time. The self-test is what proves the gate works.)
       - name: Agent-readiness gate self-test
         run: sh scripts/check-agent-readiness.test.sh
+
+      # Algorithm gate self-test — same doctrine: proves the gate fails a missing-deletion-section
+      # change, passes a compliant one, honors the docs-only exemption, and can be lifted by its own
+      # escape hatch. Without it, a gate that blocks everything and a gate that detects correctly are
+      # indistinguishable.
+      - name: Algorithm gate self-test
+        run: sh scripts/check-algorithm.test.sh
 
       # Panoply doctor self-test — the doctor decides whether a repo has adopted the kit, so a
       # regression that makes it report "current" for everything (or nothing) would silently stop

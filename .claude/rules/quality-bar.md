@@ -19,6 +19,16 @@ If you cannot name the layer, you do not yet understand the change well enough t
 
 The path of least resistance is not neutral: it spends someone else's time later to save yours now. Prefer the right structure even when it costs more work up front, and when you don't, name the debt you are taking on.
 
+## Ask whether the thing should exist at all, before asking how to build it well
+
+This self-check governs the *shape* of a change. There is a prior question, and answering it late is the
+expensive mistake: **should this exist at all?** Run the Algorithm pass — question the requirement (and
+name who asked), delete what you can, simplify, accelerate, automate last — before you evaluate how to
+build something well. Optimizing or automating a part that should have been deleted is worse than doing
+nothing, because it makes the waste permanent. Every plan on a structural change owes a deletion
+candidate list; "nothing can be deleted here" is a conclusion to argue, not a default. Full doctrine:
+`.claude/rules/algorithm.md`.
+
 ## Flag tradeoffs explicitly
 
 - When a simpler approach trades away scalability, type safety, maintainability, queryability, testability, or an established best practice, **state the tradeoff and give your honest recommendation.** Not a menu with no opinion — a recommendation, with the reason.

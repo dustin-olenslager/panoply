@@ -273,7 +273,7 @@ cmd_apply() {
   # for a deliberate refresh, so the destructive path is always a stated choice.
   _force_scripts=0
   for a in "$@"; do [ "$a" = "--force-scripts" ] && _force_scripts=1; done
-  for _s in panoply.sh panoply.test.sh sync-agents.sh check-docs.sh check-plan-home.sh; do
+  for _s in panoply.sh panoply.test.sh sync-agents.sh check-docs.sh check-plan-home.sh check-algorithm.sh check-algorithm.test.sh; do
     [ -f "$_src/scripts/$_s" ] || continue
     if [ ! -f "scripts/$_s" ]; then
       cp "$_src/scripts/$_s" "scripts/$_s" && chmod +x "scripts/$_s"
@@ -301,7 +301,10 @@ cmd_apply() {
        they own. Never delete clean-architecture.md, workflow.md, or quality-bar.md.
     3. Merge — never overwrite — a pre-existing CLAUDE.md / AGENTS.md (the repo's own rules win).
     4. Run:  sh scripts/sync-agents.sh      (mirrors must be generated AFTER pruning)
-    5. Run:  sh scripts/check-docs.sh && sh scripts/panoply.sh check
+    5. Run:  sh scripts/check-docs.sh && sh scripts/check-plan-home.sh && sh scripts/panoply.sh check
+    6. Wire the Algorithm gate into CI (verify.yml: `sh scripts/check-algorithm.sh --since <base>`)
+       and, where the repo has one, its pre-commit hook (`--staged`). It requires the plan doc's
+       "Deletion candidates" section on a structural change — see .claude/rules/algorithm.md.
 
   A script this repo already had and has since edited was KEPT, not replaced (see any "KEPT scripts/"
   line above). Review it against the kit's copy and re-run with `apply --force-scripts` only when

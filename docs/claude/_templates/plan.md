@@ -36,6 +36,28 @@ Fill this before the first milestone — a plan that cannot name its layers is n
   Interface Adapters + Frameworks & Drivers. If an entity or use-case file would appear in that diff,
   the design is not done.
 
+## The Algorithm pass (question · delete · simplify · accelerate · automate)
+
+Run this **in order**, before the milestones below, on any structural change — a new requirement, part,
+process, or automation. One line each; skip it only for routine work (typo, copy change, a fix inside an
+existing pattern) and say so in Build notes. Full doctrine: `.claude/rules/algorithm.md`.
+
+- **Question** — who asked for this, and which constraint does it serve? _(no name → it does not get built)_
+- **Delete** — what can be removed instead? Name the candidates, including "the whole request".
+- **Simplify** — what is the least shape that satisfies the named requirement?
+- **Accelerate** — what is the measured rate today, and where is the bottleneck?
+- **Automate** — is this genuinely the last step, and were 1–3 actually done on it?
+
+### Deletion candidates
+
+**Required section — an empty list must be argued here, not left blank.** Every plan on a structural
+change owes this: the candidate, whether it was removed or kept, and why. Deletion is the only step that
+leaves no artifact, which is why it is written down instead of intended.
+
+| Candidate | Removed? | Why |
+|---|---|---|
+| <part, step, job, gate, or doc> | yes/no | <the reason — or what depends on it> |
+
 ## Milestones
 
 Each milestone is independently reviewable and leaves the system working. Re-read this section at

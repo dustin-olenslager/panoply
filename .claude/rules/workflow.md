@@ -11,6 +11,17 @@ You cannot propose a change to a repo whose state you have not read. Before plan
 - Read the central plan doc (`docs/claude/roadmap.md` in kit repos; the repo's one plan doc where the adapt has set a lighter one), the running worklog, and only then the code you are about to change.
 - **Carry forward in-flight work** — continue the queued task or the open PR; never open a parallel track for work already in progress. (Full mechanics: `git-workflow.md` → Pre-flight.)
 
+## The Algorithm pass — run before you plan, on anything structural
+
+Order: **question the requirement (name it) → delete what you can → simplify → accelerate → automate
+last.** Before proposing a non-trivial change, a new process, or an automation, answer these in the plan
+doc (one line each): who asked and which constraint it serves; what can be removed instead; the least
+shape that satisfies it; the measured cycle-time number and bottleneck; and whether automation is
+genuinely last. **Every plan owes a deletion candidate list — "nothing can be deleted here" must be
+argued, not assumed.** Skip the pass for routine work (typo, copy change, a fix inside an existing
+pattern) and say what you did. Full doctrine, the per-step artifacts, and the scope test:
+`.claude/rules/algorithm.md`.
+
 ## Change Approval
 
 - **Describe your proposed changes and get approval before editing code.** State what you plan to change, which files, and why — then stop and wait for confirmation. Editing first and explaining after removes the user's only cheap moment to redirect you.

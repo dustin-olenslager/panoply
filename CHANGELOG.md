@@ -12,6 +12,19 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **The Algorithm pass added as a rule module** (`.claude/rules/algorithm.md`): question every
+  requirement (and make it come with a name), **delete** what you can, simplify, accelerate, automate
+  last — in that order, on anything structural, code and non-code. Every plan now owes a **Deletion
+  candidates** section, because deletion is the only step whose output is absence and therefore the only
+  one that gets silently skipped. Wired into `workflow.md` (pre-flight), `quality-bar.md` (the prior
+  question), the MIRROR preamble + read-order in `AGENTS.md`, and `_templates/plan.md`.
+
+- MINOR — **Algorithm gate** (`scripts/check-algorithm.sh` + `scripts/check-algorithm.test.sh`): fails a
+  structural change whose plan carries no step-2 artifact, passes a compliant one, exempts docs-only
+  changes, and can be lifted by `ALGORITHM_OFF=1`. Six-case canary asserts both directions including the
+  deny → apply-the-remedy → allow round trip. Wired into `verify.yml` (gate + self-test) and installed by
+  `panoply.sh apply`, whose checklist now names the CI/pre-commit wiring.
+
 - PATCH — `panoply.test.sh` skips loudly instead of false-redding when run outside the kit
   template (it derives its kit root from `$0`, so an adopter became its own 'kit').
 
