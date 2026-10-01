@@ -136,7 +136,13 @@ owner and, with no answer returned, the recommended option was taken as the safe
 
 ## On ship
 
-Move this folder to `governance/completed/`, add the `completed-features.md` entry, append the worklog line,
-remove the queue row, move the roadmap initiative, and promote the durable lesson — **a gate that asks two
-different questions of two trees will disagree with itself; and a canary that cannot go red is not evidence**
-— into `key-patterns.md`, all in the same commit as the ship.
+**Shipped 2026-10-01** in PR #19 (squash-merged), CI `verify` green in 13s. Folder archived at
+`governance/completed/version-resolution-one-question/`; the `completed-features.md` entry, the worklog
+line, the removed `in-progress.md` row, and the moved `roadmap.md` initiative (to Shipped) landed in the
+same batch. The durable lesson — **a gate that asks two different questions of two trees will disagree with
+itself, and a canary that cannot go red is not evidence** — was promoted into `key-patterns.md`.
+
+Post-fix verification of the original symptom, run on fresh `main` under all three conditions that used to
+distinguish pass from fail: real canonical clone present (`18/18`), empty `HOME` with no clone (`18/18`), and
+the machine's own canonical clone (both agreement cases `ok`). The false red is gone everywhere, not just on
+the runner.
