@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # check-agent-readiness.sh — the mechanical floor for dual-mode agent readiness.
 #
-# Enforces what .claude/rules/agent-readiness.md can check WITHOUT judgement. The parts that need
+# Enforces what .agents/rules/agent-readiness.md can check WITHOUT judgement. The parts that need
 # judgement (does a tool description read well? can a real harness complete a goal?) stay in the
 # review checklist and the agent-perspective smoke test — this script does not pretend to cover them.
 #
@@ -78,7 +78,7 @@ console.log(Object.keys(d).join("\n"));' "$f" 2>/dev/null ;;
 # pattern they look for as string literals, so without this the script passes itself and reports
 # MCP + scoped-auth as present in a repo that has neither. Any file whose job is to name these
 # patterns (this script, other gates) must stay out of the corpus.
-SELF_EXCLUDE='check-agent-readiness\.sh$|/scripts/check-|agent-readiness\.md$|/\.claude/rules/|/\.clinerules/|copilot-instructions\.md$|/\.cursor/rules/|/\.windsurf/rules/|^GEMINI\.md$|^CONVENTIONS\.md$|^AGENTS\.md$|^CLAUDE\.md$'
+SELF_EXCLUDE='check-agent-readiness\.sh$|/scripts/check-|agent-readiness\.md$|/\.agents/rules/|/\.clinerules/|copilot-instructions\.md$|/\.cursor/rules/|/\.windsurf/rules/|^GEMINI\.md$|^CONVENTIONS\.md$|^AGENTS\.md$|^CLAUDE\.md$'
 
 grep_tree() {
   pattern="$1"; shift
@@ -302,8 +302,8 @@ if [ "$FAILS" -gt 0 ]; then
     printf 'check-agent-readiness: this is an adoption aid, not a state to leave on.\n' >&2
     exit 0
   fi
-  printf 'check-agent-readiness: see .claude/rules/agent-readiness.md for the rule and the review checklist.\n' >&2
-  printf 'check-agent-readiness: mid-adoption? set AGENT_READINESS_ENFORCE=warn TEMPORARILY and record the gap in docs/claude/in-progress.md.\n' >&2
+  printf 'check-agent-readiness: see .agents/rules/agent-readiness.md for the rule and the review checklist.\n' >&2
+  printf 'check-agent-readiness: mid-adoption? set AGENT_READINESS_ENFORCE=warn TEMPORARILY and record the gap in docs/agents/in-progress.md.\n' >&2
   exit 1
 fi
 

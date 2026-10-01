@@ -17,29 +17,29 @@ or second-guess the adapt logic here — read the kit's file and execute it.
    git history, manifests). This new-vs-existing read is context the adapt step
    uses; note it and pass it along.
 
-2. **Fetch the kit into `<TARGET>/.claude-kit-tmp`.** The repo is public, so use
+2. **Fetch the kit into `<TARGET>/.agents-kit-tmp`.** The repo is public, so use
    `degit` (lighter, no upstream git history to entangle with yours):
 
    ```sh
-   npx degit dustin-olenslager/panoply "<TARGET>/.claude-kit-tmp"
+   npx degit dustin-olenslager/panoply "<TARGET>/.agents-kit-tmp"
    ```
 
    (If `degit` is unavailable, an authenticated clone works too:
-   `git clone --depth 1 https://github.com/dustin-olenslager/panoply "<TARGET>/.claude-kit-tmp"`
-   then `rm -rf "<TARGET>/.claude-kit-tmp/.git"`.)
+   `git clone --depth 1 https://github.com/dustin-olenslager/panoply "<TARGET>/.agents-kit-tmp"`
+   then `rm -rf "<TARGET>/.agents-kit-tmp/.git"`.)
 
 3. **Read and EXECUTE the kit's adapt command against TARGET.** Open
-   `<TARGET>/.claude-kit-tmp/.claude/commands/adapt-claude-setup.md` and follow its
-   instructions to the letter, treating `.claude-kit-tmp` as the staged kit and
+   `<TARGET>/.agents-kit-tmp/.agents/commands/adapt-agents-setup.md` and follow its
+   instructions to the letter, treating `.agents-kit-tmp` as the staged kit and
    TARGET as the real project. The adapt command owns the whole job:
 
    - detects the stack (package manager, commands, frameworks, layers, data layer,
      tests, CI, default branch) from the real project;
    - fills every `{{PLACEHOLDER}}` with a verified value, and prunes modules,
-     rules, and agents that do not apply;
-   - MERGES into any pre-existing `CLAUDE.md` / `AGENTS.md` / history — the
+     rules, and personas that do not apply;
+   - MERGES into any pre-existing `AGENTS.md` / history — the
      project's own files win and are never overwritten;
-   - seeds `docs/claude/roadmap.md` and the worklog (fresh `worklog.md`, or an
+   - seeds `docs/agents/roadmap.md` and the worklog (fresh `worklog.md`, or an
      existing `CHANGELOG`/`HISTORY` `[Unreleased]` section);
    - generates the provider mirrors via `scripts/sync-agents.sh` (Copilot, Cursor,
      Cline, Windsurf, Gemini, aider) from the single-source `AGENTS.md`;
@@ -50,10 +50,10 @@ or second-guess the adapt logic here — read the kit's file and execute it.
    Follow the adapt command's own question budget (it asks at most five, or none
    with `--yes`). Do not add or skip its steps.
 
-4. **Clean up.** The adapt step removes `.claude-kit-tmp` when it finishes. If it
-   is still there, delete it: `rm -rf "<TARGET>/.claude-kit-tmp"`.
+4. **Clean up.** The adapt step removes `.agents-kit-tmp` when it finishes. If it
+   is still there, delete it: `rm -rf "<TARGET>/.agents-kit-tmp"`.
 
 5. **Report** what was filled / pruned / seeded / installed (the adapt command's
    Phase 5 report), plus the onboarding read-order the kit establishes: start at
-   `AGENTS.md`, then `docs/claude/roadmap.md` + `docs/claude/in-progress.md`, then
-   the deep rules under `.claude/rules/`.
+   `AGENTS.md`, then `docs/agents/roadmap.md` + `docs/agents/in-progress.md`, then
+   the deep rules under `.agents/rules/`.

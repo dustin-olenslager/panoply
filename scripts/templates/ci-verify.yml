@@ -1,12 +1,12 @@
 # Starter CI workflow — the ONE plane that binds every agent, in any tool.
 #
-# .claude/settings.json only fences Claude Code. This workflow is what actually blocks a bad merge
+# .agents/policy.md only fences Claude Code. This workflow is what actually blocks a bad merge
 # from a Cursor / Codex / Copilot / Windsurf / Cline / aider agent — because it runs on the server,
 # not on anyone's machine, and a required status check cannot be skipped with `--no-verify`.
 #
 # TO MAKE IT REAL (two steps, both done by a human once):
 #   1. Copy this file to .github/workflows/verify.yml and replace each <CMD> with the command from
-#      CLAUDE.md → Key Commands (the same ones your pre-commit gate runs).
+#      the architecture-boundary check (the same ones your pre-commit gate runs).
 #   2. In repo Settings → Branches, add a branch-protection rule on the default branch that marks
 #      the "verify" check REQUIRED and forbids force-push / direct push. Until you do step 2, this
 #      workflow reports but does not block — see AGENTS.md → "Enforcement — the honest version".
@@ -35,7 +35,7 @@ jobs:
 
       # Agent-mirror drift — fails if any tool-native file (.cursor/.clinerules/.windsurf/.github/
       # copilot-instructions.md, GEMINI.md, CONVENTIONS.md) or the AGENTS.md rules block is stale vs
-      # AGENTS.md + .claude/rules/*.md. This is what keeps every tool's inlined ruleset honest.
+      # AGENTS.md + .agents/rules/*.md. This is what keeps every tool's inlined ruleset honest.
       - name: Agent mirrors in sync
         run: sh scripts/sync-agents.sh --check
 
@@ -46,15 +46,15 @@ jobs:
         run: sh scripts/check-docs.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
-      # Plan-home gate — fails if any plan/roadmap doc lives outside docs/claude/. Keeps one
-      # canonical plan per project (docs/claude/roadmap.md) so an agent picking the repo up can
+      # Plan-home gate — fails if any plan/roadmap doc lives outside docs/agents/. Keeps one
+      # canonical plan per project (docs/agents/roadmap.md) so an agent picking the repo up can
       # never read the wrong one. Adopting a repo with a backlog of strays? Fold them first, or
       # set PLAN_HOME_OFF=1 here until you have.
       - name: Plan home
         run: sh scripts/check-plan-home.sh
 
       - name: Typecheck
-        run: <TYPECHECK_CMD>          # CLAUDE.md → Key Commands
+        run: <TYPECHECK_CMD>          # the architecture-boundary check
 
       - name: Lint
         run: <LINT_CMD>
@@ -67,12 +67,12 @@ jobs:
       - name: Architecture boundaries
         run: <ARCH_CHECK_CMD>         # dependency-cruiser / import-linter / ArchUnit / …
 
-      # Agent-readiness gate — the mechanical floor for dual-mode apps (.claude/rules/agent-readiness.md).
+      # Agent-readiness gate — the mechanical floor for dual-mode apps (.agents/rules/agent-readiness.md).
       # Checks the agent card exists + is served, mutations are idempotent, MCP schemas are generated
       # not hand-written, no vendor LLM endpoint is hardcoded outside its adapter, and a scoped
       # non-human principal exists. Delete this step if MODULE:agent was pruned.
       # Mid-adoption? set AGENT_READINESS_ENFORCE: warn here TEMPORARILY and track the gap in
-      # docs/claude/in-progress.md — it reports without blocking, and leaving it on is a silent gate.
+      # docs/agents/in-progress.md — it reports without blocking, and leaving it on is a silent gate.
       - name: Agent readiness
         run: sh scripts/check-agent-readiness.sh --since "${{ github.event.pull_request.base.sha }}"
 

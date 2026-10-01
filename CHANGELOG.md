@@ -12,7 +12,7 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
-- MINOR — **The Algorithm pass added as a rule module** (`.claude/rules/algorithm.md`): question every
+- MINOR — **The Algorithm pass added as a rule module** (`.agents/rules/algorithm.md`): question every
   requirement (and make it come with a name), **delete** what you can, simplify, accelerate, automate
   last — in that order, on anything structural, code and non-code. Every plan now owes a **Deletion
   candidates** section, because deletion is the only step whose output is absence and therefore the only
@@ -46,10 +46,10 @@ Semver, applied to governance:
   nothing into an adapted repo, so a stale adoption was indistinguishable from a current one. The
   canary asserts all six states plus the `PANOPLY_OFF` escape hatch and the not-a-git-tree passthrough.
 
-- MINOR — **locked dev-workflow policy encoded in the rules** (`.claude/rules/git-workflow.md`,
-  `.claude/rules/workflow.md`, `.claude/rules/quality-bar.md` + regenerated mirrors): the 2026-09-29
+- MINOR — **locked dev-workflow policy encoded in the rules** (`.agents/rules/git-workflow.md`,
+  `.agents/rules/workflow.md`, `.agents/rules/quality-bar.md` + regenerated mirrors): the 2026-09-29
   owner-locked flow is now doctrine every agent and every mirror carries — pre-flight before any
-  work or planning; plan presented to the owner before code; the `docs/claude/` spine as the single
+  work or planning; plan presented to the owner before code; the `docs/agents/` spine as the single
   plan home (one lightweight `docs/PLAN.md` allowed in small non-kit repos; root `PLAN.md` and
   GitHub Issues never); one branch per batch off fresh main, parallel writers one worktree each;
   push each batch as it completes; the STANDARD gate before merge (tests + typecheck + lint + arch
@@ -62,18 +62,18 @@ Semver, applied to governance:
 ## [1.4.0] — 2026-09-26
 
 Agent-readiness doctrine (MINOR — additive; safe to adopt). Pruned automatically by
-`/adapt-claude-setup` where the repo has no agent consumer.
+`/adapt-agents-setup` where the repo has no agent consumer.
 
-- MINOR — **agent-readiness module** (`.claude/rules/agent-readiness.md`, `MODULE:agent`): dual-mode
+- MINOR — **agent-readiness module** (`.agents/rules/agent-readiness.md`, `MODULE:agent`): dual-mode
   doctrine for apps that must work under a human UI *and* an AI agent — the three required surfaces
   (HTTP API with idempotency keys, MCP server with generated schemas, A2A agent card), BYO-LLM-key
   config via `LLM_BASE_URL`/`LLM_API_KEY`/`LLM_MODEL`, scoped non-human principals, and the trust
   rule that agent writes are attributable in the UI and reversible. Enforced by
   `scripts/check-agent-readiness.sh` (warn mode for mid-adoption) with a canary self-test
   (`scripts/check-agent-readiness.test.sh`) wired into the kit's own CI — the gate must be seen to
-  fail a defective fixture before it is trusted to pass a real repo. `adapt-claude-setup.md` detects
+  fail a defective fixture before it is trusted to pass a real repo. `adapt-agents-setup.md` detects
   agent consumption and prunes the module where none exists; `ci-verify.yml` carries the step
-  adopting repos get. Plan (archived): `docs/claude/governance/completed/agent-readiness-module.md`.
+  adopting repos get. Plan (archived): `docs/agents/governance/completed/agent-readiness-module.md`.
 - PATCH — canary hardening: removed the SC2015 `A && B || C` shape from the canary so it passes
   shellcheck on both 0.11 and the older version CI runs (local silence is not CI silence); canary 3
   now asserts warn mode still *reports* rather than only that it stops blocking.
@@ -84,7 +84,7 @@ Agent-readiness doctrine (MINOR — additive; safe to adopt). Pruned automatical
   rejected: OpenCode does not load that filename, so the mirror would bind nothing.
 
 ### Added
-- `.claude/rules/agent-readiness.md` (`MODULE:agent`) — the doctrine. Premise: **the UI is a client
+- `.agents/rules/agent-readiness.md` (`MODULE:agent`) — the doctrine. Premise: **the UI is a client
   of the API, never the owner of a capability**, so a screen-only action is a capability the app does
   not have. Three required surfaces, all Interface Adapters holding zero business rules: HTTP API
   (idempotency keys, retry/fix/give-up error codes, cursor pagination, published schemas), MCP server
@@ -111,8 +111,8 @@ checklist and the agent-perspective smoke test it requires.
 
 - MINOR — queue hygiene: a task's `in-progress.d` fragment is deleted in the same PR that ships
   the code, and leftovers are retired from PR state with `phalanx-docs-reconcile.sh` (Phalanx
-  ≥ 1.7.30) instead of by hand. Stated in AGENTS.md (mirrors regenerated), `docs/claude/README.md`
-  and `.claude/rules/documentation.md`.
+  ≥ 1.7.30) instead of by hand. Stated in AGENTS.md (mirrors regenerated), `docs/agents/README.md`
+  and `.agents/rules/documentation.md`.
 
 Provider-agnostic governance layer (MINOR — additive; safe to adopt).
 
@@ -121,7 +121,7 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   (source, config, schema, scripts, CI) but not the worklog target in the same commit. Enforces the
   same-change update contract mechanically, provider-neutrally (runs in required CI + pre-commit), so
   no agent in any tool can land a code change without its doc update. Worklog target auto-detected
-  (`CHANGELOG.md`/`HISTORY.md`, else `docs/claude/worklog.md`), overridable via `DOCS_WORKLOG`.
+  (`CHANGELOG.md`/`HISTORY.md`, else `docs/agents/worklog.md`), overridable via `DOCS_WORKLOG`.
   Wired into `scripts/templates/pre-commit` and `scripts/templates/ci-verify.yml` (`--since origin/main`).
 - `scripts/init-repo-protection.sh` — interactive branch protection setup via `gh` CLI: configures
   default branch to require PR, require `verify` check, forbid force-push, forbid direct push. Prompts
@@ -131,7 +131,7 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   plan.md exists, checklist.md has pending items, adr.md has new section since base, PR description
   has ≥2 persona sign-offs (Security, Performance, Maintainability, UX, or domain-specific). Trivial
   escape: PR label "trivial", commit prefix "trivial:", or 1-file ≤15-line no-schema change.
-- Expert-review policy in `.claude/rules/workflow.md` and `AGENTS.md`: non-trivial changes require
+- Expert-review policy in `.agents/rules/workflow.md` and `AGENTS.md`: non-trivial changes require
   structured review with 4 default personas; evidence checked by `check-expert-review.sh` in CI.
   Conflict escalation to operator via ADR.
 - Provider mirrors regenerated via `sync-agents.sh` — all mirrors in sync with updated workflow.md.
@@ -143,7 +143,7 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   nine kit repos, five had no `checklist.md` at all (they keep the checklist inside `plan.md`) and would
   have been blocked from committing the moment the gate started working, one of them through a live
   local pre-commit hook. It now accepts a checklist item — checked or unchecked — anywhere under
-  `docs/claude/**`, which is what "review evidence exists" actually means; requiring an OPEN item
+  `docs/agents/**`, which is what "review evidence exists" actually means; requiring an OPEN item
   rewarded unfinished work. (b) The ADR check tested `[ "${1:-}" = "--since" ]` *inside* the function,
   where `$1` is the label argument, so it could never fire — removed rather than left implying
   enforcement that does not exist. (c) The persona sign-off check armed itself whenever `gh` happened to
@@ -170,8 +170,8 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   the first time it does.
 
 ### Changed
-- **The queue is one file per task, and the only backlog.** `.claude/rules/documentation.md` now names
-  `docs/claude/in-progress.d/<slug>.md` as the tactical queue — one committed fragment per task —
+- **The queue is one file per task, and the only backlog.** `.agents/rules/documentation.md` now names
+  `docs/agents/in-progress.d/<slug>.md` as the tactical queue — one committed fragment per task —
   instead of the shared `in-progress.md` table two open PRs collide on (the same reason the worklog
   moved to per-change fragments). `in-progress.md` becomes a generated view: read it, never edit it,
   never commit it. The fragment is also written to be DRIVEN: `status` / `order` / `req` / `risk`
@@ -180,41 +180,41 @@ Provider-agnostic governance layer (MINOR — additive; safe to adopt).
   this kit never mentioned `TASKS.md`, and Phalanx's loop never looked at `in-progress.md`. Phalanx
   ADR-0004 adopts the same files and the same keys. Mirrors regenerated.
 
-- Provider mirrors are now **self-contained**: `sync-agents.sh` inlines the full `.claude/rules/*.md`
+- Provider mirrors are now **self-contained**: `sync-agents.sh` inlines the full `.agents/rules/*.md`
   bodies into every tool file and into `AGENTS.md`'s `PANOPLY:RULES` block (was: a header + `MIRROR`
-  block + a pointer to `.claude/rules/` no non-Claude tool could follow). `AGENTS.md` carries the
+  block + a pointer to `.agents/rules/` no non-Claude tool could follow). `AGENTS.md` carries the
   `PANOPLY:RULES` markers; `ci-verify.yml` runs `sync-agents.sh --check` so drift fails CI for every tool;
-  `adapt-claude-setup.md` runs the inlining generator last (after rules are pruned) and verifies no
+  `adapt-agents-setup.md` runs the inlining generator last (after rules are pruned) and verifies no
   mirror is a bare pointer.
-- `.claude/rules/clean-architecture.md` — new module-fenced **Enforcement** gate: names the per-stack
+- `.agents/rules/clean-architecture.md` — new module-fenced **Enforcement** gate: names the per-stack
   boundary linter (dependency-cruiser / import-linter / ArchUnit / …), the report-only→blocking ramp,
   and "CI is the binding plane"; review-checklist item 1 now points at `{{ARCH_CHECK_CMD}}`.
-- `.claude/rules/documentation.md` — the four-altitude anti-redundancy table (roadmap / in-progress /
+- `.agents/rules/documentation.md` — the four-altitude anti-redundancy table (roadmap / in-progress /
   worklog / completed-features) and the same-change update contract binding every provider.
-- `.claude/rules/git-workflow.md` — module-fenced arch-boundary pre-commit gate, and the
+- `.agents/rules/git-workflow.md` — module-fenced arch-boundary pre-commit gate, and the
   enforcement-plane note (the `settings.json` deny binds only Claude; server-side CI binds all tools).
-- `.claude/commands/adapt-claude-setup.md` — detects the running log + provider files + arch linter,
+- `.claude/commands/adapt-agents-setup.md` — detects the running log + provider files + arch linter,
   scaffolds roadmap/worklog, emits `AGENTS.md` + runs `sync-agents.sh`, copies the CI/pre-commit
   templates, extends the porcelain allowlist, and reports the worklog target + mirrors + manual step.
-- `.claude/commands/audit-claude-setup.md` — Check 4 worklog/roadmap-currency, Check 5 AGENTS.md
+- `.claude/commands/audit-agents-setup.md` — Check 4 worklog/roadmap-currency, Check 5 AGENTS.md
   presence + deny↔guardrails sync, Check 6 "wired, not just installed", and new Check 7 (provider hub
   read-order + mirror-drift + inline-doctrine).
 - `CLAUDE.md` — `@AGENTS.md` bridge, module-fenced arch-boundary command row, roadmap + worklog in
   Project Knowledge.
-- `docs/claude/_templates/plan.md` — a Roadmap-initiative field, a forced **Architecture** section
+- `docs/agents/_templates/plan.md` — a Roadmap-initiative field, a forced **Architecture** section
   (layers/ports/DTOs/direction/swap-test), and worklog/roadmap moves in the On-ship step.
-- `docs/claude/in-progress.md` — an Initiative column and the tactical→strategic roll-up note.
-- `docs/claude/README.md` — read order, layout, and doc lifecycle now name roadmap + worklog.
+- `docs/agents/in-progress.md` — an Initiative column and the tactical→strategic roll-up note.
+- `docs/agents/README.md` — read order, layout, and doc lifecycle now name roadmap + worklog.
 - docs: describe the install as provider-agnostic (AGENTS.md hub + mirrors + CI), not Claude-only.
 
 ## [1.0.0] — 2026-08-19
 
 Initial published release of the Panoply kit (`dustin-olenslager/panoply`), fetched with
-`npx degit dustin-olenslager/panoply` and wired in by `/adapt-claude-setup`.
+`npx degit dustin-olenslager/panoply` and wired in by `/adapt-agents-setup`.
 
 ### Added
-- Initial kit: `CLAUDE.md` spine, `.claude/rules/*`, `.claude/agents/*`,
-  `.claude/commands/{adapt,audit,assess}-*.md`, `settings.json`, and the `docs/claude/` scaffold.
+- Initial kit: `CLAUDE.md` spine, `.agents/rules/*`, `.claude/agents/*`,
+  `.claude/commands/{adapt,audit,assess}-*.md`, `settings.json`, and the `docs/agents/` scaffold.
 - `documentation.md` → "When to write": handoff-on-pause rule (write the exact next action where the
   next session looks first) and the "shipped-but-unlogged counts as not done" enforcement framing.
   Lifts the Frame Forge work-logging doctrine to template altitude so every repo inherits it.
@@ -225,8 +225,8 @@ Initial published release of the Panoply kit (`dustin-olenslager/panoply`), fetc
   in a fresh clone; never a credential in the remote URL, never commit a secret, rotate on exposure.
 - `settings.json` deny: block `git remote add/set-url` with an embedded `https://…@` credential;
   allow `git cherry` (read-only) so the new branch-verification doctrine runs without a prompt.
-- `audit-claude-setup.md` → Check 4: shipped-but-unlogged detector (diff merges since the newest
+- `audit-agents-setup.md` → Check 4: shipped-but-unlogged detector (diff merges since the newest
   completed-log entry against the log + `in-progress.md`; flag active items with no Next step).
-- `docs/claude/_templates/plan.md`: a `Next step` handoff field.
-- `docs/claude/in-progress.md`: the Notes cell reframed as the active row's handoff.
+- `docs/agents/_templates/plan.md`: a `Next step` handoff field.
+- `docs/agents/in-progress.md`: the Notes cell reframed as the active row's handoff.
 - This `CHANGELOG.md` and the versioned GitHub repo it lives in.

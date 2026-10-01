@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # check-algorithm.sh — the Algorithm-pass gate: a structural change must show its step-2 artifact.
 #
-# Enforces the Algorithm pass (.claude/rules/algorithm.md) mechanically, in the same spirit as the
+# Enforces the Algorithm pass (.agents/rules/algorithm.md) mechanically, in the same spirit as the
 # plan-home and docs gates: the rule is doctrine, and doctrine drifts.
 #
 # Why specifically the DELETION step: of the five steps (question, delete, simplify, accelerate,
@@ -30,9 +30,9 @@ cd "$ROOT"
 
 [ "${ALGORITHM_OFF:-0}" = "1" ] && { echo "check-algorithm: disabled (ALGORITHM_OFF=1)"; exit 0; }
 
-# Where the plan home lives. A project too small for the docs/claude spine keeps ONE lightweight
-# docs/PLAN.md (see .claude/rules/workflow.md → Planning Workflow); both are accepted here.
-PLAN_GLOB="${ALGORITHM_PLAN_GLOB:-docs/claude/*/*/plan.md docs/PLAN.md docs/claude/PLAN.md}"
+# Where the plan home lives. A project too small for the docs/agents spine keeps ONE lightweight
+# docs/PLAN.md (see .agents/rules/workflow.md → Planning Workflow); both are accepted here.
+PLAN_GLOB="${ALGORITHM_PLAN_GLOB:-docs/agents/*/*/plan.md docs/PLAN.md docs/agents/PLAN.md}"
 # What counts as a structural change. Docs/rules-only edits are exempt: a rule module, a note, or a
 # copy change is not a part of the system, and asking for a deletion list on a typo fix is exactly the
 # ceremony the rule's own scope test forbids.
@@ -165,9 +165,9 @@ echo "    ### Deletion candidates" >&2
 echo "    | Candidate | Removed? | Why |" >&2
 echo "" >&2
 echo "  An empty table must be ARGUED, not left blank — 'nothing can be deleted here' is a conclusion" >&2
-echo "  to defend. Copy the section from docs/claude/_templates/plan.md." >&2
+echo "  to defend. Copy the section from docs/agents/_templates/plan.md." >&2
 echo "" >&2
-echo "  Doctrine: .claude/rules/algorithm.md. Deliberate exception (a spike, a one-file fix inside an" >&2
+echo "  Doctrine: .agents/rules/algorithm.md. Deliberate exception (a spike, a one-file fix inside an" >&2
 echo "  existing pattern)? Say so out loud and set ALGORITHM_OFF=1 for that change — do not silently" >&2
 echo "  bypass it." >&2
 exit 1

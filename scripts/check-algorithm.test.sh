@@ -94,9 +94,9 @@ gate_at_msg() {
 
 # --- case 1: structural change, no deletion section → REFUSED ---------------
 r="$(mkrepo fail-no-section)"; base="$(root_sha "$r")"
-mkdir -p "$r/src" "$r/docs/claude/core/thing"
+mkdir -p "$r/src" "$r/docs/agents/core/thing"
 printf 'x\n' > "$r/src/thing.ts"
-printf '# Plan\n\n## Goal\n\nNo algorithm pass here.\n' > "$r/docs/claude/core/thing/plan.md"
+printf '# Plan\n\n## Goal\n\nNo algorithm pass here.\n' > "$r/docs/agents/core/thing/plan.md"
 git -C "$r" add -A; cmit "$r" "feat: thing" || exit 2
 rc="$(gate_at "$r" "$base")"
 if [ "$rc" = "fail-refused" ]; then ok "structural change with no deletion section is refused"
@@ -105,7 +105,7 @@ if gate_at_msg "$r" "$base"; then ok "refusal names the remedy (no retry loop)"
 else bad "refusal does not name the remedy"; fi
 
 # --- case 2: same change, deletion section added → PASS (positive control) --
-printf '# Plan\n\n## The Algorithm pass\n\n- Delete: none, argued below.\n\n### Deletion candidates\n\n| Candidate | Removed? | Why |\n|---|---|---|\n| none | no | every part has a live caller |\n' > "$r/docs/claude/core/thing/plan.md"
+printf '# Plan\n\n## The Algorithm pass\n\n- Delete: none, argued below.\n\n### Deletion candidates\n\n| Candidate | Removed? | Why |\n|---|---|---|\n| none | no | every part has a live caller |\n' > "$r/docs/agents/core/thing/plan.md"
 git -C "$r" add -A; cmit "$r" "docs: algorithm pass" || exit 2
 rc="$(gate_at "$r" "$base")"
 if [ "$rc" = "ok" ]; then ok "compliant plan passes (positive control)"
@@ -137,11 +137,11 @@ else bad "expected a refusal, got '$rc'"; fi
 
 # --- case 6: THE GATE MUST NOT BLOCK ITS OWN REMEDY -------------------------
 r="$(mkrepo pass-remedy-roundtrip)"; base="$(root_sha "$r")"
-mkdir -p "$r/lib" "$r/docs/claude/core/sub"
+mkdir -p "$r/lib" "$r/docs/agents/core/sub"
 printf 'a\n' > "$r/lib/a.ts"
 git -C "$r" add -A && { cmit "$r" "feat: a" || exit 2; }
 first="$(gate_at "$r" "$base")"
-printf '# Plan\n\n### Deletion candidates\n\n| Candidate | Removed? | Why |\n|---|---|---|\n| nothing | no | single new file |\n' > "$r/docs/claude/core/sub/plan.md"
+printf '# Plan\n\n### Deletion candidates\n\n| Candidate | Removed? | Why |\n|---|---|---|\n| nothing | no | single new file |\n' > "$r/docs/agents/core/sub/plan.md"
 git -C "$r" add -A && { cmit "$r" "docs: pass" || exit 2; }
 second="$(gate_at "$r" "$base")"
 if [ "$first" = "fail-refused" ] && [ "$second" = "ok" ]; then ok "refuse → apply the remedy → allow (round trip)"
@@ -158,9 +158,9 @@ else bad "--staged: expected a refusal, got '$rc' / $(printf '%s' "$out" | head 
 
 # --- case 8: the gate must not mutate the repo it judges --------------------
 r="$(mkrepo no-mutation)"; base="$(root_sha "$r")"
-mkdir -p "$r/src" "$r/docs/claude/core/x"
+mkdir -p "$r/src" "$r/docs/agents/core/x"
 printf 'c\n' > "$r/src/c.ts"
-printf '# Plan\n\n### Deletion candidates\n\n| Candidate | Removed? | Why |\n|---|---|---|\n| none | no | new file |\n' > "$r/docs/claude/core/x/plan.md"
+printf '# Plan\n\n### Deletion candidates\n\n| Candidate | Removed? | Why |\n|---|---|---|\n| none | no | new file |\n' > "$r/docs/agents/core/x/plan.md"
 git -C "$r" add -A && { cmit "$r" "feat: c" || exit 2; }
 before="$(git -C "$r" status --porcelain)"
 ( cd "$r" && sh scripts/check-algorithm.sh --since "$base" >/dev/null 2>&1 ) || true

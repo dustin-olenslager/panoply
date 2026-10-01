@@ -18,9 +18,9 @@ fi
 # Never publish settings.local.json or personal overrides.
 if [ ! -f .gitignore ] || ! grep -q 'settings.local.json' .gitignore 2>/dev/null; then
   {
-    echo ".claude/settings.local.json"
+    echo ".agents/settings.local.json"
     echo "CLAUDE.local.md"
-    echo ".claude-kit-tmp/"
+    echo ".agents-kit-tmp/"
   } >> .gitignore
 fi
 

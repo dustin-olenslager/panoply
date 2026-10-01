@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Starter local pre-commit gate. Copy to .git/hooks/pre-commit (chmod +x), or wire it via husky /
-# lefthook / pre-commit. Replace each <CMD> with the command from CLAUDE.md → Key Commands.
+# lefthook / pre-commit. Replace each <CMD> with the command from AGENTS.md → Key Commands.
 #
 # HONEST NOTE: a client-side hook is convenience, not enforcement — any agent can bypass it with
 # `git commit --no-verify`, and a non-Claude agent may not run it at all. The binding plane is
@@ -25,7 +25,7 @@ if [ -f scripts/check-docs.sh ]; then
   echo "pre-commit: docs gate…"; sh scripts/check-docs.sh
 fi
 
-# Plan-home gate — a new plan doc may only be added inside docs/claude/ (roadmap row + area folder).
+# Plan-home gate — a new plan doc may only be added inside docs/agents/ (roadmap row + area folder).
 if [ -f scripts/check-plan-home.sh ]; then
   echo "pre-commit: plan home…"; sh scripts/check-plan-home.sh --staged
 fi
