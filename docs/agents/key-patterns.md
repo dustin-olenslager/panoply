@@ -18,7 +18,8 @@ a line and say "this violates it."
 | Symptom you will see | Actual cause | What to do |
 |---|---|---|
 | _EXAMPLE — tests pass locally, fail in CI with a timeout_ | _CI runs without the local cache warm_ | _Seed the fixture in `beforeAll`, not lazily_ |
-| | | |
+| A structural change's plan has no `Deletion candidates` section, so `check-algorithm.sh` refuses the write | Deletion's output is **absence**, so nothing at the end reminds anyone it was skipped | Fill the section from `_templates/plan.md` before retrying. An empty table must be **argued**, not left blank — and a proposal that was considered and **turned down** belongs in the same list (what it was, why it lost, **what we do instead**) |
+| An idea gets re-proposed a month after it was rejected | The rejection was a **conversation**; conversations leave no artifact to find | Record it in the plan doc's candidate list when the decision is made. Do **not** build a second decisions store or an index for it — the list the agent already reads before working in that area is the ledger |
 
 ## Testing conventions
 

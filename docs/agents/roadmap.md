@@ -30,7 +30,6 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 | Initiative | Intent (one line) | Queue rows (`in-progress.md`) | Plan docs |
 |---|---|---|---|
 | Locked dev-workflow policy | Encode the 2026-09-29 owner-locked dev-workflow policy (points 1–10) into the rule modules and regenerate every tool-native mirror | row 2 | `governance/dev-workflow-locked-policy/plan.md` |
-| Rejections are first-class | A decision that was turned down is recorded in the plan doc's deletion-candidate list with what we do instead, so the next agent finds the answer where it asks the question — no second store, no index | row 4 | `governance/rejections-first-class/plan.md` |
 | The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 3 | `governance/execution-algorithm/plan.md` |
 | Every-agent coverage: the agent | Name and verify the agent as an AGENTS.md-native tool; no new mirror required | row 1 | `governance/opencode-native-coverage/plan.md` |
 
@@ -56,6 +55,7 @@ into the feature log.
 
 | Initiative | Shipped | Features (`completed-features.md`) |
 |---|---|---|
+| Rejections are first-class | 2026-10-01 | Rejections are first-class — the step-2 candidate list is also the rejections ledger |
 | Agent-readiness doctrine | 2026-09-26 | Agent-readiness module + CI gate (dual-mode apps) |
 | Mandatory PR gates + expert review + docs enforcement | 2026-08-21 | Branch protection init, expert-review CI gate, docs-gate completion, adapt command wiring |
 | Docs you can prove are current | 2026-08-21 | Docs-gate — mechanical landing gate enforcing worklog currency |

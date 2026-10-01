@@ -130,9 +130,17 @@ premise and the Algorithm pass. The Phalanx mirror is explicitly out of scope, r
 > property is load-bearing, and no run has shown prose insufficient. Removing a false claim about the gate is
 > cheaper than widening the gate to make the claim true.
 
+> **Build note:** 2026-10-01 — shipped in PR #17 (squash-merged), CI `verify` green in 14s. Local gate suite
+> was green except `panoply.test.sh`, which failed the pre-existing *"copied doctor reports the kit version"*
+> case; reproduced identically on a clean `origin/main` worktree, so it is an environment artifact, not this
+> change (see Known gaps in `completed-features.md`). `sync-agents.sh --check`, `check-plan-home.sh`,
+> `check-algorithm.sh`, `check-algorithm.test.sh` (13/13), `check-docs.sh`, `check-expert-review.sh`, and
+> `shellcheck` were all green.
+
 ## On ship
 
-Move this folder to `governance/completed/`, add the `completed-features.md` entry, append the final worklog
-line, remove the `in-progress.md` row, move the roadmap initiative to Shipped, and promote the durable lesson
-(a rejection left in a chat thread leaves no artifact — record it in the list that already exists, and do not
-build a second store for it) into `key-patterns.md` — all in the same commit as the ship.
+**Shipped 2026-10-01.** Folder archived at `governance/completed/rejections-first-class/`; the
+`completed-features.md` entry, the final worklog line, the removed `in-progress.md` row, and the moved
+`roadmap.md` initiative (to Shipped) all landed in the same batch; the durable lesson — a rejection left in a
+chat thread leaves no artifact, so record it in the list that already exists rather than building a second
+store — was promoted into `key-patterns.md`.
