@@ -207,7 +207,7 @@ candidate list, rather than a good intention.
 | Step | The question | The written artifact this step owes |
 |---|---|---|
 | 1. Question | Who asked for this, and which constraint does it serve? | A **requester name** and the constraint, per requirement |
-| 2. Delete | What here can be removed entirely? | A **deletion candidate list** — items removed, items kept, and the reason |
+| 2. Delete | What here can be removed entirely — and what has already been turned down? | A **deletion candidate list** — items removed, items kept, items **rejected**, and the reason |
 | 3. Simplify | What is the least that satisfies the requirement? | The simplified shape, and what it dropped |
 | 4. Accelerate | What is the measured rate, and what is the bottleneck? | A **measured number** before and after — never an adjective |
 | 5. Automate | Which step is automated, and were steps 1–4 run on it first? | The named step, plus proof steps 1–3 already ran |
@@ -241,6 +241,16 @@ time, you are not deleting enough. The healthy target is deleting far more often
 - **Every plan owes a deletion candidate list, not just the parts it adds.** "Nothing can be deleted
   here" is a conclusion that must be argued, not a default — and it is the answer that is most often
   wrong.
+- **A rejected candidate belongs in the same list as a deleted one** — deleting a part and turning down
+  a proposal are one act, "we considered this and are not doing it", and both leave the same absence.
+  Give every rejection three things: what it was, why it lost, and **what we are doing instead** (the
+  decision, requirement, or part that replaced it). A rejection with no *instead* is unfinished, and a
+  rejection with no reason gets re-proposed next month by someone who never saw it — a conversation is
+  not an artifact. One line per rejection, in the plan doc's list, written when the decision is made.
+- **Record the rejection at the moment it happens, in the artifact that already exists.** A plan doc's
+  candidate list is read by exactly the agent about to propose the same thing again, so it is the ledger
+  — never a second decisions store, and never a chat thread. The whole point is that the answer is where
+  the question gets asked.
 - **Nothing is protected by virtue of working.** "It works, so leave it" is how dead weight survives.
   Working is the floor, not the justification for existing. The test is demand and artifact, not function.
 - **Delete the step before deleting its implementation.** A process that produces nothing anyone reads
@@ -300,7 +310,8 @@ Before proposing a non-trivial change, a new process, a new tool, or an automati
 plan doc or the proposal — briefly, one line each, in order:
 
 1. **Question** — who asked, and which constraint does it serve? _(no name → it does not get built)_
-2. **Delete** — what can be removed instead? _(name the candidates — including "the whole request")_
+2. **Delete** — what can be removed instead? _(name the candidates — including "the whole request"; and
+   add every approach already turned down, with what we do instead)_
 3. **Simplify** — what is the least that satisfies the named requirement?
 4. **Accelerate** — what is the measured rate today, and where is the bottleneck?
 5. **Automate** — is this the last step, and were 1–3 actually done on it?
@@ -319,13 +330,12 @@ checked without judgement:
 
 - a non-trivial change exists (code, or a new automation/process file) — skip if not;
 - the plan doc for the area exists and carries a **Deletion candidates** section, so the step-2 artifact
-  is present rather than assumed;
-- an automation introduced in the change names the step it automates.
+  is present rather than assumed.
 
-It cannot judge whether the deletion list is *good*, whether the requirement's requester is real, or
-whether the measured number is honest. Those stay a review question — ask them explicitly in the
-expert-review gate rather than trusting the script's green check. A gate that passes while a requirement
-went unexamined is a gate measuring the wrong thing.
+It cannot judge whether the deletion list is *good*, whether a rejection's *instead* names something
+real, whether the requirement's requester is real, or whether the measured number is honest. Those stay a
+review question — ask them explicitly in the expert-review gate rather than trusting the script's green
+check. A gate that passes while a requirement went unexamined is a gate measuring the wrong thing.
 
 Escape hatch: `ALGORITHM_OFF=1` for a deliberate exception. Say plainly that it was used, so the choice
 is reviewed rather than assumed — an undocumented bypass is a rule nobody can audit.

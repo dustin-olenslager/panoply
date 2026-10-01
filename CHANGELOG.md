@@ -12,6 +12,15 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **Rejections are first-class in the step-2 list.** The plan doc's *Deletion candidates* section
+  is now also the **rejections ledger**: a proposal considered and turned down is recorded there, at the
+  moment the decision is made, with **what we do instead** — the one thing that stops the same idea being
+  re-proposed every month, because a rejection left in a chat thread leaves no artifact to find.
+  `.agents/rules/algorithm.md` step 2 states it (a rejection and a deletion are one act — both leave
+  absence), the step-2 row of its step table names rejected items, and `_templates/plan.md` gains the
+  "What we do instead" column. **No gate changed**: the section and its heading are already required by
+  `check-algorithm.sh`, so this widens what the artifact must contain, not what the checker looks for.
+
 - PATCH — finish the agent-agnostic neutralization pass: four prose clauses that a
   prior exact-string replacement had mangled (`README.md`, `.agents/rules/documentation.md`,
   `.agents/commands/audit-agents-setup.md`, `docs/agents/worklog.md`) now read as plain

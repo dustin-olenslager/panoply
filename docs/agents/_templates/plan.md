@@ -54,9 +54,15 @@ existing pattern) and say so in Build notes. Full doctrine: `.agents/rules/algor
 change owes this: the candidate, whether it was removed or kept, and why. Deletion is the only step that
 leaves no artifact, which is why it is written down instead of intended.
 
-| Candidate | Removed? | Why |
-|---|---|---|
-| <part, step, job, gate, or doc> | yes/no | <the reason — or what depends on it> |
+**This list is also the rejections ledger.** A proposal that was considered and turned down is a
+candidate — record it here, at the moment the decision is made, rather than leaving it in a chat thread
+where the next agent cannot find it. A rejection owes three things: what it was, why it lost, and **what
+we are doing instead** — the column exists for the last one. A rejection with no *instead* is unfinished,
+and the row is what stops the same idea being re-proposed every month.
+
+| Candidate | Removed? | Why | What we do instead |
+|---|---|---|---|
+| <part, step, job, gate, or doc> | yes/no/rejected | <the reason — or what depends on it> | <the decision or part that replaced it — required when `rejected`, else `—`> |
 
 ## Milestones
 
