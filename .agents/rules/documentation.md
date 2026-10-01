@@ -53,7 +53,7 @@ In the SAME commit that lands work — any agent:
 4. **On a new or reprioritised initiative**: add or move its `roadmap.md` row.
 
 This contract is plain-markdown, enforced by review and `/audit-agents-setup` — never a tool-only
-permission gate, so it binds a non-agent exactly as much as a the agent one. It is mirrored into
+permission gate — it binds every agent exactly as much as any other. It is mirrored into
 `AGENTS.md` so every tool reads it. **Shipped-but-unlogged counts as not done** (see below).
 
 ### The queue is the ONLY backlog — autonomous drivers included

@@ -12,6 +12,11 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — finish the agent-agnostic neutralization pass: four prose clauses that a
+  prior exact-string replacement had mangled (`README.md`, `.agents/rules/documentation.md`,
+  `.agents/commands/audit-agents-setup.md`, `docs/agents/worklog.md`) now read as plain
+  agent-agnostic text. No rule, command, or gate behavior changed.
+
 - MINOR — **The Algorithm pass added as a rule module** (`.agents/rules/algorithm.md`): question every
   requirement (and make it come with a name), **delete** what you can, simplify, accelerate, automate
   last — in that order, on anything structural, code and non-code. Every plan now owes a **Deletion

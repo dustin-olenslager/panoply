@@ -131,13 +131,13 @@ real command (harmless), and destructive commands the current stack allows that 
 learned about (not harmless) — a new ORM's schema-push command, a new deploy CLI.
 
 - **AGENTS.md present and bridged.** `AGENTS.md` exists at the repo root and the generated agent hub imports it
-  (`@AGENTS.md`). If absent → **P0**: the entire non-the agent onboarding path is missing — every tool
+  (`@AGENTS.md`). If absent → **P0**: the entire non-Claude onboarding path is missing — every tool
   other tools has no front door.
 - **Deny-list ↔ guardrails sync.** Compare the destructive-command categories in `.agents/policy.md`
   `deny` (force-push, `db:push`/`reset`/`drop` and ORM equivalents, `curl | sh`, publish/deploy,
   secret reads) against the `MUST NOT` list in the `AGENTS.md` `MIRROR` block. A deny entry with no
   corresponding cross-tool `MUST NOT` (e.g. Check 5 added a new ORM's push command to the deny list
-  but the guardrails never learned it) → **P1**: the the agent gate and the cross-tool doctrine have
+  but the guardrails never learned it) → **P1**: the per-tool permission gate and the cross-tool doctrine have
   diverged, and `sync-agents.sh` will propagate the stale block to every mirror. Fix = add the line to
   `AGENTS.md` and re-run `sh scripts/sync-agents.sh`.
 

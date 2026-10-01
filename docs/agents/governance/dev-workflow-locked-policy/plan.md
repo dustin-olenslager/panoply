@@ -22,7 +22,7 @@ After this ships, every agent (Hermes/SME subagents, any agent) working in any r
 9. Code + docs/worklog in the same commit (multi-commit PRs can fail `check-docs.sh --since` on intermediates).
 10. Owner decisions presented as two tappable options + a recommendation, never prose blocks.
 
-**Out of scope:** repo GitHub settings (squash-only + delete-branch-on-merge are already flipped centrally on all owned repos — nothing to change here); CI workflow edits (verify.yml already runs the mirror/doc/review gates this change leans on); the OpenCode-coverage initiative running in parallel on its own branch.
+**Out of scope:** repo GitHub settings (squash-only + delete-branch-on-merge are already flipped centrally on all owned repos — nothing to change here); CI workflow edits (verify.yml already runs the mirror/doc/review gates this change leans on); the any agent-coverage initiative running in parallel on its own branch.
 
 ## Context
 
