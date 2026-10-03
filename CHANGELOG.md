@@ -55,6 +55,17 @@ Semver, applied to governance:
   MIRROR block is unchanged and still verbatim in every mirror. The canonical text stays
   `.agents/rules/*.md`. `sync-agents.sh --check` is unchanged in shape (still CI-wired, still fails on a
   stale index block).
+- MAJOR — **the kit had two queues for one fact; it now has one.** `.agents/rules/documentation.md`
+  named `docs/agents/in-progress.d/` (one file per task) as the tactical queue and `in-progress.md`
+  as its "generated view" — but the kit repo has no `in-progress.d/` at all, so the flagship repo did
+  not use half the spine it mandates, and the rule told every agent to write a Next step into a
+  fragment that does not exist here. `in-progress.md` is the queue: it is the file the onboarding
+  contract in `AGENTS.md`, `docs/agents/README.md`, `scripts/panoply.sh`'s scaffold, the
+  `panoply` skill, and `scripts/check-plan-home.sh`'s allowlist all reference, and the only one that
+  can be dogfooded today. Every reference to the directory is removed from `documentation.md`,
+  `workflow.md`, `AGENTS.md` (mirrors regenerated) and `docs/agents/README.md`. Archived completed
+  plans and released changelog entries keep their historical wording — an archive records what
+  shipped, so it is not rewritten.
 
 - PATCH — **the spec gate no longer demands a spec for wiring.** `CODE_RE` matched any `.yml`, so
   `.github/workflows/*.yml` — a CI workflow, a pre-commit hook, a tool config — counted as structural.

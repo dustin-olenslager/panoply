@@ -58,9 +58,9 @@ are the point, not a defect. Newest file wins; earlier ones exist for trend comp
    inline with `> **Build note:**` at the moment you find them; append a `worklog.md` line (or a
    `CHANGELOG` `[Unreleased]` line) in the same commit as each landed change.
 3. **Ship** — move the whole `<feature>/` folder into `<area>/completed/`, rename files to describe
-   what shipped, add a row to `completed-features.md`, delete the task's `in-progress.d/<slug>.md`
-   fragment **in the same PR that ships the code**, and move the initiative in `roadmap.md` (to
-   Shipped if it was its last plan). A fragment that outlives its merge misleads every later session;
+   what shipped, add a row to `completed-features.md`, delete the task's `in-progress.md` row
+   **in the same PR that ships the code**, and move the initiative in `roadmap.md` (to
+   Shipped if it was its last plan). A row that outlives its merge misleads every later session;
    leftovers are retired from PR state with `phalanx-docs-reconcile.sh --apply` (Phalanx ≥ 1.7.30),
    never by guessing.
 4. **Promote** — anything durable the build taught you (a decision, a gotcha) graduates out of the
