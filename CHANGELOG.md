@@ -27,7 +27,8 @@ Semver, applied to governance:
   mutation-tested (removing either detection path, or the metasyntax filter, turns checks red). Wired into
   `scripts/templates/ci-verify.yml` + `pre-commit`. **Adopting repos:** the gate is additive and ships in
   the template CI; a repo with a backlog and no specs sets `SPEC_OFF=1` temporarily (stated, reviewed)
-  while it folds the rung in.
+  while it folds the rung in. **Shipped** in PR #21 (squash-merged `0eca293`); the initiative is in
+  `roadmap.md` -> Shipped and the plan is archived at `governance/completed/spec-before-plan/`.
 - PATCH — **this repo now keeps ONE running log.** `docs/agents/worklog.md` was still the kit's own
   template stub, which says in its own body to **delete the file** when the repo keeps a
   `CHANGELOG`/`HISTORY` `[Unreleased]` section — and this repo does. Two parallel running logs is the one

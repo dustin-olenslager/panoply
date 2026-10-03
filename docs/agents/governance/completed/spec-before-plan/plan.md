@@ -112,24 +112,26 @@ was considered and what happened to it.
 
 Each is independently reviewable and leaves the system working.
 
-- [ ] **M1 — the artifact exists.** `docs/agents/_templates/spec.md` with the five sections (stories +
+- [x] **M1 — the artifact exists.** `docs/agents/_templates/spec.md` with the five sections (stories +
   priority + independent-test line; acceptance scenarios; numbered FRs; success criteria; open
   questions carrying `[NEEDS CLARIFICATION: …]`), and a `Spec:` link row added to
   `docs/agents/_templates/plan.md` so the plan names the spec it implements. Files:
   `docs/agents/_templates/spec.md` (new), `docs/agents/_templates/plan.md` (edited).
-- [ ] **M2 — the rule exists.** `.agents/rules/spec.md`: what a spec is, the carry-forward rule
+- [x] **M2 — the rule exists.** `.agents/rules/spec.md`: what a spec is, the carry-forward rule
   (unresolved markers must not reach a plan), the routine-work exemption, the honest limits, and the
   `SPEC_OFF=1` escape hatch; plus one line in the `AGENTS.md` MIRROR preamble's read-order list and
   `workflow.md` → Planning Workflow pointing at it. Files: `.agents/rules/spec.md` (new), `AGENTS.md`
   (preamble line), `.agents/rules/workflow.md` (one pointer).
-- [ ] **M3 — the gate exists and can go red in both directions.** `scripts/check-spec.sh` + canary
+- [x] **M3 — the gate exists and can go red in both directions.** `scripts/check-spec.sh` + canary
   `scripts/check-spec.test.sh` (cases: no spec at all → refused; spec with an unresolved marker →
   refused; compliant spec → pass; docs-only change → exempt; `SPEC_OFF=1` lifts; refuse→remedy→allow
   round trip; the gate does not mutate the repo). Wired into `scripts/templates/ci-verify.yml` (PR
   context) and `scripts/templates/pre-commit`; mirrors regenerated with `sh scripts/sync-agents.sh`.
-- [ ] **M4 — the Hermes side walks it.** The `spec-driven-start` skill: one entry, intake → spec →
-  clarify → plan → tasks, stopping at each artifact for the owner's yes/no, writing the same artifacts
-  M1–M3 define. Records the kit's merged SHA so the two halves are pinned to each other.
+- [x] **M4 — the Hermes side walks it.** The `spec-driven-start` skill is written: one entry,
+  intake → spec → clarify → plan, stopping at each artifact for the owner's yes/no, writing the same
+  artifacts M1–M3 define. It records the kit's merged SHA (`0eca293`, PR #21) so the two halves are
+  pinned to each other. **Not yet exercised on a real project** — the first live run through it is what
+  proves the walkthrough, and any lesson it produces goes back into the skill.
 
 **Ship:** fold each milestone row per the ship convention — `completed-features.md` entry, worklog
 line, `roadmap.md` move to Shipped, and promote the "a gate must observe its own remedy" restatement

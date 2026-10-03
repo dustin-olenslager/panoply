@@ -32,7 +32,6 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 | Locked dev-workflow policy | Encode the 2026-09-29 owner-locked dev-workflow policy (points 1–10) into the rule modules and regenerate every tool-native mirror | row 2 | `governance/dev-workflow-locked-policy/plan.md` |
 | The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 3 | `governance/execution-algorithm/plan.md` |
 | Every-agent coverage: the agent | Name and verify the agent as an AGENTS.md-native tool; no new mirror required | row 1 | `governance/opencode-native-coverage/plan.md` |
-| Spec artifacts — a spec before a plan | What a user can do after this ships, and how we will know it worked, as a checked artifact: prioritized stories with independent tests, Given/When/Then acceptance scenarios, and a `[NEEDS CLARIFICATION: …]` marker that must not survive into a plan | row 4 | `governance/spec-artifacts/plan.md` |
 
 ## Next — committed, not yet started
 
@@ -56,6 +55,7 @@ into the feature log.
 
 | Initiative | Shipped | Features (`completed-features.md`) |
 |---|---|---|
+| Spec artifacts — a spec before a plan | 2026-10-03 | Spec before plan — a structural change carries a spec, and an unresolved ambiguity cannot reach the plan |
 | Version resolution answers one question | 2026-10-01 | Version resolution answers one question — the source and the copied doctor agree |
 | Rejections are first-class | 2026-10-01 | Rejections are first-class — the step-2 candidate list is also the rejections ledger |
 | Agent-readiness doctrine | 2026-09-26 | Agent-readiness module + CI gate (dual-mode apps) |

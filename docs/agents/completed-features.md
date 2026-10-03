@@ -19,6 +19,26 @@ Add an entry when a feature is tested and signed off, at the same time you move 
 
 ---
 
+### Spec before plan — 2026-10-03
+- **What shipped:** a structural change in a kit repo must now carry a spec at
+  `docs/agents/<area>/<feature>/spec.md` before its plan — prioritized user stories each with an
+  **independent test**, Given/When/Then acceptance scenarios, numbered `MUST` requirements, and
+  measurable success criteria. An unknown is written `[NEEDS CLARIFICATION: …]`, which is legal in a
+  draft spec and refused toward a plan. `scripts/check-spec.sh` enforces presence and resolution in
+  required CI, with a 14-check mutation-tested canary. Hermes walks the same pass through the
+  `spec-driven-start` skill.
+- **Area:** `governance`
+- **Archived plan:** `governance/completed/spec-before-plan/plan.md` (with `spec.md` beside it — the
+  shipped feature's own spec, written with the artifact it introduced)
+- **Notable decisions:** the spec lives BESIDE its plan, never in a `specs/NNN-slug` tree, so
+  `check-plan-home.sh` and `check-algorithm.sh` need zero new allowances; the gate judges presence and
+  resolution only and says so in its own limits header; a marker is metasyntax-exempt so the gate cannot
+  match its own documentation (the failure the placeholder scan already hit once); and this repo
+  deletes its `docs/agents/worklog.md` stub, because two parallel running logs had already cost drift.
+- **Known gaps:** the gate cannot judge spec *quality* (independently testable stories, concrete
+  scenarios, measurable criteria) — that stays a review question. The Hermes walkthrough is written but
+  not yet exercised on a real project.
+
 ### EXAMPLE — Paginated records list — 2026-01-15
 - **What shipped:** the records table loads a page at a time with server-side filtering and sort,
   replacing the load-everything fetch.
