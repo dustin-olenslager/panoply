@@ -44,6 +44,12 @@ jobs:
         run: sh scripts/check-docs.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
+      # Conflict markers — the one corrupt state a generated file can be in that no other gate sees.
+      # `sync-agents.sh --check` validates only its own block, so AGENTS.md reached main carrying
+      # `<<<<<<< HEAD` and a doubled block with every gate green. Scans the tracked tree in one pass.
+      - name: No unresolved conflict markers
+        run: sh scripts/check-conflict-markers.sh
+
       # Expert-review gate — fails if non-trivial PR lacks review evidence:
       # plan.md exists, checklist.md has items, adr.md has new section, PR has ≥2 persona sign-offs.
       # Trivial escape: PR label "trivial", commit prefix "trivial:", or 1-file ≤15-line no-schema change.
@@ -140,6 +146,13 @@ jobs:
       - name: Plan-home gate self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-plan-home.test.sh
+
+      # Proves the conflict-marker gate fails a marker, passes a clean tree, refuses a failed search,
+      # and — case 6 — that sync-agents --check passes on the very file this gate rejects. If 6a ever
+      # stops reproducing, the two checks have converged and this gate needs re-arguing.
+      - name: Conflict-marker gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-conflict-markers.test.sh
 
       # Rule-fork drift self-test — proves check-rule-fork.sh refuses a fork that silently dropped a
       # policy rung, passes one that legitimately adapted, honors the allowlist, and exits 2 when its

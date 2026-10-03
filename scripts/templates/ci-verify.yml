@@ -45,6 +45,12 @@ jobs:
         run: sh scripts/check-docs.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
+      # Conflict markers — the one corrupt state a generated file can be in that no other gate sees.
+      # `sync-agents.sh --check` validates only its own block, so a file can reach main carrying
+      # `<<<<<<< HEAD` and a doubled block with every other gate green. One pass over the tracked tree.
+      - name: No unresolved conflict markers
+        run: sh scripts/check-conflict-markers.sh
+
       # Plan-home gate — fails if any plan/roadmap doc lives outside docs/agents/. Keeps one
       # canonical plan per project (docs/agents/roadmap.md) so an agent picking the repo up can
       # never read the wrong one. Adopting a repo with a backlog of strays? Fold them first, or
@@ -147,6 +153,12 @@ jobs:
       - name: Plan-home gate self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-plan-home.test.sh
+
+      # Proves the conflict-marker gate fails a marker, passes a clean tree, and refuses a failed
+      # search. Case 6 also pins the blind spot: sync-agents --check passing on the file this rejects.
+      - name: Conflict-marker gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-conflict-markers.test.sh
 
       # Proves the algorithm gate still refuses a structural change with no deletion section.
       # Drop this step if you pruned the Algorithm rule.

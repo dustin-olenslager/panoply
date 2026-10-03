@@ -12,6 +12,20 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **a generated file can no longer reach main carrying an unresolved merge conflict.** `AGENTS.md`
+  did exactly that: a hand-resolved conflict kept BOTH sides, so the file shipped a literal `<<<<<<< HEAD`
+  and a doubled, empty `PANOPLY:RULES` block — and every gate passed, because `sync-agents.sh --check`
+  validates only its own generated block and no other gate reads the bytes. An agent reading that file
+  received two contradictory instruction sets with no signal anything was wrong. Adds
+  `scripts/check-conflict-markers.sh`, CI-wired as a required per-PR step. The design is `a pilot repo`'s
+  conflict sweep promoted out of its `check-docs.sh` into a gate of its own; a `git grep -nE` single pass
+  measured 16 ms against 431 ms for a file-by-file loop (27x), and the pattern is a regex so the script
+  cannot match itself. One upstream defect fixed: `git grep` exits 1 both for "no match" and for some
+  failures, so a search that never ran read as clean — a fatal exit now refuses with exit 2. A lone
+  `=======` line is reported but does NOT fail, since a Markdown heading underline is legal and an
+  always-red gate is worse than none. Canary 15/15, and it pins the blind spot (case 6: `sync-agents
+  --check` passes on the file this gate rejects) so the reason for the gate is re-argument-proof.
+
 - MINOR — **policy drift between the kit's rules and a fork is now detected.** `.agents/rules/*.md` and a
   forked copy (the harness's `.claude/rules/*.md`) diverged silently: measured module-by-module, two
   shared rungs were simply missing from the fork — the Algorithm pass and the spec rung — while the other
