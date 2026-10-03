@@ -75,35 +75,6 @@ jobs:
         run: sh scripts/check-spec.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
-      # Gate self-test — the kit ships gates that adapted repos depend on, so a gate that silently
-      # stops detecting anything is a defect in the kit, not in the adopting repo. This asserts
-      # check-agent-readiness.sh still fails a repo seeded with every defect it claims to catch and
-      # still passes a compliant one. (The agent-readiness gate itself is NOT run against the kit:
-      # this repo is a shell/doc template with no agent surface of its own — MODULE:agent is pruned
-      # at adapt time. The self-test is what proves the gate works.)
-      - name: Agent-readiness gate self-test
-        run: sh scripts/check-agent-readiness.test.sh
-
-      # Algorithm gate self-test — same doctrine: proves the gate fails a missing-deletion-section
-      # change, passes a compliant one, honors the docs-only exemption, and can be lifted by its own
-      # escape hatch. Without it, a gate that blocks everything and a gate that detects correctly are
-      # indistinguishable.
-      - name: Algorithm gate self-test
-        run: sh scripts/check-algorithm.test.sh
-
-      # Spec gate self-test — same doctrine as the two above: proves the gate refuses a missing spec,
-      # refuses an unresolved marker, passes a compliant one, honors the docs-only exemption, and can be
-      # lifted by SPEC_OFF. A gate that blocks everything and a gate that detects correctly are otherwise
-      # indistinguishable.
-      - name: Spec gate self-test
-        run: sh scripts/check-spec.test.sh
-
-      # Panoply doctor self-test — the doctor decides whether a repo has adopted the kit, so a
-      # regression that makes it report "current" for everything (or nothing) would silently stop
-      # every gate downstream. Same doctrine as the self-test above: prove the gate detects.
-      - name: Panoply doctor self-test
-        run: sh scripts/panoply.test.sh
-
       # Architecture-boundary check — not applicable for shell-script kit (no boundary linter)
       # - name: Architecture boundaries
       #   run: <ARCH_CHECK_CMD>
@@ -111,3 +82,67 @@ jobs:
       # Optional but recommended: a secret scan so a leaked credential fails the PR.
       # - name: Secret scan
       #   uses: gitleaks/gitleaks-action@v2
+
+  # Gate self-tests live in their OWN job, gated on the kit's own tooling changing. The kit ships
+  # gates adapted repos depend on, so a gate that silently stops detecting anything is a kit defect
+  # and must be re-proven — but only when a gate or its fixtures could have changed. Running them on
+  # every PR re-proves the kit's canaries on unrelated product PRs (in the shipped template that was
+  # 4 of 11 steps), which is cost with no signal: a docs-only PR cannot tell anyone whether
+  # check-spec.sh still detects. Push to main always runs them, so drift cannot hide behind the filter.
+  self-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history, so the change detection can diff against the PR base
+
+      # Decide whether the gates themselves changed. A step (not a job-level `if:`) because GitHub
+      # has no native "paths changed since the PR base" condition; this is the smallest correct
+      # mechanism and it keeps the required `verify` check identical for every PR.
+      - name: Detect gate/tooling changes
+        id: gate-changes
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD \
+               | grep -qE '^(scripts/|\.agents/rules/|\.github/workflows/)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "no gate/tooling change in this PR — skipping the kit's gate self-tests"
+          fi
+
+      # The agent-readiness gate itself is NOT run against the kit: this repo is a shell/doc template
+      # with no agent surface of its own — MODULE:agent is pruned at adapt time. The self-test is what
+      # proves the shipped gate still fails a repo seeded with every defect it claims to catch and
+      # still passes a compliant one.
+      - name: Agent-readiness gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-agent-readiness.test.sh
+
+      # Proves the algorithm gate fails a missing-deletion-section change, passes a compliant one,
+      # honors the docs-only exemption, and can be lifted by its own escape hatch. Without it, a gate
+      # that blocks everything and a gate that detects correctly are indistinguishable.
+      - name: Algorithm gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-algorithm.test.sh
+
+      # Proves the spec gate refuses a missing spec, refuses an unresolved marker, passes a compliant
+      # one, honors the docs-only exemption, and can be lifted by SPEC_OFF.
+      - name: Spec gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-spec.test.sh
+
+      # The plan-home gate was CI-wired with no canary of its own; this proves it refuses a stray
+      # plan doc outside the doc spine, passes a plan in the spine, and honors PLAN_HOME_OFF.
+      - name: Plan-home gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-plan-home.test.sh
+
+      # The doctor decides whether a repo has adopted the kit, so a regression that makes it report
+      # "current" for everything (or nothing) would silently stop every gate downstream.
+      - name: Panoply doctor self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/panoply.test.sh

@@ -56,13 +56,9 @@ jobs:
       # unresolved [NEEDS CLARIFICATION: …]. An ambiguity that reaches the plan has already become a
       # guess nobody reviewed. Doctrine: .agents/rules/spec.md. Adopting a repo that predates the spec
       # rung? Set SPEC_OFF=1 here TEMPORARILY and track the gap in docs/agents/in-progress.md.
-      # Canary: sh scripts/check-spec.test.sh (run it in CI, so the gate's own ability to go red is proven).
       - name: Spec
         run: sh scripts/check-spec.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
-
-      - name: Spec canary
-        run: sh scripts/check-spec.test.sh
 
       - name: Typecheck
         run: <TYPECHECK_CMD>          # the architecture-boundary check
@@ -97,3 +93,53 @@ jobs:
       # Optional but recommended: a secret scan so a leaked credential fails the PR.
       # - name: Secret scan
       #   uses: gitleaks/gitleaks-action@v2
+
+  # Gate self-tests live in their OWN job, gated on the kit's own tooling changing — they are not
+  # part of the required `verify` check. Panoply ships gates this repo depends on, so a gate that
+  # silently stops detecting anything is a defect worth catching; but re-proving the kit's canaries
+  # on every unrelated product PR buys no signal (a docs-only PR cannot tell anyone whether the spec
+  # gate still detects) and 4 of the 11 steps of this workflow were exactly that. They run whenever
+  # scripts/, the rule modules, or the workflows change, and on every push to the default branch, so
+  # drift cannot hide behind the filter. Delete this job if you do not want the kit's gates
+  # self-tested in your CI at all.
+  self-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history, so the change detection can diff against the PR base
+
+      # Decide whether the gates themselves changed. A step (not a job-level `if:`) because GitHub has
+      # no native "paths changed since the PR base" condition; this is the smallest correct mechanism.
+      - name: Detect gate/tooling changes
+        id: gate-changes
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD \
+               | grep -qE '^(scripts/|\.agents/rules/|\.github/workflows/)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "no gate/tooling change in this PR — skipping the kit's gate self-tests"
+          fi
+
+      # Proves the shipped spec gate still refuses a missing spec and an unresolved marker, passes a
+      # compliant one, honors the docs-only exemption, and can be lifted by SPEC_OFF.
+      - name: Spec gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-spec.test.sh
+
+      # Proves the plan-home gate still refuses a stray plan doc outside the doc spine and passes one
+      # in the spine. Drop this step if you pruned the plan-home gate.
+      - name: Plan-home gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-plan-home.test.sh
+
+      # Proves the algorithm gate still refuses a structural change with no deletion section.
+      # Drop this step if you pruned the Algorithm rule.
+      - name: Algorithm gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-algorithm.test.sh

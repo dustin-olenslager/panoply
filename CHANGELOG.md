@@ -22,6 +22,25 @@ Semver, applied to governance:
   lazily and only matters when code actually changed. Both gates had NO test, which is how the fail-open
   survived; adds `check-docs.test.sh` (5 cases) and `check-expert-review.test.sh` (4 cases), each
   mutation-tested to prove it goes red.
+- PATCH — **the kit's gate self-tests no longer run on every PR, and the plan-home gate finally has a
+  canary.** Two findings from the adversarial audit. (a) `.github/workflows/verify.yml` and the shipped
+  template ran the gate self-tests (`check-spec.test.sh`, `check-algorithm.test.sh`,
+  `check-plan-home.test.sh`, `check-agent-readiness.test.sh`, `panoply.test.sh`) on EVERY pull request —
+  4 of the 11 steps of the shipped template — re-proving the kit's own canaries on unrelated product PRs.
+  A docs-only PR cannot tell anyone whether a gate still detects, so this was cost with no signal. The
+  self-tests now live in a separate `self-tests` job gated on the kit's tooling changing
+  (`scripts/**`, `.agents/rules/**`, `.github/workflows/**`) — detected in one step because GitHub has no
+  native per-job "paths changed" condition — and always run on push to the default branch, so drift
+  cannot hide behind the filter. The required `verify` job is unchanged for every PR. (b)
+  `check-plan-home.sh` was CI-wired in the template with no canary of its own: the kit was trusting a gate
+  nobody had seen fail. New `scripts/check-plan-home.test.sh` (13 checks) asserts both directions — a
+  stray root `PLAN.md`, a root `*-plan.md`, and a flat `docs/agents/plan.md` are REFUSED; a plan in the
+  doc spine (`docs/agents/<area>/<feature>/plan.md`) PASSES; the canonical `roadmap.md` is not a stray; a
+  repo with no roadmap is refused; `PLAN_HOME_ALLOW` scopes one path; `PLAN_HOME_OFF=1` lifts it; and
+  `--staged` refuses a newly staged stray but passes an edit to an already-tracked one. It is added to
+  the scripts `panoply.sh apply` installs, so adopters get the canary their CI template now runs.
+  Mutation-tested: neutering `is_plan_shaped` turns 7 checks red, making `is_allowed` block everything
+  turns 3 red.
 
 - PATCH — **the spec gate no longer demands a spec for wiring.** `CODE_RE` matched any `.yml`, so
   `.github/workflows/*.yml` — a CI workflow, a pre-commit hook, a tool config — counted as structural.

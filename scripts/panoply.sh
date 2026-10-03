@@ -283,7 +283,7 @@ cmd_apply() {
   # for a deliberate refresh, so the destructive path is always a stated choice.
   _force_scripts=0
   for a in "$@"; do [ "$a" = "--force-scripts" ] && _force_scripts=1; done
-  for _s in panoply.sh panoply.test.sh sync-agents.sh check-docs.sh check-plan-home.sh check-algorithm.sh check-algorithm.test.sh; do
+  for _s in panoply.sh panoply.test.sh sync-agents.sh check-docs.sh check-plan-home.sh check-plan-home.test.sh check-algorithm.sh check-algorithm.test.sh; do
     [ -f "$_src/scripts/$_s" ] || continue
     if [ ! -f "scripts/$_s" ]; then
       cp "$_src/scripts/$_s" "scripts/$_s" && chmod +x "scripts/$_s"
