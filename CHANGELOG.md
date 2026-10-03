@@ -12,6 +12,17 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — **two gates could not be escaped and one silently stopped guarding.** `check-expert-review.sh
+  --since <unresolvable-ref>` failed OPEN: `git rev-list` errored, the loop body never ran, and the gate
+  reported OK — deregistering itself in the exact checkout it exists to guard. It now refuses with exit 2,
+  matching `check-spec.sh` / `check-algorithm.sh`. `check-docs.sh` and `check-expert-review.sh` had no
+  escape hatch at all, contradicting the kit's own hatch doctrine, so adds `DOCS_OFF` and
+  `EXPERT_REVIEW_OFF`. Also fixes a real hole found while testing: a docs-only change in a repo with no
+  worklog target was refused, blocking a fresh repo's first markdown commit — the worklog is now resolved
+  lazily and only matters when code actually changed. Both gates had NO test, which is how the fail-open
+  survived; adds `check-docs.test.sh` (5 cases) and `check-expert-review.test.sh` (4 cases), each
+  mutation-tested to prove it goes red.
+
 - PATCH — **the spec gate no longer demands a spec for wiring.** `CODE_RE` matched any `.yml`, so
   `.github/workflows/*.yml` — a CI workflow, a pre-commit hook, a tool config — counted as structural.
   Adding a gate step would have demanded a spec *for the wiring that runs gates*, which is the same

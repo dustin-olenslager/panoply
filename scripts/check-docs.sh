@@ -10,6 +10,8 @@
 #   sh scripts/check-docs.sh              # check the staged changes (pre-commit context)
 #   sh scripts/check-docs.sh --since REF  # check every commit in REF..HEAD (CI context)
 #
+#   DOCS_OFF=1   disable entirely (deliberate exception — say so out loud)
+#
 # Worklog target: CHANGELOG.md / HISTORY.md if present, else docs/agents/worklog.md.
 # Override with DOCS_WORKLOG=<path>. "Doc" files are exempt from the mandatory line; the exempt
 # extensions default to `md` and are overridable via DOCS_EXEMPT (space-separated, e.g. `md rst adoc`).
@@ -20,18 +22,25 @@
 # problem, not an automation problem — the honest limit of any git-native kit.
 set -eu
 
+# A declared escape hatch, matching ALGORITHM_OFF / PLAN_HOME_OFF / SPEC_OFF. Every blocking gate
+# needs one: without it, an agent hitting a legitimate-but-unusual case has no remedy the kit names,
+# so it invents one (`--no-verify`, a fabricated worklog line) instead of declaring the exception.
+[ "${DOCS_OFF:-0}" = "1" ] && { echo "check-docs: disabled (DOCS_OFF=1)"; exit 0; }
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 # --- worklog target ---
+# Resolved LAZILY, after the diff is known: a missing worklog target is only a problem if a code change
+# needs one. A docs-only change in a repo with no worklog file yet is perfectly legal, and refusing it
+# blocked a fresh repo from committing its first markdown — the gate demanding a file that the change
+# itself has no reason to touch.
 WORKLOG="${DOCS_WORKLOG:-}"
 if [ -z "$WORKLOG" ]; then
   if [ -f CHANGELOG.md ]; then WORKLOG="CHANGELOG.md"
   elif [ -f HISTORY.md ]; then WORKLOG="HISTORY.md"
   elif [ -f docs/agents/worklog.md ]; then WORKLOG="docs/agents/worklog.md"
-  else
-    echo "check-docs: no worklog target (CHANGELOG.md / HISTORY.md / docs/agents/worklog.md)" >&2
-    exit 1
+  else WORKLOG=""
   fi
 fi
 
@@ -53,10 +62,17 @@ check_files() {
   changed_code=0; touched_worklog=0
   while IFS= read -r f; do
     [ -n "$f" ] || continue
-    [ "$f" = "$WORKLOG" ] && touched_worklog=1
+    [ -n "$WORKLOG" ] && [ "$f" = "$WORKLOG" ] && touched_worklog=1
     is_code "$f" && changed_code=1
   done
-  if [ "$changed_code" -eq 1 ] && [ "$touched_worklog" -eq 0 ]; then
+  # No code changed -> nothing to document, regardless of whether a worklog exists.
+  [ "$changed_code" -eq 1 ] || return 0
+  if [ -z "$WORKLOG" ]; then
+    echo "check-docs: $label changed code but this repo has no worklog target" >&2
+    echo "  add CHANGELOG.md / HISTORY.md / docs/agents/worklog.md, or set DOCS_WORKLOG=<path>." >&2
+    return 1
+  fi
+  if [ "$touched_worklog" -eq 0 ]; then
     echo "check-docs: $label changed code but not $WORKLOG" >&2
     echo "  add a line to $WORKLOG in the same commit (see .agents/rules/documentation.md)" >&2
     return 1

@@ -10,6 +10,10 @@
 # shellcheck disable=SC2126
 set -eu
 
+# A declared escape hatch, matching ALGORITHM_OFF / PLAN_HOME_OFF / SPEC_OFF / DOCS_OFF. This gate
+# blocks ordinary work, so the alternative to a named hatch is an undeclared `--no-verify`.
+[ "${EXPERT_REVIEW_OFF:-0}" = "1" ] && { echo "check-expert-review: disabled (EXPERT_REVIEW_OFF=1)"; exit 0; }
+
 # Trivial escape hatches
 # 1. PR has label "trivial"
 # 2. Latest commit message starts with "trivial:"
@@ -96,6 +100,14 @@ if [ "$is_trivial" -eq 0 ]; then
   if [ "${1:-}" = "--since" ]; then
     # CI mode: check each commit in range
     ref="${2:?usage: check-expert-review.sh --since <ref>}"
+    # A base that does not resolve makes `git rev-list` fail, and the empty loop then falls through
+    # to the OK path — the gate silently deregisters itself in exactly the checkout it is meant to
+    # guard. Refuse loudly instead, matching check-spec.sh / check-algorithm.sh, which exit 2 here.
+    if ! git rev-parse -q --verify "${ref}^{commit}" >/dev/null 2>&1; then
+      echo "check-expert-review: diff base '$ref' does not resolve in this checkout (shallow clone or" >&2
+      echo "  wrong ref). Pass the PR base SHA explicitly, or set EXPERT_REVIEW_OFF=1 for a deliberate skip." >&2
+      exit 2
+    fi
     for sha in $(git rev-list "$ref"..HEAD); do
       [ "$(git rev-list --no-walk --count --merges "$sha")" -eq 0 ] || continue
       files="$(git show --name-only --format= "$sha" 2>/dev/null | grep -v '^$' | wc -l | tr -d ' ')"
