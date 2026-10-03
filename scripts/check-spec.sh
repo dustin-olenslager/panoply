@@ -46,8 +46,19 @@ SPEC_GLOB="${SPEC_GLOB:-docs/agents/*/*/spec.md}"
 # What counts as a structural change. Docs/rules-only edits are exempt: a rule module, a note, or a copy
 # change is not a part of the system, and demanding a spec for a typo fix is exactly the ceremony the
 # rule's own scope test forbids.
+#
+# NOTE the exemption below is config/, not just docs/. A workflow that runs a gate, a pre-commit hook, a
+# linter config or a CI template is WIRING: it changes when the gates run, never what a user can do with
+# the product. Demanding a spec for "add a step to verify.yml" would be wrong for the same reason a typo
+# fix is wrong — and it would have mis-classified this file's own adoption, since every `.yml` under
+# `.github/` matched the suffix rule below.
 CODE_RE='(^|/)(src|apps|packages|lib|scripts|e2e|infra|migrations)/|\.(ts|tsx|js|jsx|mjs|cjs|py|rb|go|rs|java|kt|cs|swift|c|cc|cpp|h|hpp|sql|sh|ps1|tf|yml|yaml)$'
 [ -n "${SPEC_FILES:-}" ] && CODE_RE="$SPEC_FILES"
+
+# Wiring, not system: CI workflows, templates, hook and tool config. Exempt even though the suffix rule
+# above would otherwise call them code. Kept as its own pattern so the exemption is auditable rather
+# than buried in a negative lookahead nobody can read.
+CONFIG_RE='^\.github/|(^|/)\.pre-commit|(^|/)(tsconfig|eslint\.config|vite\.config|playwright\.config|jest\.config|vitest\.config|docker-compose)[^/]*$|(^|/)\.agents/'
 
 MODE="git"
 SINCE=""
@@ -117,6 +128,8 @@ STRUCTURAL=0
 for f in $FILES; do
   [ -n "$f" ] || continue
   case "$f" in docs/*|*.md|*/completed/*) continue ;; esac
+  # Wiring is exempt even though it carries a code suffix — see CONFIG_RE.
+  printf '%s' "$f" | grep -Eq "$CONFIG_RE" && continue
   printf '%s' "$f" | grep -Eq "$CODE_RE" || continue
   STRUCTURAL=1
   break

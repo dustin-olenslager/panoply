@@ -12,6 +12,20 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — **the spec gate no longer demands a spec for wiring.** `CODE_RE` matched any `.yml`, so
+  `.github/workflows/*.yml` — a CI workflow, a pre-commit hook, a tool config — counted as structural.
+  Adding a gate step would have demanded a spec *for the wiring that runs gates*, which is the same
+  ceremony the rule's scope test forbids, and it mis-classified the kit's own adoption of the gate.
+  New `CONFIG_RE` exempts `.github/**`, `.agents/**`, `.pre-commit` and tool configs before the suffix
+  rule is consulted. Canary cases 13 + 14 prove both directions: a workflow edit passes, and a `src/`
+  change is still refused, so the exemption cannot quietly swallow real code.
+
+- PATCH — **the kit repo now dogfoods the spec gate, and CI proves it detects.** PR #21 wired
+  `check-spec.sh` into the shipped CI *template* but never into this repo's own `.github/workflows/verify.yml`,
+  so the rung shipped unexercised: no runner had ever invoked it. Adds the `Spec` step (PR context, beside
+  the Algorithm gate) and a `Spec gate self-test` step (`check-spec.test.sh`, beside the other gate
+  self-tests) so the gate's own ability to go red is proven on a runner, not just locally.
+
 - MINOR — **a spec now precedes the plan, and the kit checks it** (PR #21). The kit had a strong plan rung
   and no spec rung: `docs/agents/_templates/plan.md` opened at `## Goal` and went straight to layers and
   milestones, so requirements survived only as prose and nothing asked *what a user can do after this

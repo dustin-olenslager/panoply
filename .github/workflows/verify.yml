@@ -68,6 +68,13 @@ jobs:
         run: sh scripts/check-algorithm.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
+      # Spec gate — fails a structural change with no spec beside its plan, or a spec still carrying an
+      # unresolved [NEEDS CLARIFICATION: …]. `check-spec.sh` ships in the kit, so a gate that silently
+      # stops detecting is a kit defect: the self-test below proves it still detects, in CI.
+      - name: Spec
+        run: sh scripts/check-spec.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
+
       # Gate self-test — the kit ships gates that adapted repos depend on, so a gate that silently
       # stops detecting anything is a defect in the kit, not in the adopting repo. This asserts
       # check-agent-readiness.sh still fails a repo seeded with every defect it claims to catch and
@@ -83,6 +90,13 @@ jobs:
       # indistinguishable.
       - name: Algorithm gate self-test
         run: sh scripts/check-algorithm.test.sh
+
+      # Spec gate self-test — same doctrine as the two above: proves the gate refuses a missing spec,
+      # refuses an unresolved marker, passes a compliant one, honors the docs-only exemption, and can be
+      # lifted by SPEC_OFF. A gate that blocks everything and a gate that detects correctly are otherwise
+      # indistinguishable.
+      - name: Spec gate self-test
+        run: sh scripts/check-spec.test.sh
 
       # Panoply doctor self-test — the doctor decides whether a repo has adopted the kit, so a
       # regression that makes it report "current" for everything (or nothing) would silently stop

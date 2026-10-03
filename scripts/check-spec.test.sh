@@ -242,6 +242,29 @@ rc="$(gate_at "$r" "$base")"
 if [ "$rc" = "fail-unresolved" ]; then ok "a real marker beside metasyntax is still refused"
 else bad "real marker was hidden by metasyntax in the same file (got '$rc')"; fi
 
+# --- case 13: WIRING is not structural (the config exemption) ---------------
+# A CI workflow that runs a gate changes WHEN gates run, never what a user can do with the product —
+# the same reason a copy change is exempt. Without this exemption every `.github/**/*.yml` counts as
+# code purely by suffix, so the kit's own adoption of a gate would demand a spec for adding the step.
+r="$(mkrepo pass-config-wiring)"; base="$(root_sha "$r")"
+mkdir -p "$r/.github/workflows"
+printf 'name: verify\\n' > "$r/.github/workflows/verify.yml"
+git -C "$r" add -A; cmit "$r" "ci: add a workflow" || exit 2
+rc="$(gate_at "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "a CI workflow edit is wiring, not structural (config exemption)"
+else bad "workflow edit demanded a spec — config wiring must be exempt (got '$rc')"; fi
+
+# --- case 14: the config exemption must NOT swallow real code ---------------
+# The negative control for case 13. An exemption that exempts too much is worse than none: it would
+# quietly let unspecified application code through under a config-looking path.
+r="$(mkrepo fail-config-not-code)"; base="$(root_sha "$r")"
+mkdir -p "$r/src"
+printf 'g\\n' > "$r/src/g.ts"
+git -C "$r" add -A; cmit "$r" "feat: g" || exit 2
+rc="$(gate_at "$r" "$base")"
+if [ "$rc" = "fail-nospec" ]; then ok "real code under src/ is still refused (negative control)"
+else bad "config exemption leaked: src/ change was not refused (got '$rc')"; fi
+
 printf '\ncheck-spec canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0
