@@ -56,6 +56,12 @@ jobs:
       # unresolved [NEEDS CLARIFICATION: …]. An ambiguity that reaches the plan has already become a
       # guess nobody reviewed. Doctrine: .agents/rules/spec.md. Adopting a repo that predates the spec
       # rung? Set SPEC_OFF=1 here TEMPORARILY and track the gap in docs/agents/in-progress.md.
+      # Rule-fork drift gate — if this repo has ADOPTED the kit AND another repo forks its rules,
+      # audit the fork for a silently-dropped policy rung. Set TARGET to the fork's checkout path.
+      # Delete this step if nothing forks these rules. Its canary runs in the gated self-tests job.
+      # - name: Rule-fork drift
+      #   run: TARGET=/path/to/fork sh scripts/check-rule-fork.sh
+
       - name: Spec
         run: sh scripts/check-spec.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
@@ -134,6 +140,10 @@ jobs:
 
       # Proves the plan-home gate still refuses a stray plan doc outside the doc spine and passes one
       # in the spine. Drop this step if you pruned the plan-home gate.
+      - name: Rule-fork drift self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-rule-fork.test.sh
+
       - name: Plan-home gate self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-plan-home.test.sh

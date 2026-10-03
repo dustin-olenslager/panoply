@@ -12,6 +12,15 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **policy drift between the kit's rules and a fork is now detected.** `.agents/rules/*.md` and a
+  forked copy (the harness's `.claude/rules/*.md`) diverged silently: measured module-by-module, two
+  shared rungs were simply missing from the fork — the Algorithm pass and the spec rung — while the other
+  seven differences were legitimate adaptation (retargeted paths, filled placeholders). Adds
+  `scripts/check-rule-fork.sh`, a read-only anchor-based detector that fails when a shared policy anchor is
+  missing with no allowlist entry and exits 2 if its own anchor list rots, so it cannot become a silent
+  no-op. A line-diff was rejected (it flags adaptive noise and would be always-red); generating one repo's
+  rules from another's was rejected as coupling. Canary asserts both directions and exits 2 on anchor rot.
+
 - PATCH — **two gates could not be escaped and one silently stopped guarding.** `check-expert-review.sh
   --since <unresolvable-ref>` failed OPEN: `git rev-list` errored, the loop body never ran, and the gate
   reported OK — deregistering itself in the exact checkout it exists to guard. It now refuses with exit 2,
