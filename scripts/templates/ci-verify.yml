@@ -52,6 +52,18 @@ jobs:
       - name: Plan home
         run: sh scripts/check-plan-home.sh
 
+      # Spec gate — fails if a structural change has no spec behind it, or if the spec still carries an
+      # unresolved [NEEDS CLARIFICATION: …]. An ambiguity that reaches the plan has already become a
+      # guess nobody reviewed. Doctrine: .agents/rules/spec.md. Adopting a repo that predates the spec
+      # rung? Set SPEC_OFF=1 here TEMPORARILY and track the gap in docs/agents/in-progress.md.
+      # Canary: sh scripts/check-spec.test.sh (run it in CI, so the gate's own ability to go red is proven).
+      - name: Spec
+        run: sh scripts/check-spec.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
+
+      - name: Spec canary
+        run: sh scripts/check-spec.test.sh
+
       - name: Typecheck
         run: <TYPECHECK_CMD>          # the architecture-boundary check
 

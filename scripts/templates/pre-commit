@@ -30,6 +30,12 @@ if [ -f scripts/check-plan-home.sh ]; then
   echo "pre-commit: plan home…"; sh scripts/check-plan-home.sh --staged
 fi
 
+# Spec gate — a structural change must carry a spec, with no unresolved ambiguity left in it.
+# Doctrine: .agents/rules/spec.md. SPEC_OFF=1 is the stated escape hatch (say that you used it).
+if [ -f scripts/check-spec.sh ]; then
+  echo "pre-commit: spec…"; sh scripts/check-spec.sh --staged
+fi
+
 # Expert-review gate (local: checks staged change for trivial escape or review evidence).
 if [ -f scripts/check-expert-review.sh ]; then
   echo "pre-commit: expert review…"; sh scripts/check-expert-review.sh

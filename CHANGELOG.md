@@ -12,6 +12,28 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **a spec now precedes the plan, and the kit checks it** (PR #21). The kit had a strong plan rung
+  and no spec rung: `docs/agents/_templates/plan.md` opened at `## Goal` and went straight to layers and
+  milestones, so requirements survived only as prose and nothing asked *what a user can do after this
+  ships* or *how we will know it worked*. Measured in this repo's own artifacts: three governance plans,
+  zero acceptance scenarios. `.agents/rules/spec.md` is the new rule; `docs/agents/_templates/spec.md` the
+  artifact (prioritized stories each with an **independent test**, Given/When/Then scenarios, numbered
+  `MUST` requirements, measurable success criteria); `plan.md` gains a `Spec:` link row.
+  `scripts/check-spec.sh` refuses a structural change with no spec beside its plan **or** a spec still
+  carrying `[NEEDS CLARIFICATION: …]` — legal in a draft spec, forbidden toward a plan, because an
+  ambiguity that reaches implementation has already become an unreviewed guess. Canary
+  `scripts/check-spec.test.sh` (14 checks) proves both directions, the exemptions, the escape hatch, the
+  refuse→remedy→allow round trip, and that the gate does not match its own convention metasyntax;
+  mutation-tested (removing either detection path, or the metasyntax filter, turns checks red). Wired into
+  `scripts/templates/ci-verify.yml` + `pre-commit`. **Adopting repos:** the gate is additive and ships in
+  the template CI; a repo with a backlog and no specs sets `SPEC_OFF=1` temporarily (stated, reviewed)
+  while it folds the rung in.
+- PATCH — **this repo now keeps ONE running log.** `docs/agents/worklog.md` was still the kit's own
+  template stub, which says in its own body to **delete the file** when the repo keeps a
+  `CHANGELOG`/`HISTORY` `[Unreleased]` section — and this repo does. Two parallel running logs is the one
+  thing the doc contract forbids, and it had already cost drift: the spec-artifact line above was written
+  to the stub, where `check-docs.sh` does not look (it resolves `CHANGELOG.md` first), so the landing gate
+  failed the PR. The stub is deleted and its lines folded here.
 - PATCH — **version resolution asks one question, in every tree.** `scripts/panoply.sh version` disagreed with
   itself: the kit source reported `unreleased` for a checkout 14 commits past its last tag, while the doctor
   `apply` copies into an adopted repo reported that tag (`v1.4.0`) because it read a canonical clone's

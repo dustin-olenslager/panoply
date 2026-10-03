@@ -4,6 +4,10 @@
 - **Owner:** <who is driving this>
 - **Next step:** the exact next action to resume this cold — the file to open, the function to change, the command to run, the blocker. Refresh it every time you stop. _(This is the handoff: a plan with a stale or empty Next step cannot be picked up cold — see `.agents/rules/documentation.md`.)_
 - **Roadmap initiative:** the `../../roadmap.md` initiative this plan executes _(delete if this is a standalone one-off with no strategic home — but prefer to name one)_.
+- **Spec:** `spec.md` in this folder — the what and why this plan implements. Required for a structural
+  change, and it must carry no unresolved `[NEEDS CLARIFICATION: …]` (`scripts/check-spec.sh` enforces
+  this; see `.agents/rules/spec.md`). For routine work inside an existing pattern, write "n/a — routine"
+  and say in Build notes why it qualified.
 - **Parent plan:** _(link if this is a sub-milestone; otherwise delete)_
 
 ## Goal

@@ -32,6 +32,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 | Locked dev-workflow policy | Encode the 2026-09-29 owner-locked dev-workflow policy (points 1–10) into the rule modules and regenerate every tool-native mirror | row 2 | `governance/dev-workflow-locked-policy/plan.md` |
 | The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 3 | `governance/execution-algorithm/plan.md` |
 | Every-agent coverage: the agent | Name and verify the agent as an AGENTS.md-native tool; no new mirror required | row 1 | `governance/opencode-native-coverage/plan.md` |
+| Spec artifacts — a spec before a plan | What a user can do after this ships, and how we will know it worked, as a checked artifact: prioritized stories with independent tests, Given/When/Then acceptance scenarios, and a `[NEEDS CLARIFICATION: …]` marker that must not survive into a plan | row 4 | `governance/spec-artifacts/plan.md` |
 
 ## Next — committed, not yet started
 
