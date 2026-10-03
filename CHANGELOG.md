@@ -41,6 +41,20 @@ Semver, applied to governance:
   the scripts `panoply.sh apply` installs, so adopters get the canary their CI template now runs.
   Mutation-tested: neutering `is_plan_shaped` turns 7 checks red, making `is_allowed` block everything
   turns 3 red.
+- PATCH — **`AGENTS.md` stops shipping a second copy of the ruleset.** `sync-agents.sh` inlined the
+  full text of every `.agents/rules/*.md` module (~157KB) between the `PANOPLY:RULES` markers, so the
+  rule corpus was shipped twice — once canonical under `.agents/rules/`, once re-rendered in
+  `AGENTS.md` — and `AGENTS.md` grew to 170,809 bytes. Beyond contradicting the kit's own "one fact,
+  one home" doctrine, the inlining did not achieve its stated goal for the tools it named: a runtime
+  that loads `AGENTS.md` and truncates it (~20K chars here) silently drops the middle, so the tool got
+  neither the whole ruleset nor a working pointer. `AGENTS.md` now carries a generated **index** — module
+  → one-line description → path to read — between the markers (`AGENTS.md` is now 15,546 bytes, under
+  the 20K cap, so nothing is truncated). The **tool-native mirrors are unchanged and stay
+  self-contained**: `sync-agents.sh` still inlines the complete bodies into each `CLAUDE.md` /
+  `GEMINI.md` / `.cursor/rules/*.mdc` / etc., so a single-file tool still gets the whole ruleset. The
+  MIRROR block is unchanged and still verbatim in every mirror. The canonical text stays
+  `.agents/rules/*.md`. `sync-agents.sh --check` is unchanged in shape (still CI-wired, still fails on a
+  stale index block).
 
 - PATCH — **the spec gate no longer demands a spec for wiring.** `CODE_RE` matched any `.yml`, so
   `.github/workflows/*.yml` — a CI workflow, a pre-commit hook, a tool config — counted as structural.

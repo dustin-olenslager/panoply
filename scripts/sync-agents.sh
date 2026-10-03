@@ -3,13 +3,16 @@
 # out — never hand-duplicated:
 #   * the universal preamble  = the MIRROR block in AGENTS.md (read-order + non-negotiables + guardrails)
 #   * the rule bodies         = the full text of every .agents/rules/*.md module
-# Each mirror INLINES the preamble followed by the complete body of every rule module, so a tool that
-# only loads its own native file gets the WHOLE ruleset — never a pointer to .agents/rules/ it cannot
-# follow. AGENTS.md is refilled in place too, between its <!-- PANOPLY:RULES:BEGIN/END --> markers, so
-# AGENTS.md-native tools get the full governance with no @-imports and need no mirror. Never hand-edit
-# a mirror or the AGENTS.md rules block; edit AGENTS.md (preamble) or .agents/rules/*.md (bodies) and
-# re-run. POSIX sh, no runtime deps — Git Bash, WSL, macOS, Linux, CI.
-#   sh scripts/sync-agents.sh              # write mirrors + refill AGENTS.md rules block
+# Each tool-native mirror INLINES the preamble followed by the complete body of every rule module, so a
+# tool that flips on only its own native file gets the WHOLE ruleset — never a pointer to
+# .agents/rules/ it cannot follow. AGENTS.md is different: its <!-- PANOPLY:RULES:BEGIN/END --> block is
+# refilled with a generated INDEX (module → one-line description → path), NOT the bodies. AGENTS.md is
+# the hub read by AGENTS.md-native tools, but it is also the file some runtimes load and truncate (an
+# early version inlined ~157KB of bodies there, twice the corpus, and a ~20K cap silently dropped the
+# middle). The index keeps AGENTS.md small and honest: the rule text lives ONCE under .agents/rules/.
+# Never hand-edit a mirror or the AGENTS.md rules block; edit AGENTS.md (preamble) or .agents/rules/*.md
+# (bodies) and re-run. POSIX sh, no runtime deps — Git Bash, WSL, macOS, Linux, CI.
+#   sh scripts/sync-agents.sh              # write mirrors + refill the AGENTS.md rules index block
 #   sh scripts/sync-agents.sh --check      # exit 1 if any mirror / the AGENTS.md block is stale (CI gate)
 set -eu
 
@@ -49,9 +52,11 @@ NOTE="> **This file is self-contained.** It reproduces the COMPLETE ruleset for 
 
 TMP="$(mktemp)"
 RULESTMP="$(mktemp)"
-trap 'rm -f "$TMP" "$RULESTMP"' EXIT INT TERM
+INDEXTMP="$(mktemp)"
+trap 'rm -f "$TMP" "$RULESTMP" "$INDEXTMP"' EXIT INT TERM
 
-# Concatenate every rule module's full body, separated by an hr.
+# Concatenate every rule module's full body, separated by an hr. This full rendering is INLINED into
+# every tool-native mirror, so a tool that reads only its own native file gets the whole ruleset.
 render_rules() {
   _first=1
   for m in $MODULES; do
@@ -60,6 +65,29 @@ render_rules() {
   done
 }
 render_rules > "$RULESTMP"
+
+# One-line description of a rule module: its `# ` H1, else its filename. Used by the AGENTS.md INDEX.
+rule_desc() { # $1 = module basename
+  _d="$(sed -n 's/^# //p' "$RULES_DIR/$1.md" | head -1)"
+  [ -n "$_d" ] || _d="$1"
+  printf '%s' "$_d"
+}
+
+# AGENTS.md renders an INDEX, not the rule bodies. This is deliberate: AGENTS.md is read by
+# AGENTS.md-native tools that cannot follow `@`-imports, but it is also the file Hermes loads and
+# truncates at ~20,000 chars — so inlining the full ~157KB corpus there did NOT achieve the
+# self-containment it claimed (the middle was silently dropped), while contradicting the kit's own
+# "one fact, one home" doctrine by shipping every rule body twice. The index names each module, its
+# one-line description, and the path to read. The full bodies stay canonical under .agents/rules/*.md.
+render_index() {
+  for m in $MODULES; do
+    # Backticks here are MARKDOWN code spans, not command substitution. shellcheck cannot tell, so
+    # SC2016 is disabled on this line rather than escaped: the literal backticks are the point.
+    # shellcheck disable=SC2016
+    printf -- '- `%s` — %s — `.agents/rules/%s.md`\n' "$m" "$(rule_desc "$m")" "$m"
+  done
+}
+render_index > "$INDEXTMP"
 
 STALE=0
 # Compare TMP against the on-disk target (check mode) or install it (write mode).
@@ -180,22 +208,23 @@ if [ -d "$ROOT/.agents/rules" ]; then
   done
 fi
 
-# --- AGENTS.md: refill the full rule bodies between the PANOPLY:RULES markers (self-contained, no
-#     @-imports), preserving all hand-authored content outside the block. ---
+# --- AGENTS.md: refill the rule INDEX between the PANOPLY:RULES markers, preserving all hand-authored
+#     content outside the block. The full bodies are NOT inlined here (see render_index above): the
+#     canonical text lives once under .agents/rules/*.md, and this block points at it. ---
 if ! grep -q 'PANOPLY:RULES:BEGIN' "$SRC" || ! grep -q 'PANOPLY:RULES:END' "$SRC"; then
   echo "AGENTS.md is missing the <!-- PANOPLY:RULES:BEGIN/END --> markers." >&2
   exit 1
 fi
-awk -v rules="$RULESTMP" '
+awk -v rules="$INDEXTMP" '
   /PANOPLY:RULES:BEGIN/ { print; print ""; while ((getline line < rules) > 0) print line; print ""; skip=1; next }
   /PANOPLY:RULES:END/   { skip=0; print; next }
   skip { next }
   { print }
 ' "$SRC" > "$TMP"
 if [ "$CHECK" -eq 1 ]; then
-  if ! diff -q "$TMP" "$SRC" >/dev/null 2>&1; then echo "STALE: AGENTS.md (rules block)"; STALE=1; fi
+  if ! diff -q "$TMP" "$SRC" >/dev/null 2>&1; then echo "STALE: AGENTS.md (rules index block)"; STALE=1; fi
 else
-  cp "$TMP" "$SRC"; echo "refilled AGENTS.md rules block"
+  cp "$TMP" "$SRC"; echo "refilled AGENTS.md rules index block"
 fi
 
 if [ "$CHECK" -eq 1 ]; then
