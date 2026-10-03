@@ -160,6 +160,16 @@ jobs:
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-conflict-markers.test.sh
 
+      # Both gates block every PR, so both canaries must run somewhere — otherwise the widest-blast-radius
+      # gates in the kit are the two with no way to prove they still detect.
+      - name: Docs gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-docs.test.sh
+
+      - name: Expert-review gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-expert-review.test.sh
+
       # Proves the algorithm gate still refuses a structural change with no deletion section.
       # Drop this step if you pruned the Algorithm rule.
       - name: Algorithm gate self-test

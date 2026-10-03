@@ -286,8 +286,14 @@ fi
 
 if [ "${1:-}" = "--since" ]; then
   ref="${2:?usage: check-agent-readiness.sh --since <ref>}"
-  if ! git rev-parse --verify "$ref^{commit}" >/dev/null 2>&1; then
-    fail "--since ref '$ref' not found" "cannot verify agent-surface drift; pass the PR base SHA."
+  # Ref-guard, matching check-spec.sh / check-expert-review.sh / check-algorithm.sh: a --since base
+  # that does not resolve must REFUSE loudly (exit 2), never fall through to "no changed files / OK".
+  # This gate previously used a bare `rev-parse --verify`, the pre-fix shape; the same question must
+  # get the same answer in every gate or the divergence is the bug.
+  if ! git rev-parse -q --verify "${ref}^{commit}" >/dev/null 2>&1; then
+    printf 'check-agent-readiness: --since ref %s does not resolve in this checkout (shallow clone or wrong ref).\n' "$ref" >&2
+    printf '  Pass the PR base SHA, or set AGENT_READINESS_ENFORCE=warn for a deliberate skip.\n' >&2
+    exit 2
   else
     CHANGED="$(git diff --name-only "$ref"..HEAD 2>/dev/null || true)"
     if [ -n "$CHANGED" ]; then

@@ -56,6 +56,31 @@ MD
 # Documentation
 In the SAME commit that lands work — any agent:
 MD
+  # The remaining always-applicable modules the anchor list guards. Each carries the real anchor phrase
+  # verbatim; when the gate grows an ALWAYS anchor, this fixture grows the matching module.
+  cat > "$d/.agents/rules/algorithm.md" <<'MD'
+# The Algorithm: Question, Delete, Simplify, Accelerate, Automate
+**Delete any part or process you can.**
+**Automate only what survived steps 1–4.**
+MD
+  cat > "$d/.agents/rules/spec.md" <<'MD'
+# Spec before Plan
+**An unresolved marker must not survive into a plan.**
+MD
+  cat > "$d/.agents/rules/clean-architecture.md" <<'MD'
+# Clean Architecture
+Source-code dependencies point inward only.
+MD
+  cat > "$d/.agents/rules/code-style.md" <<'MD'
+# Code Style & Patterns
+## Before you write code
+Read the module governing what you touch.
+MD
+  cat > "$d/.agents/rules/error-handling.md" <<'MD'
+# Error Handling
+## Validate at the boundaries
+Every external input is untrusted.
+MD
   printf '%s' "$d"
 }
 
@@ -65,7 +90,11 @@ MD
 mktarget() {
   kd="$1"; t="$TMP/$2"
   mkdir -p "$t/.claude/rules"
-  for m in workflow quality-bar git-workflow documentation; do
+  # EVERY always-applicable module the anchor list guards. This set must track the gate's
+  # ALWAYS_MODULES list: when the gate grows an always-module, this fixture grows it too. Otherwise a
+  # legitimately adapted target looks like it dropped a rung, and case 1 fails for a reason unrelated
+  # to what it is testing. (Exactly what happened going from 4 modules to 9.)
+  for m in workflow quality-bar git-workflow documentation algorithm spec clean-architecture code-style error-handling; do
     sed -e 's#docs/agents/#docs/claude/#g' -e 's#{{DEFAULT_BRANCH}}#main#g' \
       "$kd/.agents/rules/$m.md" > "$t/.claude/rules/$m.md"
   done
@@ -114,15 +143,22 @@ out="$(sh "$K/scripts/check-rule-fork.sh" "$T3" 2>&1)" && rc=0 || rc=$?
 if [ "$rc" -eq 0 ]; then ok "local additions that keep the rung pass"
 else bad "a target that kept the rung was refused, rc=$rc: $out"; fi
 
-# --- case 4: a kit-only module the target never adopted → soft, not hard -------
-# Dropping a module that does not apply is a legitimate adapt decision; it must not fail the run.
+# --- case 4: a conditional module the target never adopted → soft, not hard -----
+# Dropping a module that does not APPLY is a legitimate adapt decision and must not fail the run.
+# The module must be a CONDITIONAL one: the always-applicable modules (algorithm, spec,
+# clean-architecture, code-style, documentation, error-handling, quality-bar, workflow, git-workflow)
+# are HARD drift when absent, since losing one silently is a policy regression. git-workflow used to be
+# this case's example and no longer qualifies — a version-controlled repo that drops the git rules has
+# lost policy, not made an adaptation. Case 4b asserts the always-module rule directly.
 T4="$(mktarget "$K" pruned)"
-rm "$T4/.claude/rules/git-workflow.md"
+printf '# Database\n## Applies when: the project owns a schema\n' > "$K/.agents/rules/database.md"
+rm "$T4/.claude/rules/git-workflow.md"          # always-applicable → must be HARD
+rm -f "$T4/.claude/rules/database.md"           # conditional + never copied → soft
 out="$(sh "$K/scripts/check-rule-fork.sh" "$T4" 2>&1)" && rc=0 || rc=$?
-if [ "$rc" -eq 0 ]; then ok "an unadopted module is a soft finding, not drift"
-else bad "a pruned module wrongly failed the run, rc=$rc: $out"; fi
-if printf '%s' "$out" | grep -q "module-absent"; then ok "soft finding names module-absent"
-else bad "no module-absent soft finding for the pruned module"; fi
+if [ "$rc" -eq 1 ]; then ok "a dropped ALWAYS module is hard drift"
+else bad "dropping git-workflow gave rc=$rc (must be 1)"; fi
+if printf '%s' "$out" | grep -q "missing module: git-workflow"; then ok "the hard finding names the dropped always-module"
+else bad "hard finding did not name git-workflow: $out"; fi
 
 # --- case 5: a target with NO rule dir at all → cannot audit (exit 1, named) ---
 T5="$TMP/no-rules"; mkdir -p "$T5"
@@ -181,6 +217,28 @@ if [ "$rc" -eq 0 ]; then ok "a divergence recorded in ALLOW is not blocked"
 else bad "ALLOW entry did not short-circuit the gate, rc=$rc: $out"; fi
 if printf '%s' "$out" | grep -q "allowed:workflow"; then ok "allowed divergence is reported as a soft finding"
 else bad "allowed divergence not surfaced as soft"; fi
+
+# --- case 9: COVERAGE — every always-applicable module has at least one anchor ---
+# This case exists because mutation-testing found the gap: reverting the anchor list from 13 entries to
+# the original 7 left the whole canary green. Coverage of the anchor list is itself a property worth
+# asserting — an anchor list that silently shrinks stops guarding the modules the gate exists for, and
+# nothing else in the kit would notice. Read ALWAYS_MODULES out of the gate so the two cannot diverge.
+AM="$(sed -n 's/^ALWAYS_MODULES="\(.*\)"$/\1/p' "$GATE_SRC" | head -1)"
+if [ -z "$AM" ]; then bad "could not read ALWAYS_MODULES from the gate"
+else
+  uncovered=""
+  anchors_block="$(awk '/^ANCHORS=/{f=1} f{print} f&&/^EOF$/{exit}' "$GATE_SRC")"
+  for m in $AM; do
+    # An anchor line for this module in the gate's ANCHORS block? TAB-separated: "<module>	<phrase>".
+    if printf '%s\n' "$anchors_block" | grep -q "^$m	"; then :; else uncovered="$uncovered $m"; fi
+  done
+  if [ -z "$uncovered" ]; then ok "every always-applicable module has at least one anchor"
+  else bad "always-modules with NO anchor (silently unguarded):$uncovered"; fi
+  # And the count must be plausible — 9 modules with 1-2 anchors each.
+  n="$(printf '%s\n' "$anchors_block" | grep -cE '^[a-z-]+	')"
+  if [ "$n" -ge 9 ]; then ok "anchor list carries $n entries (>= one per always-module)"
+  else bad "anchor list has only $n entries for $(printf '%s' "$AM" | wc -w) always-modules"; fi
+fi
 
 printf '\ncheck-rule-fork canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1

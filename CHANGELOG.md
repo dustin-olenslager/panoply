@@ -12,6 +12,31 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **`apply` installed 3 fewer gates than the CI template invokes, so a freshly-adopted repo's
+  first PR died.** The install list was a hand-kept literal; `check-spec.sh`, `check-expert-review.sh`
+  and `check-agent-readiness.sh` were missing from it while `scripts/templates/ci-verify.yml` ran all
+  three, so `apply` deterministically produced the kit's own exit-11 half-applied state (reproduced:
+  adoption into a throwaway repo → 10 files, no `check-spec.sh`). The list is now DERIVED from the
+  template's own `run:` lines plus each script's canary, so the applier and CI cannot drift apart again.
+  Verified: 0 template dependencies missing after adoption, was 3.
+
+- MINOR — **the rule-fork gate guarded 4 of 9 always-applicable modules, and reported a dropped module
+  as soft.** `check-rule-fork.sh` covered only `workflow quality-bar git-workflow documentation`, so a
+  fork with `algorithm.md` and `spec.md` deleted returned rc=0 "no policy drift" — the exact failure its
+  own header cites. Anchors now cover all nine always-applicable modules (13 anchors), and absence of an
+  ALWAYS module is HARD drift while a conditional module (`database`, `frontend`, …) stays soft, since
+  only the latter is a legitimate adaptation. Canary 18/18 and it now asserts anchor-list COVERAGE —
+  mutation-testing found that reverting 13 anchors to 7 left the whole canary green.
+
+- MINOR — **two canaries existed, passed, and ran in no CI.** `check-docs.test.sh` and
+  `check-expert-review.test.sh` were wired nowhere, so the two widest-blast-radius gates (both blocking
+  on every PR) were the two with no way to prove they still detect. Both are now steps in `verify.yml`
+  and in the shipped template.
+
+- PATCH — **`check-agent-readiness.sh` used the pre-fix ref guard.** Its `--since` validation was a bare
+  `git rev-parse --verify` where the other four gates use `-q --verify` + exit 2; the same question must
+  get the same answer in every gate or the divergence is the bug. Now matches the house pattern.
+
 - MINOR — **a generated file can no longer reach main carrying an unresolved merge conflict.** `AGENTS.md`
   did exactly that: a hand-resolved conflict kept BOTH sides, so the file shipped a literal `<<<<<<< HEAD`
   and a doubled, empty `PANOPLY:RULES` block — and every gate passed, because `sync-agents.sh --check`

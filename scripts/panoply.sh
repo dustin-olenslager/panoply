@@ -281,9 +281,37 @@ cmd_apply() {
   # overwriting it is an unreported capability regression. Install when absent; when it differs,
   # report the divergence and leave the repo's copy alone. `--force-scripts` is the explicit opt-in
   # for a deliberate refresh, so the destructive path is always a stated choice.
+  #
+  # THE LIST IS DERIVED, NOT HAND-KEPT. It used to be a literal list, and it drifted: three gates the
+  # shipped CI template invokes (check-spec.sh, check-expert-review.sh, check-agent-readiness.sh) were
+  # never installed, so a freshly-adopted repo's FIRST PR died on "No such file or directory" — the
+  # applier deterministically produced the kit's own exit-11 half-applied state. A hand-kept list next
+  # to a template that names its own dependencies will always drift; read the template instead, so
+  # applier and CI cannot disagree. Any `scripts/X.sh` the template invokes, plus its canary when one
+  # exists, plus the kit's own core.
   _force_scripts=0
   for a in "$@"; do [ "$a" = "--force-scripts" ] && _force_scripts=1; done
-  for _s in panoply.sh panoply.test.sh sync-agents.sh check-docs.sh check-plan-home.sh check-plan-home.test.sh check-conflict-markers.sh check-conflict-markers.test.sh check-algorithm.sh check-algorithm.test.sh; do
+  _tmpl_tmp="$(mktemp)"
+  # The kit's own core, one per line so each is a matchable filename.
+  for _c in panoply.sh panoply.test.sh sync-agents.sh; do printf '%s\n' "$_c" >> "$_tmpl_tmp"; done
+  if [ -f "$_src/scripts/templates/ci-verify.yml" ]; then
+    # Every script the shipped workflow runs, deduped.
+    _from_template="$(grep -oE 'scripts/[a-zA-Z0-9._-]+\.sh' "$_src/scripts/templates/ci-verify.yml" \
+                      | sed 's|scripts/||' | sort -u)"
+  else
+    _from_template=""
+  fi
+  printf '%s\n' "$_from_template" >> "$_tmpl_tmp"
+  # A canary is installed wherever the script it tests is installed — a gate whose canary never ships
+  # is a gate nobody can prove still detects.
+  for _g in $_from_template; do
+    case "$_g" in *.test.sh) ;; *)
+      [ -f "$_src/scripts/${_g%.sh}.test.sh" ] && printf '%s\n' "${_g%.sh}.test.sh" >> "$_tmpl_tmp" ;;
+    esac
+  done
+  _all_installs="$(sort -u "$_tmpl_tmp")"
+  rm -f "$_tmpl_tmp"
+  for _s in $_all_installs; do
     [ -f "$_src/scripts/$_s" ] || continue
     if [ ! -f "scripts/$_s" ]; then
       cp "$_src/scripts/$_s" "scripts/$_s" && chmod +x "scripts/$_s"

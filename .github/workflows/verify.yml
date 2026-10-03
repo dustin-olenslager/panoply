@@ -154,6 +154,17 @@ jobs:
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-conflict-markers.test.sh
 
+      # These two canaries existed, passed, and were wired into NO CI — so the two widest-blast-radius
+      # gates (docs-landing and expert-review, both blocking on every PR) had canaries that could not
+      # go red in CI. A canary nobody runs is not evidence.
+      - name: Docs gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-docs.test.sh
+
+      - name: Expert-review gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-expert-review.test.sh
+
       # Rule-fork drift self-test — proves check-rule-fork.sh refuses a fork that silently dropped a
       # policy rung, passes one that legitimately adapted, honors the allowlist, and exits 2 when its
       # own anchor list has rotted. It audits an EXTERNAL adopted repo, so it is not a per-PR gate

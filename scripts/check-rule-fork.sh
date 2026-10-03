@@ -75,6 +75,13 @@ fi
 # rule entirely will still trip this — that is intended: a silent reword of a policy point is exactly
 # the fork this guards against, and the cure is an allowlist entry stating the divergence was
 # deliberate.
+#
+# COVERAGE RULE: every module whose "Applies when" line says ALWAYS needs an anchor, because losing one
+# silently is a policy regression no other gate sees. Nine modules are always-applicable today. The
+# list previously covered only four, so a fork could drop `algorithm.md` and `spec.md` wholesale and
+# still return rc=0 "no policy drift" — the exact failure this script's own header cites. Conditional
+# modules (database, frontend, api-design, …) are legitimately absent from a repo that does not apply
+# them, so they stay `module-absent` (soft), not drift.
 ANCHORS="$(cat <<'EOF'
 workflow	The Algorithm pass
 workflow	A spec precedes the plan on anything structural
@@ -83,6 +90,12 @@ quality-bar	Ask whether the thing should exist at all
 quality-bar	deletion candidate list
 git-workflow	Never push directly to
 documentation	SAME commit that lands work
+algorithm	Automate only what survived steps 1
+algorithm	Delete any part or process you can
+spec	An unresolved marker must not survive into a plan
+clean-architecture	dependencies point inward
+code-style	Before you write code
+error-handling	Validate at the boundaries
 EOF
 )"
 
@@ -109,6 +122,16 @@ has_anchor() {
 # is_allowed <key> — true if an allowlist entry matches the "<module>|<anchor>" key.
 is_allowed() {
   printf '%s\n' "$ALLOW" | grep -Fq "$1"
+}
+
+# ALWAYS_MODULES — the modules that apply to EVERY repo (their "Applies when" line says so). A target
+# missing one of these has lost a policy rung, not made an adaptation decision; so absence is HARD.
+# Everything else may legitimately be unadopted, and stays a soft `module-absent`.
+ALWAYS_MODULES="algorithm spec clean-architecture code-style documentation error-handling quality-bar workflow git-workflow"
+
+is_always_module() {
+  for _m in $ALWAYS_MODULES; do [ "$_m" = "$1" ] && return 0; done
+  return 1
 }
 
 # module_file <dir> <module> — print the module's path in a rule dir, or nothing.
@@ -151,7 +174,18 @@ for target in $TARGETS; do
     # 2. The target's copy must carry it too, unless the divergent module is absent or allowed.
     tf="$(module_file "$tdir" "$mod" || true)"
     if [ -z "$tf" ]; then
-      soft="$soft module-absent:$mod"
+      # ABSENCE IS HARD DRIFT WHEN THE MODULE ALWAYS APPLIES. A conditional module (database, frontend,
+      # api-design, …) legitimately may not be adopted, so its absence stays soft. But algorithm, spec,
+      # clean-architecture, code-style, documentation, error-handling, quality-bar, workflow and
+      # git-workflow apply to EVERY repo — dropping one is a policy regression, and reporting it as
+      # mere `soft` made it invisible: a fork with those modules deleted returned rc=0 "no policy
+      # drift", which is precisely the failure this script exists to catch.
+      if is_always_module "$mod"; then
+        hard="$hard
+    missing module: $mod (always-applicable — the whole rung is gone from $tdir)"
+      else
+        soft="$soft module-absent:$mod"
+      fi
       continue
     fi
     if has_anchor "$tf" "$anchor"; then
