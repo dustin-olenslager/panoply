@@ -74,11 +74,25 @@ you propose it.
 - **Every non-trivial change requires structured expert review before merge.** Trivial changes (per the list above, plus: single file, ≤15 lines added, no schema/API/interface change, or PR labeled `trivial` / commit prefixed `trivial:`) skip this gate.
 - **An agent's self-report is not review evidence.** "Tests pass," "done," and "it works" from the agent that wrote the change verify nothing — authorship and evidence must be independent. Non-trivial work is re-reviewed independently (by a second reviewer or a review agent reading only the diff), and the gate below exists because that requirement is easy to claim and easy to skip.
 - **Four default personas must be considered:** Security, Performance, Maintainability, UX. Domain-specific personas may be added per project.
-- **Review evidence required (checked by `scripts/check-expert-review.sh` in CI):**
-  1. `plan.md` exists for the feature area (persisted under `docs/agents/<area>/...`).
-  2. `checklist.md` has ≥1 unchecked item at PR open (proves planning happened).
-  3. `adr.md` has a new section since the PR base branch (proves architectural decision recorded).
-  4. PR description contains sign-off from ≥2 named personas (e.g., `Security: ✓`, `Performance: LGTM`).
-- **Process:** Author drafts plan → opens PR → requests review from relevant personas → each persona comments with sign-off → CI gate passes → merge.
+- **Review evidence required (checked by `scripts/check-expert-review.sh` in CI, for the change under
+  review):** the gate asks whether review evidence EXISTS for this change, and nothing more. Its
+  contract:
+  1. a plan doc exists under `docs/agents/**` (the plan home — see "Planning Workflow" above);
+  2. a checklist item exists under `docs/agents/**`, **checked or unchecked**. Requiring an OPEN item
+     would block a repo that had *finished* its work — the definition of done — until someone added a
+     fake open task, so the gate deliberately asks only that review evidence exist, not that work
+     remain. The checklist lives in the plan doc; a separate `checklist.md` is not required.
+  3. persona sign-off in the PR description (≥2 named personas, e.g. `Security: ✓`, `Performance:
+     LGTM`) is checked **only when the repo opts in** (`EXPERT_REVIEW_REQUIRE_SIGNOFFS=1`). It is
+     off by default: an enforcement that switches on as a side effect of a `gh` credential is not
+     enforcement anyone agreed to. Where it is off, sign-off is a review obligation, not a gate.
+  The gate carries the kit's usual declared escape hatch (`EXPERT_REVIEW_OFF=1`) and the trivial
+  carve-out from the bullet above. **It does not check for an `adr.md`.** For check 1 it requires the
+  plan doc to be **added or modified by the change under review** — a plan that merely sits in the tree
+  is not evidence that *this* change was reviewed, so the gate scopes the evidence to the diff. Recording
+  an architectural decision is a review obligation (see `documentation.md` → "When to write"), not
+  something this gate verifies.
+- **Process:** Author drafts plan → opens PR → requests review from relevant personas → each persona
+  comments with sign-off → CI gate passes → merge.
 - **Conflict escalation:** If personas disagree on a fundamental trade-off, the ADR records both positions and the decision; the operator (human) breaks ties.
 - **No rubber stamps:** A sign-off without reading the diff is a process violation. The adversary-review skill (§16) provides the grading rubric.

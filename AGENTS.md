@@ -87,11 +87,10 @@ declared in the use-case layer) implemented by an **adapter** at the edge.
   DTO at the boundary.
 - Before you build, state the layers you touch and the ports you add (the plan template forces this).
   If a new dependency would point outward, stop and raise it before writing the code.
-- This is enforced **mechanically** where the project has wired it: the architecture-boundary check in
-  the architecture-boundary check fails the build
-  on an outward import. That check binds every contributor equally **only once it runs in required
-  CI** — a client-side pre-commit hook is skippable with `--no-verify`, so CI is the plane that
-  actually holds against a non-agent. See "Enforcement — the honest version" below.
+- This is enforced **mechanically** where the project has wired it: the architecture-boundary check
+  fails the build on an outward import. That check binds every contributor equally **only once it runs
+  in required CI** — a client-side pre-commit hook is skippable with `--no-verify`, so CI is the plane
+  that actually holds against a non-agent. See "Enforcement — the honest version" below.
 
 <!-- MIRROR:start — this block is copied verbatim into every tool-native file by scripts/sync-agents.sh. Edit here only; it is the "if you read nothing else" contract for tools that do not open AGENTS.md. -->
 ## If you read nothing else in this repo

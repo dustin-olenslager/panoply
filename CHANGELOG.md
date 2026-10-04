@@ -24,6 +24,18 @@ Semver, applied to governance:
   its positive control, and both halves of the old rule were mutation-tested: reverting either one
   turns the canary red (4 checks and 1 check respectively). Also replaced `git show --stat | tail -1`
   (a TOTAL row in some git versions, a filename in others) with a summed `git diff --numstat`.
+- PATCH — **`workflow.md` promised four expert-review checks the gate does not run.** The rule module
+  (one of the three that may never be deleted) claimed `check-expert-review.sh` verified a
+  `checklist.md` with ≥1 *unchecked* item, a new `adr.md` section since the base branch, and
+  unconditional ≥2-persona sign-off. The gate had deliberately dropped the unchecked-item rule (it
+  blocked a repo that had *finished* its work — the definition of done — until someone added a fake
+  open task), has no ADR logic at all, and checks sign-off only behind the opt-in
+  `EXPERT_REVIEW_REQUIRE_SIGNOFFS=1`. The doctrine now states the gate's real contract — review
+  evidence that EXISTS for this change, a plan doc and a checklist item (checked or unchecked), with
+  sign-off as a review obligation unless a repo opts in — and says plainly what it does not check. A
+  doubled phrase in `AGENTS.md` ("the architecture-boundary check in the architecture-boundary check
+  fails the build") is fixed. Untruths in an always-on rule module teach every agent to trust a
+  control that is not there; that is the doc-bug class this fixes. No scripts changed.
 
 - MINOR — **`apply` installed 3 fewer gates than the CI template invokes, so a freshly-adopted repo's
   first PR died.** The install list was a hand-kept literal; `check-spec.sh`, `check-expert-review.sh`
