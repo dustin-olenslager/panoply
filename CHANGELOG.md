@@ -12,6 +12,19 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **the expert-review gate was a file-presence check wearing a review gate's name.** Its two
+  required checks were TREE-GLOBAL: `find docs/agents -name plan.md` matched a plan for ANY feature,
+  and `grep -rlE '^[[:space:]]*- \[[ xX]\]' docs/agents` matched any checklist line anywhere. Once a
+  repo held one finished plan, both were satisfied for every later PR, so a 200-line structural change
+  with no plan and no review passed — the gate could not distinguish "this PR was reviewed" from "this
+  repo has ever contained a plan". Review evidence must now be a plan doc the change itself ADDED or
+  MODIFIED (`git diff --name-only <base>...HEAD`, the same scaffold `check-spec.sh` /
+  `check-algorithm.sh` use), and the checklist must live in that touched file. The canary gains the
+  adversarial case (plan for feature A in the tree, large feature-B change with no plan → REFUSED) plus
+  its positive control, and both halves of the old rule were mutation-tested: reverting either one
+  turns the canary red (4 checks and 1 check respectively). Also replaced `git show --stat | tail -1`
+  (a TOTAL row in some git versions, a filename in others) with a summed `git diff --numstat`.
+
 - MINOR — **`apply` installed 3 fewer gates than the CI template invokes, so a freshly-adopted repo's
   first PR died.** The install list was a hand-kept literal; `check-spec.sh`, `check-expert-review.sh`
   and `check-agent-readiness.sh` were missing from it while `scripts/templates/ci-verify.yml` ran all

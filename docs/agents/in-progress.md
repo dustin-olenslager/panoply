@@ -21,6 +21,7 @@ entry to `completed-features.md`.
 | 1 | Name + verify the agent coverage (AGENTS.md-native, no mirror) | governance | Every-agent coverage: the agent | `governance/opencode-native-coverage/plan.md` | In review | PR open on `docs/opencode-native-coverage`; next step = merge, then fold this row per ship convention |
 | 2 | Encode the locked dev-workflow policy (points 1–10) in rules + every mirror | governance | Locked dev-workflow policy | `governance/dev-workflow-locked-policy/plan.md` | In review | PR open on `chore/dev-workflow-rules`; next step = owner review + squash-merge — do NOT open parallel rule edits |
 | 3 | The Algorithm — five-step pass, in the rules, in every mirror, and in Hermes (injection + gate) | governance | The Algorithm | `governance/execution-algorithm/plan.md` | In progress — M4 of 5 | Kit half (M1–M3) done and canary-green; next step = open the ONE PR on `feat/execution-algorithm`, then build the `execution-algorithm` Hermes plugin (M4) and the cadence report (M5). Do NOT open a parallel rule edit for the same modules |
+| 4 | Scope the expert-review gate to the change, not the tree | governance | Mechanical enforcement | `governance/expert-review-scope/plan.md` | In review | PR open on `fix/expert-review-gate`; next step = merge, then move the folder into `governance/completed/` and add a `completed-features.md` row |
 
 **Status vocabulary:** `Not started` · `In progress — milestone N of M` · `Blocked — <on what>` ·
 `In review` · `Done — archiving`.
