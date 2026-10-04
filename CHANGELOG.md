@@ -12,6 +12,16 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **the software factory: spec + plan for consolidating panoply and the archived harness into
+  one phase-aware factory, with wireframe-first design.** Written under the method it describes (expert
+  debate -> persona interviews -> wireframe -> plan), per the owner's instruction to build it with the
+  methodology being built. Adds the two rungs the process never had: requirement-level spec->plan
+  coverage (the seam a planning audit proved is missing and evidenced with real drift in this repo),
+  and a wireframe rung with simulated interviews that run BEFORE backend work. Design decisions from
+  three practitioner debates are carried into the requirements rather than smoothed away, including
+  the architect's position that the phase model stays data+doctrine and no Node runtime enters the
+  zero-dependency shell kit. Plan: `docs/agents/governance/software-factory/{spec,plan}.md`, M1-M6.
+
 - PATCH — the kit's own `panoply.test.sh` no longer builds its "old doctor" fixture out of
   `origin/main`. Main now carries `_PANOPLY_GENERATION`, so a fixture sourced from it stopped being an
   old copy the moment #35 merged — the case passed on its branch and went red on main. A fixture built
