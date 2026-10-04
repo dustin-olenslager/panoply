@@ -183,6 +183,28 @@ The cross-tool layer rots like any other config. Read-only unless `--fix`.
   rules: the dependency rule vs `clean-architecture.md`, the same-change update contract vs
   `documentation.md`, the guardrails vs `settings.json` deny (see Check 5). Divergence → **P2**.
 
+## Check 8 — Is this repo on the current KIT, or a stale copy of it?
+
+The kit's own doctor is the authority here. Run it and read the exit code:
+
+```
+sh scripts/panoply.sh check     # 0 current · 10 absent · 11 partial · 12 stale · 13 unadapted · 14 mirrors drifted · 15 SELF-STALE
+```
+
+- **Exit 15 (SELF-STALE) → P0.** The repo's `scripts/panoply.sh` is an older kit generation; every
+  verdict it produced is against a layout the current kit no longer uses. Fix: run
+  `sh scripts/panoply.sh migrate`, review the diff, commit. (An old-layout repo — `docs/claude/` +
+  `.claude/rules/` — is exactly this case: 9 of 11 early adopters are.)
+- **Exit 12 (STALE) with a `<version>+drifted` stamp → P1.** `apply` could not bring some managed file
+  to the kit's bytes. Read the `DRIFTED` lines from the last `apply`, review the kit `CHANGELOG`, then
+  re-run `apply --force-scripts` **only** to discard the local version — a `.panoply-bak` is written
+  beside each file it replaces.
+- **Exit 0** means current — but confirm the doctor itself is not the stale party by running the kit's
+  own copy (`sh <kit>/scripts/panoply.sh check`); a copy can pass while the kit has moved on.
+
+Run it read-only. `migrate` and `apply --force-scripts` are writes and belong to a deliberate,
+reviewed change, not to an audit pass.
+
 ---
 
 ## Output — a prioritized fix list

@@ -12,6 +12,11 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — the `n/a — no user-facing surface` form is stated to cover internal tooling, CI, a script or
+  documentation, not only a library. Found when the new interview check (correctly) refused the kit's
+  own `kit-self-update` spec: the rule said what the `n/a` form accepts but did not say that a
+  maintainer-only change qualifies, so the escape read as library-specific.
+
 - PATCH — **the doctrine told agents five agent-readiness checks the gate does not run, and never
   mentioned a required gate that does.** Same defect class as the expert-review lie (#31), swept
   across all eight gates. `agent-readiness.md` claimed the gate runs a "smoke test with only
@@ -71,6 +76,40 @@ Semver, applied to governance:
   expert is real is unjudgeable by a section-presence check, which would pass on a fabricated expert
   and block no real mistake (the honest residue is stated in `spec.md`, not automated). Persona count
   12 → 2, a counted number.
+- PATCH — **the new canary and simulator carried two shellcheck findings the CI ShellCheck flags and
+  the dev box's older one does not.** `scripts/panoply.test.sh` captured output with an `A && B || C`
+  chain (SC2015) and `scripts/simulate-adopters.sh` used a useless `cat` in a pipe (SC2002); both are
+  info/advisory locally but fail the `Lint (shellcheck)` step on CI. Replaced the capture with an
+  explicit redirect and dropped the `cat`. No behaviour change.
+
+- MINOR — **an adopted repo can now pull kit fixes deliberately, and a stale copy of the kit can no
+  longer report a clean bill of health.** The kit is adopted by ~11 repos that each keep their OWN copy
+  of `scripts/panoply.sh`, `sync-agents.sh` and the rule modules, and nothing brought a fix forward.
+  Four owner-verified consequences, each now fixed and canary-proven: (1) **a false green** — an old
+  adopter's own doctor reported `OK — kit v1.4.0 applied and current` (exit 0) on a repo the current
+  doctor calls `HALF-APPLIED` (exit 11); measured on a copy of a pilot repo, own-doctor 0 vs
+  current-doctor 11. The doctor now embeds a GENERATION marker (`_PANOPLY_GENERATION`) and reports a new
+  state `SELF-STALE` (exit 15) with three tells — the running copy carries no marker, a reachable kit
+  source disagrees, or the repo's own committed `scripts/panoply.sh` is an older generation — and never
+  claims OK over an obsolete layout. A version-string comparison was rejected: between releases both
+  copies report `unreleased`, so it detects nothing in the exact case the false green appears.
+  (2) **a lying stamp** — `apply` on a drifted repo kept every local file, changed nothing, and still
+  rewrote `kit_sha`, certifying code that was not installed; reproduced on a copy of a pilot repo.
+  `apply` now prints a per-file disposition (`ADDED`/`KEPT`/`DRIFTED`/`FORCED`), sets a `_drifted` flag,
+  stamps `<version>+drifted` instead of claiming current, and exits 12 — the stamp certifies the STATE,
+  not the attempt. (3) **an unrecoverable destructive path** — `--force-scripts` overwrote a
+  locally-edited script with no `.bak` (the kit's own source named a pilot repo's `check-docs.sh` work as
+  what it would destroy); it now writes `scripts/<file>.panoply-bak` before overwriting and prints the
+  path, collision-safe across repeated runs, and writes no backup for a file it did not overwrite.
+  (4) **no update path** — new `migrate` subcommand translates an OLD-layout adopter (`docs/claude/` +
+  `.claude/rules/`, 9 of 11 adopters) onto the current layout (`docs/agents/` + `.agents/rules/`),
+  reporting the translation BEFORE performing it, copying the adopter's own adapted content forward,
+  never deleting the old tree, and refreshing the doctor itself (with a backup). No auto-pull: doctrine
+  is that a rule change is reviewed, not silently overwritten. Canary 18 → 36 checks; each new
+  behaviour mutation-tested (neutering self-stale detection turns 4 red; removing the drift stamp guard
+  1 red; removing the drift exit 1 red; removing the backup 1 red; removing the migrate translation
+  report 1 red). Simulated against three throwaway adopter repos (old-layout, current-with-local-edits,
+  lying-stamp) — see `scripts/simulate-adopters.sh`.
 
 - MINOR — **the expert-review gate was a file-presence check wearing a review gate's name.** Its two
   required checks were TREE-GLOBAL: `find docs/agents -name plan.md` matched a plan for ANY feature,

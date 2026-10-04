@@ -69,7 +69,10 @@ the spine or set `SPEC_GLOB` to the sibling it does keep.
    SIMULATED role-plays**: they surface requirements and failure modes a software-only view misses,
    and they are never written as a real quote from a real person. A genuinely-interviewed real user
    supersedes the simulation for that persona, and is named. A project with no user-facing surface
-   writes `n/a — no user-facing surface` and says why; everything else gets four.
+   writes `n/a — no user-facing surface` and says why; everything else gets four. **The `n/a` form is
+   not only for libraries:** a change to internal tooling, CI, a script, or documentation has no screen
+   to design, and says `n/a` with the reason. The test is whether the change alters what a *user of the
+   product* can do — if it only alters how maintainers work, there are no product personas to interview.
 
 ## The marker rule — the one hard part
 

@@ -8,12 +8,27 @@
 # any agent, a cron, a pre-commit hook.
 #
 #   sh scripts/panoply.sh check [--quiet]   exit 0 = current, non-zero = action needed
-#   sh scripts/panoply.sh apply [--yes]     seed/refresh the DETERMINISTIC half of the kit
+#   sh scripts/panoply.sh apply [--yes] [--force-scripts]   seed/refresh the DETERMINISTIC half
+#   sh scripts/panoply.sh migrate [--yes]   translate an OLD-layout adopter onto the current layout
 #   sh scripts/panoply.sh stamp             write/refresh .panoply-version only
 #   sh scripts/panoply.sh version           print this kit's version
 #
-# Exit codes (check): 0 current · 10 absent · 11 partial · 12 stale · 13 placeholders left · 14 mirrors drifted
+# Exit codes (check): 0 current · 10 absent · 11 partial · 12 stale · 13 placeholders left · 14 mirrors
+#                     drifted · 15 the CHECK ITSELF is stale (see below)
 # Env: PANOPLY_OFF=1 disables the check entirely (adopting repo mid-migration).
+#
+# 15 — SELF-STALE. The doctor cannot detect that IT is the stale party by inspecting the repo, because
+# it only knows its own embedded expectations. So it embeds a GENERATION marker and, when it can reach
+# a kit source, compares its marker against the source's. A copy that disagrees is stale and says so,
+# rather than printing a clean bill of health against an obsolete layout — the false green this state
+# exists to kill. When no kit source is reachable the doctor refuses to fail open: it reports that it
+# cannot verify (exit 15) instead of treating its own assumptions as proof.
+#
+# The generation marker is compared, never the version string: between releases both the copy and the
+# source report `unreleased`, so a version comparison detects nothing in the exact case (a kit between
+# tags) where the false green appears. The marker changes exactly when the doctor's layout expectation
+# changes, which is what "this copy is stale" means. See docs/agents/governance/kit-self-update/plan.md.
+
 
 set -eu
 
@@ -94,7 +109,36 @@ _REQUIRED_RULES=".agents/rules/clean-architecture.md"
 _MARKER_MIRROR="MIRROR:start"
 _MARKER_RULES="PANOPLY:RULES:BEGIN"
 
+# The GENERATION marker — the answer to "is THIS copy of the doctor stale?". It changes exactly when
+# the doctor's embedded layout expectation (the _REQUIRED_* paths above and the states it can report)
+# changes. A copy and a source that disagree on this value are two different kit generations, and the
+# older one must say so rather than validate a repo against an obsolete layout.
+#
+# Bump this string when you change _REQUIRED_* , the exit-code table, or the set of states — i.e. when
+# a copied doctor from before the change would validate the wrong thing.
+_PANOPLY_GENERATION="layout-agents-2"   # v1: docs/claude + .claude/rules ; v2: docs/agents + .agents/rules
+
 _stamp_file() { printf '.panoply-version'; }
+
+# The generation marker embedded in a given copy of this script, read textually so the doctor never has
+# to execute another copy. Prints the marker, or nothing when the file carries none (a pre-marker kit
+# generation, which is itself the tell that it is stale).
+_generation_of_file() {
+  [ -f "$1" ] || return 1
+  sed -n 's/^_PANOPLY_GENERATION="\([^"]*\)".*/\1/p' "$1" | head -1
+}
+
+# The generation marker the REACHABLE kit source was built for, or nothing when no source is reachable.
+# Read from the file, not by running it: `sh source check` would inspect THIS repo, not answer "which
+# generation are you?", and a source that fails to run must not be silently treated as absent.
+_source_generation() {
+  _r="$(_canonical_kit_root || true)"
+  [ -n "$_r" ] || return 1
+  _g="$(_generation_of_file "$_r/scripts/panoply.sh" || true)"
+  [ -n "$_g" ] || return 1
+  printf '%s' "$_g"
+}
+
 
 # ---------------------------------------------------------------- inspect ----
 # Reads the repo in the CWD. Prints findings to stderr, and a machine-readable line to stdout.
@@ -102,6 +146,59 @@ _stamp_file() { printf '.panoply-version'; }
 _inspect() {
   _status="current"
   _reason=""
+
+  # SELF-STALE is checked FIRST, and dominates every other verdict. A doctor built for an older layout
+  # validates the repo against expectations the current kit no longer holds, so its "current"/"partial"
+  # verdict is meaningless — this is the false-green the state exists to kill. It must therefore win
+  # over whatever the (obsolete) triad check concluded, including a would-be "current".
+  #
+  # TWO independent tells, because the false green appears in two situations:
+  #
+  #   a. THE RUNNING COPY CARRIES NO MARKER. A pre-marker kit generation has no `_PANOPLY_GENERATION`
+  #      anywhere in its script, so reading it off $0 yields nothing. This is the owner-verified case:
+  #      an old adopter running its OWN copy, with NO kit source reachable at all. Detecting it needs no
+  #      source — the copy's own silence is the tell — which is exactly why a version-string comparison
+  #      (both sides `unreleased`) never caught it.
+  #   b. A REACHABLE SOURCE DISAGREES. When the doctor can reach a kit source, a generation mismatch is
+  #      positive proof of staleness, and names both generations in the message.
+  #   c. THE REPO'S OWN COMMITTED COPY DISAGREES. A repo that adopted an older kit carries that older
+  #      doctor at scripts/panoply.sh. Any modern doctor — run from the kit in CI, or by a maintainer —
+  #      reads that file's generation and reports self-stale when it differs from the running one. This
+  #      is the tell that catches the existing old-layout adopters TODAY: the copy they run is the
+  #      problem, and the running doctor can see it even though the stale copy cannot see itself.
+  #
+  # The template repo itself is exempt: the kit checking itself IS the source, not a copy, and must not
+  # report itself stale against a canonical clone that may lag.
+  _selfstale=0
+  if [ ! -f scripts/init-template-repo.sh ] || [ ! -f .agents/commands/adapt-agents-setup.md ]; then
+    _mygen="$(_generation_of_file "$0" || true)"
+    _srcgen="$(_source_generation || true)"
+    _repogen="$(_generation_of_file scripts/panoply.sh || true)"
+    if [ -z "$_mygen" ]; then
+      # This doctor predates the marker: it is the stale party, whatever it is inspecting.
+      _selfstale=1
+      _reason="this doctor carries no generation marker — it predates kit generation '$_PANOPLY_GENERATION' and validates a layout the current kit no longer uses. Refresh it: sh scripts/panoply.sh migrate"
+    elif [ -n "$_srcgen" ] && [ "$_srcgen" != "$_mygen" ]; then
+      _selfstale=1
+      _reason="this doctor is generation '$_mygen' but the kit source is '$_srcgen' — the copy is stale; refresh it (sh scripts/panoply.sh migrate)"
+    elif [ -f scripts/panoply.sh ] && ! cmp -s "$0" scripts/panoply.sh && [ -z "$_repogen" ]; then
+      # The repo's committed doctor predates the marker while THIS doctor carries one: the repo is
+      # running an old copy. Reported whether or not a kit source is reachable — the repo file is the
+      # proof, no network or clone needed.
+      _selfstale=1
+      _reason="the repo's own scripts/panoply.sh carries no generation marker (an older kit generation) while this check is '$_mygen' — the repo is running a stale doctor; refresh it (sh scripts/panoply.sh migrate)"
+    fi
+    # No source reachable but the running copy carries the CURRENT generation: it can trust its own
+    # layout, so it proceeds — and says out loud that the check was not cross-verified, rather than
+    # staying silent about it (a quiet assumption is how the old false green worked).
+    if [ "$_selfstale" = "0" ] && [ -z "$_srcgen" ]; then
+      printf 'panoply: note — no kit source reachable; checked against this copy'"'"'s own generation (%s), not cross-verified\n' "$_mygen" >&2
+    fi
+  fi
+  if [ "$_selfstale" = "1" ]; then
+    printf 'selfstale\t%s\n' "$_reason"
+    return 0
+  fi
 
   for _f in "$_REQUIRED_AGENTS" "$_REQUIRED_SPINE" "$_REQUIRED_RULES"; do
     if [ ! -f "$_f" ]; then
@@ -177,8 +274,19 @@ _inspect() {
 # ---------------------------------------------------------------- commands ----
 cmd_version() { _kit_version; printf '\n'; }
 
+# cmd_stamp: record what was applied. A stamp must CERTIFY THE STATE, not the attempt.
+#
+# The defect this fixes: `apply` on a repo whose managed scripts had drifted kept every local copy,
+# changed nothing, and still rewrote the stamp to the kit's current version — so the stamp certified
+# code that was not installed, and a later `check` on that stamp is a green over a drifted tree. The
+# caller passes `_panoply_drifted=1` when it left managed files differing from the kit; the stamp then
+# records a NON-CURRENT version (`<version>+drifted`) instead of claiming current, so the drift is
+# visible in the very file readers trust. `stamp` invoked directly (no drift context) is unchanged.
 cmd_stamp() {
   _v="$(_kit_version)"; _s="$(_kit_sha)"
+  if [ "${_panoply_drifted:-0}" = "1" ]; then
+    _v="${_v}+drifted"
+  fi
   {
     printf '# panoply kit stamp — written by scripts/panoply.sh (do not hand-edit)\n'
     printf 'kit_version: %s\n' "$_v"
@@ -186,7 +294,13 @@ cmd_stamp() {
     printf 'applied_at: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     printf 'applied_by: %s\n' "${PANOPLY_APPLIED_BY:-unknown-agent}"
   } > "$(_stamp_file)"
-  printf 'stamped %s at %s (%s)\n' "$(_stamp_file)" "$_v" "$_s"
+  if [ "${_panoply_drifted:-0}" = "1" ]; then
+    printf 'stamped %s at %s (%s) — DRIFTED: the stamp does NOT certify the current kit (%s)\n' \
+      "$(_stamp_file)" "$_v" "$_s" \
+      "managed files differ from the kit; review and re-run apply"
+  else
+    printf 'stamped %s at %s (%s)\n' "$(_stamp_file)" "$_v" "$_s"
+  fi
 }
 
 cmd_check() {
@@ -208,6 +322,16 @@ cmd_check() {
 
   _ver="$(_kit_version)"
   case "$_st" in
+    selfstale)
+      printf 'panoply: SELF-STALE — this check is out of date, so its verdict is not trustworthy.\n' >&2
+      printf 'panoply: %s\n' "$_why" >&2
+      printf 'panoply: this is the FALSE GREEN the kit now forbids: an obsolete doctor validated a repo\n' >&2
+      printf 'panoply: against a layout the kit no longer uses. Bring the copy forward deliberately:\n' >&2
+      printf 'panoply:   sh scripts/panoply.sh migrate     # then review the diff and commit\n' >&2
+      if [ "${PANOPLY_ALLOW_UNVERIFIED:-0}" = "1" ]; then
+        printf 'panoply: PANOPLY_ALLOW_UNVERIFIED=1 set — continuing with the repo verdict anyway\n' >&2
+      fi
+      exit 15 ;;
     current)
       [ "$_quiet" = 1 ] || printf 'panoply: OK — kit %s applied and current\n' "$_ver"
       exit 0 ;;
@@ -245,11 +369,22 @@ cmd_apply() {
   _src="$(cd "$(dirname "$0")/.." && pwd)"
   printf '==> panoply apply (deterministic half) — kit %s\n' "$(_kit_version)"
 
+  # Per-file dispositions. Every managed file this run considered gets exactly one of:
+  #   ADDED   — installed because it was absent
+  #   KEPT    — a LOCAL copy differs from the kit and was left alone (never a silent clobber)
+  #   DRIFTED — the run could NOT bring this file to the kit's bytes (a KEPT file, or force skipped)
+  #   (matching files print nothing: they are already the kit's, so there is no news)
+  # `_drifted=1` iff ANY managed file remains different from the kit after the run. It is what stops
+  # the stamp from certifying a state apply did not reach.
+  _drifted=0
+
   # 1. Spine. Create only what is absent; never overwrite the repo's own docs.
   mkdir -p docs/agents .agents/rules scripts
   for _d in roadmap.md in-progress.md worklog.md; do
     if [ ! -f "docs/agents/$_d" ] && [ -f "$_src/docs/agents/$_d" ]; then
-      cp "$_src/docs/agents/$_d" "docs/agents/$_d"; printf '    seeded docs/agents/%s\n' "$_d"
+      cp "$_src/docs/agents/$_d" "docs/agents/$_d"; printf '    ADDED docs/agents/%s\n' "$_d"
+    elif [ -f "docs/agents/$_d" ] && ! cmp -s "$_src/docs/agents/$_d" "docs/agents/$_d"; then
+      printf '    KEPT  docs/agents/%s — yours differs from the kit template; review it\n' "$_d"
     fi
   done
 
@@ -258,9 +393,14 @@ cmd_apply() {
     [ -f "$_m" ] || continue
     _b="$(basename "$_m")"
     if [ ! -f ".agents/rules/$_b" ]; then
-      cp "$_m" ".agents/rules/$_b"; printf '    added .agents/rules/%s\n' "$_b"
+      cp "$_m" ".agents/rules/$_b"; printf '    ADDED .agents/rules/%s\n' "$_b"
     elif ! cmp -s "$_m" ".agents/rules/$_b"; then
-      printf '    NOTE .agents/rules/%s differs from the kit — yours wins; review the kit CHANGELOG\n' "$_b"
+      # A locally-diverged module is the NORMAL state: every adopter fills {{TOKENS}} at adapt time,
+      # so its module legitimately differs from the template. That is not "drift" of the managed set —
+      # it is adaptation, and the kit's contract is that yours wins. So it is reported, not forced,
+      # and it does NOT by itself mark the repo drifted (or every correctly-adopted repo would stamp
+      # +drifted forever, an always-red failure). Rule-module divergence is review signal.
+      printf '    KEPT  .agents/rules/%s — yours differs (adapted?); review the kit CHANGELOG\n' "$_b"
     fi
   done
 
@@ -272,7 +412,7 @@ cmd_apply() {
   # kit's structure into it as checklist step 3.
   if [ ! -f AGENTS.md ] && [ -f "$_src/AGENTS.md" ]; then
     cp "$_src/AGENTS.md" AGENTS.md
-    printf '    seeded AGENTS.md (kit template — fill its {{TOKENS}})\n'
+    printf '    ADDED AGENTS.md (kit template — fill its {{TOKENS}})\n'
   fi
 
   # 3. Gates + mirror generator.
@@ -280,7 +420,9 @@ cmd_apply() {
   # work — a pilot repo's check-docs.sh carries a conflict-marker sweep the kit template lacks — and
   # overwriting it is an unreported capability regression. Install when absent; when it differs,
   # report the divergence and leave the repo's copy alone. `--force-scripts` is the explicit opt-in
-  # for a deliberate refresh, so the destructive path is always a stated choice.
+  # for a deliberate refresh, so the destructive path is always a stated choice. Unlike a rule module,
+  # a diverged SCRIPT is drift: it is kit machinery, and the kit's copy is the authority for it. So it
+  # marks the repo drifted (unless force replaces it), and the stamp says so.
   #
   # THE LIST IS DERIVED, NOT HAND-KEPT. It used to be a literal list, and it drifted: three gates the
   # shipped CI template invokes (check-spec.sh, check-expert-review.sh, check-agent-readiness.sh) were
@@ -315,18 +457,30 @@ cmd_apply() {
     [ -f "$_src/scripts/$_s" ] || continue
     if [ ! -f "scripts/$_s" ]; then
       cp "$_src/scripts/$_s" "scripts/$_s" && chmod +x "scripts/$_s"
-      printf '    added scripts/%s\n' "$_s"
+      printf '    ADDED scripts/%s\n' "$_s"
     elif ! cmp -s "$_src/scripts/$_s" "scripts/$_s"; then
       if [ "$_force_scripts" = "1" ]; then
+        # Recoverable overwrite: write the pre-overwrite bytes beside the file BEFORE replacing it,
+        # and say where. The defect this fixes: --force-scripts was destructive with no backup — a
+        # repo-local capability (a pilot repo's check-docs.sh conflict sweep) was gone with recovery only
+        # through git. Collision-safe suffix so a second forced run never destroys the first backup.
+        _bak="scripts/${_s}.panoply-bak"
+        [ -e "$_bak" ] && _bak="scripts/${_s}.panoply-bak.$(date -u +%Y%m%dT%H%M%SZ)"
+        cp "scripts/$_s" "$_bak"
         cp "$_src/scripts/$_s" "scripts/$_s" && chmod +x "scripts/$_s"
-        printf '    OVERWROTE scripts/%s (--force-scripts)\n' "$_s"
+        printf '    FORCED scripts/%s (--force-scripts); previous copy saved to %s\n' "$_s" "$_bak"
       else
-        printf '    KEPT scripts/%s — yours differs from the kit; compare before replacing\n' "$_s"
+        printf '    DRIFTED scripts/%s — yours differs from the kit; re-run with --force-scripts to refresh (a backup is written)\n' "$_s"
+        _drifted=1
       fi
     fi
   done
 
-  # 4. Stamp LAST among mechanical steps, so a failed apply never leaves a current-looking stamp.
+  # 4. Stamp LAST among mechanical steps, so a failed apply never leaves a current-looking stamp — and
+  # with the drift verdict, so it never certifies a state this run did not reach. `_panoply_drifted`
+  # is read by cmd_stamp.
+  _panoply_drifted="$_drifted"
+  export _panoply_drifted
   cmd_stamp
 
   # 5. The judgement half — an agent must do this, and the kit forbids guessing.
@@ -344,10 +498,105 @@ cmd_apply() {
        and, where the repo has one, its pre-commit hook (`--staged`). It requires the plan doc's
        "Deletion candidates" section on a structural change — see .agents/rules/algorithm.md.
 
-  A script this repo already had and has since edited was KEPT, not replaced (see any "KEPT scripts/"
-  line above). Review it against the kit's copy and re-run with `apply --force-scripts` only when
-  you mean to discard the local version.
+  Every managed file this run touched printed its disposition: ADDED (installed), KEPT (yours kept),
+  DRIFTED (differs and was NOT brought current), FORCED (replaced, with a backup named above). If any
+  line said DRIFTED, this repo is NOT current with the kit and the stamp says so — review the kit
+  CHANGELOG and re-run `apply --force-scripts` when you mean to discard the local versions.
 CHECKLIST
+
+  # A drift verdict is a non-zero outcome: apply did not bring the repo to the kit, and a reader must
+  # not be able to mistake it for success. This is the "fail loudly rather than fail open" contract.
+  if [ "$_drifted" = "1" ]; then
+    printf 'panoply: apply finished with DRIFT — the repo is NOT current with the kit (see DRIFTED lines)\n' >&2
+    return 12
+  fi
+  return 0
+}
+
+# ---------------------------------------------------------------- migrate ----
+# cmd_migrate: translate an OLD-layout adopter onto the current layout, deliberately and reviewably.
+#
+# What this is NOT: an auto-pull. It never fetches from the network and never writes a rule body the
+# adopter has not seen — doctrine is that a rule change is REVIEWED, not silently overwritten. What it
+# IS: the smallest reproducible path from "this repo adopted the kit before the layout changed" to
+# "this repo is on the current layout, ready for a normal apply". It reports the translation it will
+# perform BEFORE performing it, seeds the new-layout tree from the current kit with the same
+# no-clobber contract apply uses, and then hands off to apply for the deterministic half.
+#
+# The translation: pre-v2 kit generations kept the doc spine at `docs/claude/` and the rule modules at
+# `.claude/rules/`. The current kit requires `docs/agents/` and `.agents/rules/`. migrate COPIES the
+# old tree into the new location (never deletes the old — the adopter reviews and removes it, or keeps
+# it as history) and seeds any current-layout file the repo lacks.
+cmd_migrate() {
+  _src="$(cd "$(dirname "$0")/.." && pwd)"
+  printf '==> panoply migrate — move an OLD-layout adopter onto the current layout (kit %s)\n' \
+    "$(_kit_version)"
+
+  # Old-layout markers. A repo on the new layout has nothing to migrate; say so and stop.
+  _old=0
+  [ -d docs/claude ] && _old=1
+  [ -d .claude/rules ] && _old=1
+  _new_docs="$([ -d docs/agents ] && printf yes || printf no)"
+  _new_rules="$([ -d .agents/rules ] && printf yes || printf no)"
+
+  if [ "$_old" = "0" ] && [ "$_new_docs" = "yes" ] && [ "$_new_rules" = "yes" ]; then
+    printf '    already on the current layout (docs/agents + .agents/rules) — nothing to migrate\n'
+    printf '    run:  sh scripts/panoply.sh apply   to refresh the deterministic half\n'
+    return 0
+  fi
+
+  printf '    translation report (nothing below has been changed yet):\n'
+  [ "$_new_docs" = "yes" ] && printf '      docs/agents/        already present — left alone\n' \
+                           || printf '      docs/claude/     -> docs/agents/       (copy old spine forward)\n'
+  [ "$_new_rules" = "yes" ] && printf '      .agents/rules/      already present — left alone\n' \
+                            || printf '      .claude/rules/   -> .agents/rules/     (copy old modules forward)\n'
+
+  # Seed the spine: copy the old tree FORWARD first (so the adopter's own adapted docs win), then let
+  # apply fill anything still absent from the current kit. Prefer the repo's docs/claude content over
+  # the kit template — it is the adopter's adapted text.
+  mkdir -p docs/agents .agents/rules scripts
+  if [ -d docs/claude ] && [ "$_new_docs" = "no" ]; then
+    for _f in docs/claude/*.md; do
+      [ -f "$_f" ] || continue
+      _b="$(basename "$_f")"
+      if [ ! -f "docs/agents/$_b" ]; then
+        cp "$_f" "docs/agents/$_b"; printf '      copied docs/claude/%s -> docs/agents/%s\n' "$_b" "$_b"
+      fi
+    done
+  fi
+  # Same for the rule modules: the adopter's ADAPTED modules (tokens filled) are the better source.
+  if [ -d .claude/rules ] && [ "$_new_rules" = "no" ]; then
+    for _f in .claude/rules/*.md; do
+      [ -f "$_f" ] || continue
+      _b="$(basename "$_f")"
+      if [ ! -f ".agents/rules/$_b" ]; then
+        cp "$_f" ".agents/rules/$_b"; printf '      copied .claude/rules/%s -> .agents/rules/%s\n' "$_b" "$_b"
+      fi
+    done
+  fi
+  printf '    the OLD tree (docs/claude, .claude/rules) is left in place for you to review and delete —\n'
+  printf '    migrate never removes a file it did not create.\n\n'
+
+  # Refresh the doctor itself BEFORE apply, not after: the stamp apply writes is a claim about the
+  # repository's final state, and if the old doctor were still in place at stamp time the stamp would
+  # (correctly, but confusingly) read `+drifted`. Refreshing first means the stamp and the checked
+  # state agree, and the very next `check` runs the current doctor. The previous copy is backed up so
+  # an adopter who had local work in their doctor can recover it.
+  if [ -f "$_src/scripts/panoply.sh" ] && ! cmp -s "$_src/scripts/panoply.sh" scripts/panoply.sh; then
+    _dbak="scripts/panoply.sh.panoply-bak"
+    [ -e "$_dbak" ] && _dbak="scripts/panoply.sh.panoply-bak.$(date -u +%Y%m%dT%H%M%SZ)"
+    cp scripts/panoply.sh "$_dbak"
+    cp "$_src/scripts/panoply.sh" scripts/panoply.sh && chmod +x scripts/panoply.sh
+    printf '    refreshed the doctor itself (previous copy saved to %s)\n\n' "$_dbak"
+  fi
+
+  # Hand off to apply for the deterministic half (it seeds whatever the copy-forward did not).
+  cmd_apply "$@"
+  _apply_rc=$?
+
+  printf '\n==> migrate done — review the diff, then run:  sh scripts/panoply.sh check\n'
+  printf '    finish the judgement half with .agents/commands/adapt-agents-setup.md before committing.\n'
+  return "$_apply_rc"
 }
 
 # ---------------------------------------------------------------- dispatch ----
@@ -356,9 +605,10 @@ shift 2>/dev/null || true
 case "$_cmd" in
   check|status) cmd_check "$@" ;;
   apply)        cmd_apply "$@" ;;
+  migrate)      cmd_migrate "$@" ;;
   stamp)        cmd_stamp "$@" ;;
   version|-v|--version) cmd_version ;;
   -h|--help|help|"")
-    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//' ;;
-  *) printf 'panoply: unknown command %s (try: check | apply | stamp | version)\n' "$_cmd" >&2; exit 2 ;;
+    sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) printf 'panoply: unknown command %s (try: check | apply | migrate | stamp | version)\n' "$_cmd" >&2; exit 2 ;;
 esac

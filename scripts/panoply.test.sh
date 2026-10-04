@@ -200,8 +200,9 @@ fi
 # Why: a pilot repo's check-docs.sh carries a conflict-marker sweep the kit template lacks. apply cp'd the
 # template over it with no NOTE at all — an unreported capability regression, and the same hazard for
 # sync-agents.sh / check-plan-home.sh (any repo-local edit). Rule modules already reported divergence;
-# scripts did not. The contract is now: install when absent, KEEP and report when it differs, and
-# replace only under an explicit --force-scripts.
+# scripts did not. The contract: install when absent, report when it differs, replace only under an
+# explicit --force-scripts. A diverged SCRIPT is DRIFT (kit machinery the adopter should refresh), so
+# the report word is DRIFTED — not the old KEPT, which hid it as benign.
 R="$(_new_repo scriptclobber)"
 ( cd "$R" && sh "$DOC" apply ) >/dev/null 2>&1
 printf '\n# LOCAL CUSTOMIZATION MARKER\n' >> "$R/scripts/check-docs.sh"
@@ -211,18 +212,198 @@ if grep -q 'LOCAL CUSTOMIZATION MARKER' "$R/scripts/check-docs.sh"; then
 else
   _bad "apply preserves a locally-edited script" "the local edit was clobbered silently"
 fi
-if printf '%s' "$_out" | grep -q 'KEPT scripts/check-docs.sh'; then
-  _ok "apply reports the kept script (not silent)"
+if printf '%s' "$_out" | grep -q 'DRIFTED scripts/check-docs.sh'; then
+  _ok "apply reports the drifted script (not silent)"
 else
-  _bad "apply reports the kept script" "no KEPT note in apply output"
+  _bad "apply reports the drifted script" "no DRIFTED line in apply output"
 fi
-# and the explicit opt-in must actually replace it
+# --- case 12b (ADVERSARIAL, M2): apply must NOT stamp current a repo it left drifted -------------
+# The owner-verified defect: apply kept every local script, changed nothing, and still rewrote the
+# stamp to the kit's version — certifying code that was not installed. The stamp is now written with a
+# +drifted marker when any managed file was left different, so the very file readers trust carries the
+# drift. Assert the stamp is NOT the bare kit version (the lie), and that apply itself returns non-zero.
+_stamp_ver="$(sed -n 's/^kit_version:[[:space:]]*//p' "$R/.panoply-version" | head -1)"
+_kit_ver="$("$DOC" version)"
+if [ "$_stamp_ver" = "$_kit_ver" ]; then
+  _bad "drifted apply does not stamp current" "stamp says '$_stamp_ver' == kit '$_kit_ver' — certifies code not installed"
+else
+  _ok "drifted apply does not stamp current (stamp '$_stamp_ver', kit '$_kit_ver')"
+fi
+( cd "$R" && sh "$DOC" apply ) >/dev/null 2>&1
+_arc=$?
+if [ "$_arc" != 0 ]; then
+  _ok "drifted apply exits non-zero (drift is loud, got $_arc)"
+else
+  _bad "drifted apply exits non-zero" "a drifted apply returned 0 — the reader can mistake it for success"
+fi
+
+# --- case 13 (ADVERSARIAL, M1): a repo running a STALE DOCTOR is not reported OK -----------------
+# The owner-verified false green: a pilot repo's own copy reports `OK — kit v1.4.0 applied and
+# current` (exit 0) while the current doctor reports HALF-APPLIED (exit 11) on the same repo. The stale
+# copy cannot see itself (it lacks the code), so the fix is: ANY doctor that carries the generation
+# marker reports self-stale when the repo's own committed doctor copy predates it. Build exactly that —
+# a compliant new-layout fixture carrying an OLD (marker-less) scripts/panoply.sh, checked by the
+# CURRENT doctor.
+R="$(_new_repo stalecopydoctor)"
+_make_adopted "$R"
+# The repo's committed doctor, as an old kit generation shipped it: the pre-marker doctor from the
+# kit's own main, which has no _PANOPLY_GENERATION anywhere (a real old copy, not a stub).
+git -C "$KIT" show origin/main:scripts/panoply.sh > "$R/scripts/panoply.sh"
+chmod +x "$R/scripts/panoply.sh"
+if grep -q '_PANOPLY_GENERATION' "$R/scripts/panoply.sh"; then
+  _bad "case 13 fixture is a marker-less old doctor" "origin/main already carries a marker — the fixture is not an old copy"
+else
+  # The CURRENT doctor, run in that repo, must call it self-stale — never OK.
+  ( cd "$R" && sh "$DOC" check ) >/dev/null 2>&1
+  _st=$?
+  if [ "$_st" = 15 ]; then _ok "stale repo doctor is reported self-stale (exit 15)"; else _bad "stale repo doctor is reported self-stale" "got exit $_st, want 15"; fi
+  # Capture the text without a `A && B || C` chain (SC2015: C may run when A is true). The subshell
+  # always runs; its non-zero exit is expected and discarded deliberately.
+  ( cd "$R" && sh "$DOC" check ) >"$WORK/case13.out" 2>&1
+  _okso="$(cat "$WORK/case13.out")"
+  if printf '%s' "$_okso" | grep -q 'OK —'; then
+    _bad "stale repo doctor is NOT reported OK" "a modern doctor claimed OK over an old copy — the false green survived"
+  else
+    _ok "stale repo doctor is NOT reported OK"
+  fi
+fi
+
+# --- case 13a (M1, running a marker-less copy directly): it must refuse, not claim OK -------------
+# The direct false-green path: an adopter runs its OWN marker-less copy. It cannot report self-stale
+# (it predates the code), but a marker-less doctor must NOT be able to certify a repo it validates
+# against a superseded layout. The new doctor's own guard is the `_mygen`-empty branch, so exercising
+# it here proves the branch is reachable: strip the marker from a copy and run it.
+R="$(_new_repo markerlesscopy)"
+_make_adopted "$R"
+{ printf '#!/usr/bin/env sh\n'; grep -v '^_PANOPLY_GENERATION=' "$DOC" | grep -vF "\$_PANOPLY_GENERATION"; } > "$R/scripts/panoply.sh"
+chmod +x "$R/scripts/panoply.sh"
+( cd "$R" && sh scripts/panoply.sh check ) >/dev/null 2>&1
+_st=$?
+if [ "$_st" = 15 ]; then
+  _ok "a marker-less running copy refuses to certify (exit 15)"
+else
+  _bad "a marker-less running copy refuses to certify" "got exit $_st, want 15 — the copy validated against its own obsolete layout"
+fi
+
+# --- case 13b (M1 control): a copy of the CURRENT doctor on a compliant repo still passes ---------
+# The detection must not be an always-red gate: a copy of the current doctor, on a repo it built
+# correctly, must still exit 0. This is the positive control that makes case 13 evidence.
+R="$(_new_repo currentcopydoctor)"
+_make_adopted "$R"
+cp "$DOC" "$R/scripts/panoply.sh"
+( cd "$R" && sh scripts/panoply.sh check --quiet ) >/dev/null 2>&1
+_st=$?
+if [ "$_st" = 0 ]; then _ok "current copy on a compliant repo still passes (exit 0)"; else _bad "current copy positive control" "got exit $_st, want 0"; fi
+
+# --- case 13c (M1, reachable-source): a copy whose generation DISAGREES with a reachable source ----
+# The second tell: when a source IS reachable and its generation differs from the copy's, that is proof.
+# Simulate by pointing PANOPLY_KIT_ROOT at a source carrying a DIFFERENT generation marker.
+R="$(_new_repo selsrc)"
+_make_adopted "$R"
+cp "$DOC" "$R/scripts/panoply.sh"
+_fakesrc="$WORK/fake-kit-src"
+mkdir -p "$_fakesrc/scripts"
+sed 's/^_PANOPLY_GENERATION=".*"/_PANOPLY_GENERATION="layout-agents-FUTURE"/' "$DOC" > "$_fakesrc/scripts/panoply.sh"
+( cd "$R" && PANOPLY_KIT_ROOT="$_fakesrc" sh scripts/panoply.sh check ) >/dev/null 2>&1
+_st=$?
+if [ "$_st" = 15 ]; then _ok "copy disagrees with reachable source -> self-stale (exit 15)"; else _bad "source-generation mismatch" "got exit $_st, want 15"; fi
+
+# --- case 14 (ADVERSARIAL, M3): --force-scripts must leave a RECOVERABLE backup ------------------
+# The owner-verified defect: --force-scripts overwrote a locally-edited script with no .bak and no
+# stated location; recovery was only via git. Assert the pre-overwrite bytes survive in a backup and
+# that the command names where they went.
+R="$(_new_repo forcebackup)"
+( cd "$R" && sh "$DOC" apply ) >/dev/null 2>&1
+printf '\n# IRREPLACEABLE LOCAL WORK\n' >> "$R/scripts/check-docs.sh"
+_out="$( cd "$R" && sh "$DOC" apply --force-scripts 2>&1 )"
+_bak="$(find "$R/scripts" -maxdepth 1 -name 'check-docs.sh.panoply-bak*' 2>/dev/null | head -1)"
+if [ -n "$_bak" ] && grep -q 'IRREPLACEABLE LOCAL WORK' "$_bak"; then
+  _ok "--force-scripts leaves a recoverable backup with the pre-overwrite bytes"
+else
+  _bad "--force-scripts leaves a recoverable backup" "no backup carrying the local work"
+fi
+if printf '%s' "$_out" | grep -q 'previous copy saved to scripts/check-docs.sh.panoply-bak'; then
+  _ok "--force-scripts names the backup path"
+else
+  _bad "--force-scripts names the backup path" "the backup location was not printed"
+fi
+# and no spurious backup when there is nothing to overwrite (a clean script is not backed up)
+_before="$(find "$R/scripts" -maxdepth 1 -name 'sync-agents.sh.panoply-bak*' 2>/dev/null | wc -l | tr -d ' ')"
 ( cd "$R" && sh "$DOC" apply --force-scripts ) >/dev/null 2>&1
-if grep -q 'LOCAL CUSTOMIZATION MARKER' "$R/scripts/check-docs.sh"; then
-  _bad "--force-scripts replaces the script" "marker survived the forced refresh"
+_after="$(find "$R/scripts" -maxdepth 1 -name 'sync-agents.sh.panoply-bak*' 2>/dev/null | wc -l | tr -d ' ')"
+if [ "$_before" = "$_after" ]; then
+  _ok "--force-scripts backs up nothing it did not overwrite"
 else
-  _ok "--force-scripts replaces the script"
+  _bad "--force-scripts backs up nothing it did not overwrite" "a matching script grew a backup"
 fi
+
+# --- case 15 (M4): migrate translates an OLD-layout adopter and reports it FIRST ------------------
+# Build an adopter-shaped OLD-layout repo (docs/claude + .claude/rules), then migrate it. Assert: the
+# translation is reported, the new tree is seeded from the repo's own adapted content, the old tree is
+# NOT deleted, and afterwards the repo is on the current layout.
+R="$(_new_repo oldlayout)"
+_make_adopted "$R"
+# Convert to old layout: move the new tree into the old names.
+mkdir -p "$R/docs/claude" "$R/.claude/rules"
+mv "$R"/docs/agents/* "$R/docs/claude/" 2>/dev/null || true
+mv "$R"/.agents/rules/* "$R/.claude/rules/" 2>/dev/null || true
+rm -rf "$R/docs/agents" "$R/.agents/rules"
+# Give the fixture a REAL old doctor (from the kit's own main — a pre-marker copy), as an adopter would
+# actually carry, so the self-stale tell (c) is exercised and migrate's doctor-refresh has work to do.
+git -C "$KIT" show origin/main:scripts/panoply.sh > "$R/scripts/panoply.sh"
+chmod +x "$R/scripts/panoply.sh"
+# sanity: the CURRENT doctor must call it self-stale (the repo runs an old copy) — exit 15, not 11.
+assert_exit "old-layout repo with an old doctor is self-stale to the current doctor" 15 "$R"
+_mout="$( cd "$R" && sh "$DOC" migrate 2>&1 )"
+if printf '%s' "$_mout" | grep -q 'docs/claude/     -> docs/agents/'; then
+  _ok "migrate reports the layout translation before changing anything"
+else
+  _bad "migrate reports the translation" "no translation report in migrate output"
+fi
+if [ -d "$R/docs/claude" ]; then
+  _ok "migrate leaves the old tree in place for review"
+else
+  _bad "migrate leaves the old tree in place" "the old tree was deleted without review"
+fi
+if [ -f "$R/docs/agents/roadmap.md" ] && [ -d "$R/.agents/rules" ]; then
+  _ok "migrate seeds the current layout"
+else
+  _bad "migrate seeds the current layout" "docs/agents/roadmap.md or .agents/rules still absent"
+fi
+# migrate must refresh the doctor itself (backing up the old copy), so the next check runs the current
+# one. Without this the repo keeps running the stale copy it was told to replace.
+if [ -f "$R/scripts/panoply.sh.panoply-bak" ] && grep -q '_PANOPLY_GENERATION' "$R/scripts/panoply.sh"; then
+  _ok "migrate refreshes the doctor, backing up the old copy"
+else
+  _bad "migrate refreshes the doctor" "the old doctor survived migrate, or no backup was written"
+fi
+# and the refreshed doctor must no longer report self-stale.
+( cd "$R" && sh scripts/panoply.sh check ) >/dev/null 2>&1
+_st=$?
+if [ "$_st" != 15 ]; then
+  _ok "after migrate the repo's own doctor is no longer self-stale (exit $_st)"
+else
+  _bad "after migrate the repo's own doctor is no longer self-stale" "still exit 15"
+fi
+
+# --- case 16 (ADVERSARIAL): a LYING STAMP is caught, and apply corrects it ----------------------
+# The lying stamp is what the old apply produced on a drifted repo: it certified code that was not
+# installed. A compliant repo carrying a stamp that disagrees with the kit must be reported stale, and
+# apply must rewrite the stamp to the truth — never leave the lie in place.
+R="$(_new_repo lyingstamp)"
+_make_adopted "$R"
+# The lie: claim a version the kit is not, as re-stamping a drifted repo did.
+sed -i 's/^kit_version: .*/kit_version: v1.4.0/' "$R/.panoply-version"
+sed -i 's/^kit_sha: .*/kit_sha: deadbeef/' "$R/.panoply-version"
+assert_exit "a lying stamp is caught as stale" 12 "$R"
+( cd "$R" && sh "$DOC" apply ) >/dev/null 2>&1
+_stamp_after="$(sed -n 's/^kit_version:[[:space:]]*//p' "$R/.panoply-version" | head -1)"
+if [ "$_stamp_after" != "v1.4.0" ] && [ "$_stamp_after" = "$("$DOC" version)" ]; then
+  _ok "apply corrects a lying stamp to the kit's version ('$_stamp_after')"
+else
+  _bad "apply corrects a lying stamp" "stamp still says '$_stamp_after'"
+fi
+assert_exit "after correction the repo is current" 0 "$R"
 
 echo
 if [ "$fail" = 0 ]; then printf 'PANOPLY.TEST: all green (%d checks)\n' "$pass"; exit 0; fi

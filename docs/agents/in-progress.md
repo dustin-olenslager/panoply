@@ -23,6 +23,7 @@ entry to `completed-features.md`.
 | 3 | The Algorithm — five-step pass, in the rules, in every mirror, and in Hermes (injection + gate) | governance | The Algorithm | `governance/execution-algorithm/plan.md` | In progress — M4 of 5 | Kit half (M1–M3) done and canary-green; next step = open the ONE PR on `feat/execution-algorithm`, then build the `execution-algorithm` Hermes plugin (M4) and the cadence report (M5). Do NOT open a parallel rule edit for the same modules |
 | 4 | Scope the expert-review gate to the change, not the tree | governance | Mechanical enforcement | `governance/expert-review-scope/plan.md` | In review | PR open on `fix/expert-review-gate`; next step = merge, then move the folder into `governance/completed/` and add a `completed-features.md` row |
 | 5 | Domain expertise and design in the plan | governance | Domain expertise & design in planning | `governance/domain-expert-planning/plan.md` | In review | PR open on `feat/planning-panel`; next step = owner review + merge, then move the folder into `governance/completed/`, add the `completed-features.md` row, and delete row 5 |
+| 6 | Make the kit updateable — self-detecting doctor, truthful apply, recoverable force, migrate path | governance | Kit self-update | `governance/kit-self-update/plan.md` | In review | PR open on `fix/self-update`; next step = owner review + merge |
 
 **Status vocabulary:** `Not started` · `In progress — milestone N of M` · `Blocked — <on what>` ·
 `In review` · `Done — archiving`.

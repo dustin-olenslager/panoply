@@ -62,6 +62,34 @@ reality — commands that no longer exist, stale docs, new stack elements with n
 import-direction drift. Its sibling `/assess-stack` asks the prior question: is the stack itself still
 the right choice?
 
+## Pulling in kit fixes (the update path)
+
+A repo that already adopted the kit keeps its **own copy** of the kit's scripts and rule modules, so a
+kit fix does not reach it by itself. Three commands cover the whole lifecycle, and none of them pulls
+from the network — a rule change is **reviewed**, never silently overwritten:
+
+```
+sh scripts/panoply.sh check        # is this repo on the current kit? (exit 0 = yes)
+sh scripts/panoply.sh apply        # refresh the deterministic half; prints ADDED/KEPT/DRIFTED per file
+sh scripts/panoply.sh migrate      # carry an OLD-layout repo onto the current layout
+```
+
+- **`check` never lies about which copy is stale.** The doctor embeds a *generation* marker; when it
+  carries none, when a reachable kit source disagrees, or when the repo's own committed doctor is an
+  older generation, it reports `SELF-STALE` (exit 15) instead of a clean `OK`. A doctor that cannot
+  verify refuses rather than fail open.
+- **`apply` tells the truth.** Every managed file it considers prints its disposition — `ADDED`,
+  `KEPT` (yours wins), `DRIFTED` (differs and was **not** brought current), `FORCED` (replaced, with a
+  backup named). If anything stayed drifted, the stamp reads `<version>+drifted` and `apply` exits 12;
+  a stamp certifies the *state*, never the attempt.
+- **`--force-scripts` is recoverable.** Before it overwrites a locally-edited file it writes
+  `scripts/<file>.panoply-bak` and says where. Review the kit `CHANGELOG` before reaching for it.
+- **`migrate`** translates an old-layout repo (`docs/claude/` + `.claude/rules/`) onto the current one
+  (`docs/agents/` + `.agents/rules/`), reporting the translation first, copying your adapted content
+  forward, leaving the old tree in place for you to review, and refreshing the doctor itself.
+
+The escape hatch `PANOPLY_OFF=1` disables `check` entirely for a repo mid-migration.
+
 ## Using the agent?
 
 Run `scripts/sync-agents.sh` to generate the tool-native mirror files for whichever agent or LLM platform you use. These files are gitignored in the kit so the canonical source stays agent-agnostic, but they live in your working tree and are read by your tool. Re-run `sync-agents.sh` whenever you edit a rule module.

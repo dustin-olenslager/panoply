@@ -120,18 +120,31 @@ can run (Hermes, any agent, CI — not just the agent):
 
     sh scripts/panoply.sh check          # 0 current · 10 not applied · 11 partial · 12 stale
                                          # 13 unadapted (placeholders left) · 14 mirrors drifted
+                                         # 15 the DOCTOR ITSELF is stale — see below
 
 A non-zero result means stop and adopt:
 
+    sh scripts/panoply.sh migrate        # only if 15: carry an OLD-layout repo forward, then review
     sh scripts/panoply.sh apply          # deterministic seeding + the agent checklist
     sh scripts/sync-agents.sh            # regenerate every tool mirror
     sh scripts/panoply.sh check          # must exit 0 before other work begins
 
+**Exit 15 (`SELF-STALE`) is special: this repo's `scripts/panoply.sh` is an older kit generation, so
+EVERY verdict it prints is against a layout the current kit no longer uses** — the false green that
+lets a drifted repo believe it is current. `migrate` translates an old-layout repo
+(`docs/claude/` + `.claude/rules/`) onto the current one (`docs/agents/` + `.agents/rules/`), reports
+the translation before performing it, and refreshes the doctor itself (backing up the old copy). It
+never deletes the old tree — review it and remove it yourself. Nothing pulls from the network: a kit
+fix is REVIEWED, never silently overwritten.
+
 Do the judgement half the checklist names (fill every `{{TOKEN}}` from this project's OWN manifests,
 prune the `MODULE:` blocks that do not apply, merge — never overwrite — a pre-existing
 AGENTS.md`). A half-applied kit fails its own doc gate and looks like a doc bug, so
-finish it or revert it; do not leave it partial. `PANOPLY_OFF=1` exists for a deliberate exception —
-say plainly that you used it, so the choice is reviewed rather than assumed.
+finish it or revert it; do not leave it partial. `apply` prints a per-file disposition
+(`ADDED`/`KEPT`/`DRIFTED`/`FORCED`) and, when any managed file stays different from the kit, writes a
+`<version>+drifted` stamp and exits 12 — a stamp certifies the state, never the attempt.
+`PANOPLY_OFF=1` exists for a deliberate exception — say plainly that you used it, so the choice is
+reviewed rather than assumed.
 
 ### MUST NOT — hard guardrails
 
