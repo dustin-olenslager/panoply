@@ -8,7 +8,7 @@
 # .agents/rules/ it cannot follow. AGENTS.md is different: its <!-- PANOPLY:RULES:BEGIN/END --> block is
 # refilled with a generated INDEX (module → one-line description → path), NOT the bodies. AGENTS.md is
 # the hub read by AGENTS.md-native tools, but it is also the file some runtimes load and truncate (an
-# early version inlined ~157KB of bodies there, twice the corpus, and a ~20K cap silently dropped the
+# early version inlined ~157KB of bodies there, twice the corpus, and the loader's cap dropped the
 # middle). The index keeps AGENTS.md small and honest: the rule text lives ONCE under .agents/rules/.
 # Never hand-edit a mirror or the AGENTS.md rules block; edit AGENTS.md (preamble) or .agents/rules/*.md
 # (bodies) and re-run. POSIX sh, no runtime deps — Git Bash, WSL, macOS, Linux, CI.
@@ -27,7 +27,7 @@ CHECK=0
 
 # --- The rule modules, in read order. Curated order first (clean-architecture is the premise every
 #     other module inherits from), then any other .agents/rules/*.md not listed, so a newly added module
-#     is never silently dropped. Missing modules (pruned by /adapt) are skipped. ---
+#     is never dropped without a marker. Missing modules (pruned by /adapt) are skipped. ---
 ORDER="algorithm spec clean-architecture workflow quality-bar git-workflow documentation code-style testing error-handling database data-modeling api-design frontend design-system ai-features agent-readiness"
 MODULES=""
 for m in $ORDER; do
@@ -52,7 +52,7 @@ NOTE="> **This file is an INDEX, not the ruleset.** It carries the universal pre
 >
 > - **Single-file mirrors (this file)** carry the index only. They are read whole by a tool that also
 >   has file access, so a named path it can open is not a pointer into nowhere — and inlining every
->   body made a ~184KB file that harnesses **silently truncated** at their cap, so it was neither
+>   body made a ~184KB file that a loader caps and cuts a middle band out of, so it was neither
 >   small nor complete while claiming to be both. \`AGENTS.md\` was already an index for this reason;
 >   these files now match it.
 > - **Per-rule modules** (\`.cursor/rules/*.mdc\`, \`.agents/rules/*.mdc\`) carry each rule's FULL body
@@ -90,7 +90,7 @@ rule_desc() { # $1 = module basename
 # AGENTS.md renders an INDEX, not the rule bodies. This is deliberate: AGENTS.md is read by
 # AGENTS.md-native tools that cannot follow `@`-imports, but it is also the file Hermes loads and
 # truncates at ~20,000 chars — so inlining the full ~157KB corpus there did NOT achieve the
-# self-containment it claimed (the middle was silently dropped), while contradicting the kit's own
+# self-containment it claimed (the loader drops a middle band and says so), while contradicting the kit's own
 # "one fact, one home" doctrine by shipping every rule body twice. The index names each module, its
 # one-line description, and the path to read. The full bodies stay canonical under .agents/rules/*.md.
 render_index() {
@@ -126,7 +126,7 @@ put() { # $1 = repo-relative path
 # A mirror = frontmatter (optional) + preamble + the rules INDEX (not the rule bodies).
 #
 # The bodies are deliberately NOT inlined. Inlining every module produced a ~184KB file per tool —
-# ~47,000 tokens read at session start by any tool that loads it — while being silently truncated by
+# ~47,000 tokens read at session start by any tool that loads it — while being cut by the loader's
 # harnesses that cap the file, so it neither fit nor was actually complete. `AGENTS.md` was already
 # converted to an index for this reason (see render_index above); the mirrors were left behind and are
 # now consistent with it. One fact, one home: the bodies stay canonical under `.agents/rules/*.md`.

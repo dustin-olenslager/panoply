@@ -153,10 +153,13 @@ case "$MODE" in
       echo "doc-map: DOC_MAP_OFF=1 — check skipped"; exit 0
     fi
     # --- the truncation budget -----------------------------------------------------------------
-    # A file that a harness reads WHOLE and truncates is worse than a large file that is merely
-    # large: the reader gets a silent prefix and no error. AGENTS.md is read by Hermes at a ~20,000
-    # char cap, so its headroom is the number that matters — and it is the file that, if truncated,
-    # loses the rules index that tells an agent where everything else is.
+    # A file a harness reads WHOLE and truncates loses a MIDDLE band of itself. Hermes caps a
+    # context file at max(20_000, context_window * 4 * 0.06) chars — head 70% + tail 20% survive.
+    # So 20,000 is the FLOOR (an 8K window), not a flat ceiling: a 128K session caps at 30,720 and a
+    # 200K one at 48,000. AGENTS.md's headroom is the number that matters, and the budget below uses
+    # the floor so it is safe on the smallest window; on a large window the real headroom is bigger.
+    # Truncation is reported, not silent (the loader prints what it dropped and leaves a marker) — but
+    # a truncated read still loses the rules index that tells an agent where everything else is.
     # Only files a loader reads whole are budgeted. The changelog and command docs are large, but
     # nothing reads them whole at session start; they are read on demand and in parts.
     # AGENTS.md is the file a harness reads whole and caps; its headroom is the number that matters.
@@ -166,8 +169,9 @@ case "$MODE" in
     if [ -f "$bf" ]; then
       sz=$(wc -c < "$bf" | tr -d ' ')
       if [ "$sz" -ge "$cap" ]; then
-        echo "doc-map: $bf is $sz bytes, at or over the $cap-byte cap its loader truncates at." >&2
-        echo "  A truncated read is silently wrong. Move detail into .agents/rules/ or docs/agents/." >&2
+        echo "doc-map: $bf is $sz bytes, at or over the $cap-byte floor a small-window loader caps at." >&2
+        echo "  A truncated read drops a middle band (the loader reports it, but the loss is still real)." >&2
+        echo "  Move detail into .agents/rules/ or docs/agents/ — do not raise the floor." >&2
         budget_fail=1
       fi
     fi

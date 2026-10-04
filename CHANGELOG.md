@@ -1,5 +1,14 @@
 # Changelog — panoply
 
+FIX — the kit's own two false statements about the context-file cap.
+
+`doc-map.sh` and `sync-agents.sh` both presented 20,000 as a flat ceiling and described
+truncation as SILENT. Both are wrong. Verified in Hermes source (`agent/prompt_builder.py`):
+the cap is `max(20_000, context_window * 4 * 0.06)` — so 20,000 is the FLOOR an 8K window
+hits (a 128K session caps at 30,720; a 200K one at 48,000) — and truncation is REPORTED,
+with the dropped span named and a `read_file` pointer to the full text. An adopter sized a
+32KB AGENTS.md to defend against the wrong number because the kit called a floor a wall.
+
 Versions the **kit itself**, not any project it is applied to. When you edit a rule, command, agent,
 or setting in this template, add a line here and tag a release (`vMAJOR.MINOR.PATCH`). This is the
 human-readable "what governance changed between kit-versions" surface: read it before pulling a newer
