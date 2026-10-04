@@ -12,6 +12,19 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — **fix two gates that ignored a markdown-wrapped `n/a`**: `check-wireframe.sh` and
+  `factory-detect.sh` matched the wireframe opt-out only when whitespace followed the colon, but a real
+  spec line reads `- **Wireframe:** \`n/a — reason\``. The opt-out silently did not match and the keyword
+  fallback then read the *reason text* ("no user-facing surface") as evidence the spec WAS user-facing —
+  both halves of the rule failing the same way. The pattern is now decoration-tolerant
+  (`[^[:alnum:]]*n/a`), with a regression canary. Found by running the gates on their own spec, which is
+  how the M6 end-to-end proof was designed to find exactly this class of defect.
+- MINOR — **the factory's own build replayed through its own phases (M6)**: the archived harness's
+  capability accounting from the real 183-file tree (no unaccounted row), all 6 ADRs copied as history,
+  the four non-duplicate skills landed, and two more detector defects found by the replay — `completed/`
+  leaking into the feature list, and the queue consulted before the branch. Escape hatch unchanged.
+
+
 - MINOR — **plan→code reconciliation (M5)**: `scripts/check-milestone-evidence.sh` + 11 canaries, wired
   into CI and the adopter template. A completed milestone (`- [x]`) must name resolvable evidence — a
   backticked path that exists, or a `PR #NN` that resolves — closing the second seam the audit named

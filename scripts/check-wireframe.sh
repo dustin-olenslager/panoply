@@ -131,7 +131,7 @@ fi
 # a bare keyword match cannot tell a disclaimer ("no screen, internal only") from a requirement.
 _user_facing() {
   _s="$1"
-  if grep -qiE '(user-facing|wireframe)[^:]*:[[:space:]]*n/a' "$_s" 2>/dev/null; then
+  if grep -qiE '(user-facing|wireframe)[^:]*:[^[:alnum:]]*n/a' "$_s" 2>/dev/null; then
     return 1     # explicitly not user-facing
   fi
   grep -qiE 'user (sees|can|clicks|opens|taps)|user stories|what a user can do|screen|page|form|dashboard' "$_s" 2>/dev/null
@@ -140,7 +140,7 @@ _user_facing() {
 # Does the spec carry a REQUIRED `n/a — <reason>`? A bare `n/a` is refused: the reason is the whole
 # point, because an n/a without one cannot be told apart from skipping the rung by accident.
 _n_a_reason() {
-  grep -iE '(user-facing|wireframe)[^:]*:[[:space:]]*n/a[[:space:]]*[—:-][[:space:]]*[^[:space:]]' "$1" 2>/dev/null
+  grep -iE '(user-facing|wireframe)[^:]*:[^[:alnum:]]*n/a[^[:alnum:]]*[—:-][[:space:]]*[^[:space:]]' "$1" 2>/dev/null
 }
 
 FAILED=0
@@ -159,7 +159,7 @@ for spec in $TOUCHED_SPECS; do
     continue                      # an explicit, reasoned opt-out: legal, and recorded
   fi
 
-  if grep -qiE '(user-facing|wireframe)[^:]*:[[:space:]]*n/a' "$spec" 2>/dev/null; then
+  if grep -qiE '(user-facing|wireframe)[^:]*:[^[:alnum:]]*n/a' "$spec" 2>/dev/null; then
     FAILED=1
     REPORT="$REPORT$spec
     records 'n/a' for the wireframe rung with NO reason. The reason is required — without it, a

@@ -116,7 +116,14 @@ ev "O4 governance spine files present: $SPINE/2"
 FEATURES=""
 for d in docs/agents/*/*/; do
   [ -d "$d" ] || continue
-  case "$d" in */_templates/*|*/completed/*) continue ;; esac
+  # The trailing slash matters: the directory itself is ".../completed/", which "*/completed/*" does
+  # NOT match — only its children. Observed on this repo: "completed/" appeared in the feature list and
+  # was then eligible to be named the active feature.
+  # Normalise the trailing slash FIRST, then one pattern per excluded dir. Listing both
+  # "*/completed/*" and "*/completed/" is redundant — the first already covers the second's
+  # contents, and shellcheck is right to flag it.
+  _dn="${d%/}"
+  case "$_dn" in */_templates|*/_templates/*|*/completed|*/completed/*) continue ;; esac
   [ -f "$d/spec.md" ] || [ -f "$d/plan.md" ] || continue
   FEATURES="$FEATURES $d"
 done
@@ -158,11 +165,35 @@ ev "O6 specs with an unresolved marker: $NEEDS_CLAR"
 # The feature the queue names, else the newest by mtime. This is the "walk from the END backward"
 # step: pick the one being worked on, not the alphabetically first.
 ACTIVE=""
-for f in $FEATURES; do
-  slug="$(basename "$f")"
-  [ -f docs/agents/in-progress.md ] || continue
-  grep -q "$slug" docs/agents/in-progress.md 2>/dev/null && { ACTIVE="$f"; break; }
-done
+
+# FIRST: the branch. A branch name is the most current statement of what is being worked on — it is
+# written at the moment work starts and changes when the work changes, whereas the queue is a row
+# somebody has to remember to update. Observed on this repo: the queue's first slug match picked a stale
+# plan-only folder while the branch plainly named the work in progress.
+BRANCH_NOW="$(git branch --show-current 2>/dev/null || echo '')"
+if [ -n "$BRANCH_NOW" ]; then
+  # Reduce a branch to comparable tokens: feat/m6-consolidation -> m6 consolidation.
+  _b="$(printf '%s' "$BRANCH_NOW" | tr '[:upper:]' '[:lower:]' | sed 's|^.*/||; s/[-_]/ /g')"
+  for f in $FEATURES; do
+    slug="$(basename "$f" | tr '[:upper:]' '[:lower:]' | sed 's/[-_]/ /g')"
+    # Every meaningful token of the slug must appear in the branch name — but a one-token slug is too
+    # weak a match (a folder called "factory" would match half the fleet), so require >=2 tokens.
+    _toks=0; _hit=0
+    for t in $slug; do
+      _toks=$((_toks + 1))
+      case " $_b " in *" $t "*) _hit=$((_hit + 1)) ;; esac
+    done
+    if [ "$_toks" -ge 2 ] && [ "$_hit" -eq "$_toks" ]; then ACTIVE="$f"; break; fi
+  done
+fi
+
+if [ -z "$ACTIVE" ]; then
+  for f in $FEATURES; do
+    slug="$(basename "$f")"
+    [ -f docs/agents/in-progress.md ] || continue
+    grep -q "$slug" docs/agents/in-progress.md 2>/dev/null && { ACTIVE="$f"; break; }
+  done
+fi
 if [ -z "$ACTIVE" ] && [ -n "$(printf '%s' "$FEATURES" | tr -d ' ')" ]; then
   # Newest by mtime, resolved in the shell rather than by `ls`: no external process, no assumptions
   # about filenames, and the tie-break is deterministic (first wins) instead of depending on sort order.
@@ -252,7 +283,13 @@ else
   # "no user-facing surface" is never dragged into the wireframe rung by its own disclaimer.
   USER_FACING=0
   if [ -f "$ACTIVE/spec.md" ]; then
-    if grep -qiE '(user-facing|wireframe)[^:]*:[[:space:]]*n/a' "$ACTIVE/spec.md" 2>/dev/null; then
+    # Allow markdown decoration between the label and the value: a spec line typically reads
+    # "- **Wireframe:** `n/a — reason`", so a backtick (and bold markers) may sit between the colon
+    # and "n/a". The original pattern required whitespace only, so a markdown-wrapped n/a did NOT
+    # match the opt-out and fell through to the keyword test — where the reason text itself
+    # ("no user-facing surface") then made the spec look user-facing. Both halves of the rule failing
+    # at once, in the same direction.
+    if grep -qiE '(user-facing|wireframe)[^:]*:[^[:alnum:]]*n/a' "$ACTIVE/spec.md" 2>/dev/null; then
       USER_FACING=0
     elif grep -qiE 'user (sees|can|clicks|opens|taps)|user stories|what a user can do|screen|page|form|dashboard' "$ACTIVE/spec.md" 2>/dev/null; then
       USER_FACING=1

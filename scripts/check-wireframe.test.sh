@@ -182,6 +182,22 @@ if printf '%s' "$out" | grep -q 'no spec touched'; then
   ok "a change touching no spec defers to the spec rung explicitly"
 else bad "the gate did not defer explicitly when no spec was touched" "$out"; fi
 
+# case 13: a MARKDOWN-WRAPPED reasoned n/a → PASS. This is the regression that shipped broken: the
+# opt-out pattern required whitespace directly after the colon, but a real spec line reads
+# "- **Wireframe:** `n/a — reason`" — space, then backtick. The opt-out silently did not match, the
+# keyword fallback then read the REASON TEXT ("no user-facing surface") as evidence the spec WAS
+# user-facing, and both halves of the rule failed in the same direction. Caught by running the gate on
+# its own spec, not by a fixture — hence this case.
+r="$(mkrepo pass-markdown-na)"; base="$(git -C "$r" rev-parse HEAD)"
+mkdir -p "$r/docs/agents/core/thing" "$r/src"
+# shellcheck disable=SC2016  # markdown backticks inside the fixture text
+printf '# Spec\n\n- **FR-001**: a migration runner.\n- **Wireframe:** `n/a — no user-facing surface` (a CLI)\n' > "$r/docs/agents/core/thing/spec.md"
+printf 'x\n' > "$r/src/x.ts"
+cmit "$r" "markdown-wrapped n/a"
+rc="$(gate_class "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "a markdown-wrapped reasoned n/a is honoured"
+else bad "a markdown-wrapped reasoned n/a was ignored (got '$rc')"; fi
+
 printf '\ncheck-wireframe canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0
