@@ -12,6 +12,16 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- FIX — **a truncation budget, and an accurate statement of what each mirror is.** `doc-map.sh --check`
+  now refuses when `AGENTS.md` reaches the ~20,000-char cap its own loader truncates at — a truncated
+  read is silently wrong, and it had only ~2.5KB of headroom. A truncated file is worse than a large
+  one: the reader gets a prefix and no error. The mirror notice was also corrected to state the real,
+  deliberate split rather than implying one rule: **single-file mirrors carry the index** (they are
+  read whole by tools that can open a named path), while **per-rule modules carry each rule's full body**
+  (so a tool that loads one file, or cannot follow a path, still gets complete text for the rules that
+  apply to it). Rule bodies remain canonical under `.agents/rules/*.md` — one home, no drifting copy.
+
+
 - FEATURE — **`doc-map.sh` + context-budget canary.** `sh scripts/doc-map.sh` indexes every document
   in the repo — declared purpose, size, freshness — so an agent reads ~2k tokens of index instead of
   grepping and opening files blind. `--json`, `--dir`, `--check`, `DOC_MAP_OFF`; no dependencies.

@@ -152,6 +152,28 @@ case "$MODE" in
     if [ "${DOC_MAP_OFF:-0}" = "1" ]; then
       echo "doc-map: DOC_MAP_OFF=1 — check skipped"; exit 0
     fi
+    # --- the truncation budget -----------------------------------------------------------------
+    # A file that a harness reads WHOLE and truncates is worse than a large file that is merely
+    # large: the reader gets a silent prefix and no error. AGENTS.md is read by Hermes at a ~20,000
+    # char cap, so its headroom is the number that matters — and it is the file that, if truncated,
+    # loses the rules index that tells an agent where everything else is.
+    # Only files a loader reads whole are budgeted. The changelog and command docs are large, but
+    # nothing reads them whole at session start; they are read on demand and in parts.
+    # AGENTS.md is the file a harness reads whole and caps; its headroom is the number that matters.
+    # Add a `bf:cap` pair to this list if another file is ever read whole under a hard cap.
+    budget_fail=0
+    bf="AGENTS.md"; cap=20000
+    if [ -f "$bf" ]; then
+      sz=$(wc -c < "$bf" | tr -d ' ')
+      if [ "$sz" -ge "$cap" ]; then
+        echo "doc-map: $bf is $sz bytes, at or over the $cap-byte cap its loader truncates at." >&2
+        echo "  A truncated read is silently wrong. Move detail into .agents/rules/ or docs/agents/." >&2
+        budget_fail=1
+      fi
+    fi
+    if [ "$budget_fail" = "1" ]; then
+      exit 1
+    fi
     # A RULE module with no `Applies when:` is invisible to the map — this is the map's own
     # dependency, stated as a gate rather than assumed. Only RULE kind is required to have it;
     # specs/plans carry their contract in the plan-doc header instead.

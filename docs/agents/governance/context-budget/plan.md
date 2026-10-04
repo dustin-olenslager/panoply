@@ -106,6 +106,7 @@ a path on a continuation line is invisible to it. Detail goes in Build notes.
 - [x] **M3 — conditional rules stop force-loading** — the Cursor module builder reads each rule's own declared condition; 8 of 20 always-on, 12 scoped. Evidence: `scripts/sync-agents.sh`
 - [x] **M4 — the canary, mutation-tested** — 12 checks; re-inlining the corpus and force-loading every rule are both caught. Evidence: `scripts/doc-map.test.sh`
 - [x] **M5 — wired and documented** — canary registered in the kit's CI and the adopter template; cost section in the documentation doctrine. Evidence: `.github/workflows/verify.yml`
+- [x] **M6 — the truncation budget** — `--check` refuses when `AGENTS.md` reaches its loader's cap (17,492 of ~20,000 bytes); canary proves it can fail. Evidence: `scripts/doc-map.sh`
 
 ## Open questions
 
@@ -133,6 +134,18 @@ None blocking.
 > **gitignored**; my byte-count pipeline returned 0 because the files were filtered out, and I started
 > to read that as a tooling failure rather than as the answer. The real cost is in the working tree
 > (a session reads `CLAUDE.md` at startup), not in clones. Checked before concluding.
+
+> **Build note:** 2026-10-04 — I wrote that the mirrors needed a per-*tool* split ("self-contained for
+> path-blind tools") and recommended it as an option. Checking it showed the premise was wrong: every
+> single-file mirror is identical at 7,078 bytes, and the formats at truncation risk are exactly the
+> ones already converted. The split is by **format**, and it already existed. I said so plainly rather
+> than shipping a budget that would guard nothing. The real measured risk was `AGENTS.md` itself —
+> 17,492 bytes against a ~20,000-char cap, ~2.5KB of headroom — which is now the thing checked.
+
+> **Build note:** 2026-10-04 — `kit-repo` and the other kit repos are **not** propagated to, despite
+> having the same inlining. Its `AGENTS.md` documents the mirrors as deliberately self-contained
+> ("never a pointer it cannot follow"), so overriding that is the owner's decision, not a fix I apply
+> quietly. Held pending that decision.
 
 > **Build note:** 2026-10-04 — `check-expert-review` refused this change in CI and it was **right**: a
 > new script, a new canary and a changed generator is a structural change, and it had no plan doc. I had

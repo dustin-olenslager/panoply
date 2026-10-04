@@ -67,6 +67,22 @@ if [ -d .cursor/rules ]; then
   else bad "api-design.mdc declares a condition but the mirror drops it"; fi
 fi
 
+# --- 5b. the truncation budget: a file a loader reads WHOLE must fit ---------------------------------
+# The real measured risk: AGENTS.md is read by Hermes, which truncates at ~20,000 chars. A truncated
+# read is silently wrong — the reader gets a prefix and no error. This asserts the budget can fail.
+_tmpbak=$(mktemp) || exit 1
+cp AGENTS.md "$_tmpbak" 2>/dev/null || true
+if [ -f AGENTS.md ]; then
+  head -c 25000 /dev/zero | tr '\0' 'x' >> AGENTS.md
+  if sh scripts/doc-map.sh --check >/dev/null 2>&1; then
+    bad "an oversized AGENTS.md was accepted — the truncation budget cannot fail"
+  else
+    ok "an AGENTS.md past its loader's cap is refused"
+  fi
+  cp "$_tmpbak" AGENTS.md
+fi
+rm -f "$_tmpbak"
+
 # --- 6. --check only fails on a RULE missing its condition -------------------------------------
 # The gate's own contract: rule modules must be indexable; other docs need not carry the header.
 sh scripts/doc-map.sh --check >/dev/null 2>&1
