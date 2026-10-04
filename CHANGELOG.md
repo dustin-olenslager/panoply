@@ -12,6 +12,14 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **plan→code reconciliation (M5)**: `scripts/check-milestone-evidence.sh` + 11 canaries, wired
+  into CI and the adopter template. A completed milestone (`- [x]`) must name resolvable evidence — a
+  backticked path that exists, or a `PR #NN` that resolves — closing the second seam the audit named
+  (M1 closed spec→plan). Grades **only the milestone lines the change wrote**, so touching an older plan
+  is not blocked by debt that predates the rule. It cannot tell whether the claim is true, only that
+  evidence was offered and resolves. Escape hatch `MILESTONE_OFF=1`.
+
+
 - MINOR — **the wireframe gate (M4)**: `scripts/check-wireframe.sh` + 12 canaries, wired into CI and the
   adopter template. Presence only — a user-facing change must have `wireframe/index.html` and
   `interviews.md`, or a reasoned `n/a`. It cannot judge whether the screen is good, which stays a review

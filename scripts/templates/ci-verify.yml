@@ -79,6 +79,13 @@ jobs:
       # Presence only: it cannot judge whether the screen is good, which stays a review question.
       - name: Wireframe
         run: sh scripts/check-wireframe.sh --since "${{ github.event.pull_request.base.sha }}"
+
+      # Milestone evidence — a plan-to-code reconciliation: a COMPLETED milestone must name
+      # resolvable evidence (a path that exists, or a PR that resolves). Grade only the
+      # milestone lines this change wrote, so touching an old plan is not blocked by debt
+      # that predates the rule.
+      - name: Milestone evidence
+        run: sh scripts/check-milestone-evidence.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
       - name: Typecheck
@@ -169,6 +176,12 @@ jobs:
       - name: Wireframe gate self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-wireframe.test.sh
+
+      # The milestone gate's canary — proves it still refuses a completed milestone with no
+      # resolvable evidence, and still leaves an open milestone alone.
+      - name: Milestone evidence gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-milestone-evidence.test.sh
 
       # Proves the plan-home gate still refuses a stray plan doc outside the doc spine and passes one
       # in the spine. Drop this step if you pruned the plan-home gate.
