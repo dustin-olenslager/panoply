@@ -12,6 +12,13 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **the factory phase model and detector (M2)**: `scripts/factory-phases.tsv` (the seven phases
+  as data) + `scripts/factory-detect.sh` (the 12 observations and a fixed precedence rule, reporting the
+  phase, the evidence, and the next step) + `.agents/rules/factory-phases.md`. Detection only — acting on
+  a phase is a later milestone, so a wrong answer cannot silently drive the wrong work. 16 canaries, 4
+  mutation-tested. Escape hatch `FACTORY_PHASE_OFF=1`. Cannot see: whether an artifact is any good, or
+  the difference between "milestones ticked" and "actually shipped".
+
 - DOCS — plan doc for the coverage rivet (`docs/agents/governance/spec-plan-coverage/`), with the review
   checklist the expert-review gate requires of a structural change.
 

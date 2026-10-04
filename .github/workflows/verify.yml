@@ -154,6 +154,12 @@ jobs:
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-coverage.test.sh
 
+      # The phase detector's canary — proves it still refuses a non-repo and still finds the
+      # phase each fixture is in. Detection precedes every later rung, so it is proven in CI.
+      - name: Factory phase detector self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/factory-detect.test.sh
+
       # The plan-home gate was CI-wired with no canary of its own; this proves it refuses a stray
       # plan doc outside the doc spine, passes a plan in the spine, and honors PLAN_HOME_OFF.
       - name: Plan-home gate self-test

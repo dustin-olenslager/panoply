@@ -1,0 +1,30 @@
+# The factory's phase table — DATA, not code.
+#
+# Seven phases, in order. Each row is one phase: its id, its name, what must exist for the phase
+# to be finished, and the gate that proves it. `panoply-detect.sh` reads this file; the doctrine
+# (`docs/agents/core/factory/phases.md`) explains it. Two artifacts, one source of truth for the
+# ORDER — the detector never hard-codes the sequence.
+#
+# Why a data file and not a shell case statement: the phase order is a fact about the process, and
+# a fact that lives inside a script can only be read by running the script. As data it is greppable,
+# diffable, and testable — and a repo can be asked "what phase is this?" without executing anything.
+#
+# Columns (tab-separated, `#` comments and blank lines ignored):
+#   id       phase number, 0-6
+#   slug     stable machine name, used in reports and by later rungs
+#   name     human name for the report
+#   artifact the thing that must exist for the phase to be satisfied (checked by the detector)
+#   gate     the script that proves it, or `-` when no gate exists yet (a gap, stated not hidden)
+#
+# Phase 0 exists because a repo whose kit is absent or stale cannot have its phase history trusted:
+# the doctor's exit code is the authority, and everything downstream of ADOPT is a guess until it
+# is on the current kit.
+#
+#id	slug	name	artifact	gate
+0	adopt-audit	Adopt / Audit	current kit (doctor exit 0)	scripts/panoply.sh
+1	spec	Spec	spec.md	scripts/check-spec.sh
+2	wireframe	Wireframe	wireframe/index.html + interviews.md	-
+3	plan	Plan	plan.md with a Next step	scripts/check-plan-home.sh
+4	build	Build	open milestones, a branch off base	-
+5	verify	Verify	a fresh green verify on the branch	-
+6	ship	Ship	merged, folder in completed/	-

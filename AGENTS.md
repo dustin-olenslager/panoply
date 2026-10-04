@@ -237,5 +237,6 @@ block drifts).
 - `design-system` — UI Design System — `.agents/rules/design-system.md`
 - `ai-features` — AI Features & Data Enrichment — `.agents/rules/ai-features.md`
 - `agent-readiness` — Agent Readiness (dual-mode apps) — `.agents/rules/agent-readiness.md`
+- `factory-phases` — The factory phases — `.agents/rules/factory-phases.md`
 
 <!-- PANOPLY:RULES:END -->
