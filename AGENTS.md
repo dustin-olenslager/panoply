@@ -47,11 +47,16 @@ therefore the one that gets skipped. Full doctrine: `.agents/rules/algorithm.md`
 **Write the spec before the plan, on anything structural.** `docs/agents/<area>/<feature>/spec.md` — a
 sibling of the plan — states what a user can DO after this ships and how we will know it worked:
 prioritized user stories, each with an **independent test**, Given/When/Then acceptance scenarios, and
-numbered `MUST` requirements. An unknown is written `[NEEDS CLARIFICATION: <question>]` **and lives only
-in a draft spec** — resolve it (or delete the requirement) before `plan.md` exists, because an ambiguity
-that reaches the plan has already become an unreviewed guess. `scripts/check-spec.sh` refuses a
-structural change with no spec, or with a marker still unresolved. Routine work inside an existing
-pattern is exempt; say so. Full doctrine: `.agents/rules/spec.md`.
+numbered `MUST` requirements. It also names the **industry/domain** the software is built for and
+records **which outside experts were consulted and what they said** — the filmmaker for a film tool,
+the restaurateur for a restaurant tool — with UI/UX as a *planning* input, not a review afterthought
+(two persona files, `ux-designer` and `ux-researcher`, are the invocations). Convenience no longer
+carries: software-role input is not domain input. An unknown is written `[NEEDS CLARIFICATION:
+<question>]` **and lives only in a draft spec** — resolve it (or delete the requirement) before
+`plan.md` exists, because an ambiguity that reaches the plan has already become an unreviewed guess.
+`scripts/check-spec.sh` refuses a structural change with no spec, or with a marker still unresolved.
+**Placeholders until a real person was consulted — never a fabricated quote.** Routine work inside an
+existing pattern is exempt; say so. Full doctrine: `.agents/rules/spec.md`.
 
 In a monorepo the closest `AGENTS.md` to the file you are editing wins; this root file is the default.
 
@@ -160,6 +165,8 @@ whatever the repo has wired server-side (branch protection + required CI). Honor
 | Architecture premise | `.agents/rules/clean-architecture.md` |
 | Whether a thing should exist at all (question/delete/simplify/accelerate/automate) | `.agents/rules/algorithm.md` |
 | What a user can do after this ships, and how we'll know it worked | `.agents/rules/spec.md` + the feature's `spec.md` |
+| The industry/domain this is for, and which outside experts were consulted | the feature's `spec.md` → `## Domain & outside experts` |
+| Planning personas (UX flows, behaviour evidence) | `.agents/personas/README.md` (`ux-designer`, `ux-researcher`) |
 | Code / tests / errors | `.agents/rules/code-style.md`, `testing.md`, `error-handling.md` |
 | Data & interfaces | `.agents/rules/database.md`, `data-modeling.md`, `api-design.md` |
 | Stack, commands, structure | `AGENTS.md` |

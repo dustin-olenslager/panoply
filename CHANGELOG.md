@@ -32,6 +32,45 @@ Semver, applied to governance:
   reproductions; the full 30-row table is `AUDIT-promises.md`. Two behavioural defects are REPORTED,
   not fixed (owner's call): `check-docs.sh`'s ref guard exits 1 where the other four gates exit 2, and
   the conflict gate's `--since` path list can silently narrow. **No gate behaviour changed.**
+- PATCH — the interview check is scoped to specs THIS CHANGE touched. Found by simulation: requiring
+  the section of every spec in the tree failed a change over a pre-existing spec it had nothing to do
+  with — including the kit's own governance specs, which are about the kit rather than a product with
+  users. Same change-scoping rule the expert-review gate needed.
+
+- MINOR — **planning now interviews four user personas (simulated) before any UI/UX or functional
+  decision, and `check-spec.sh` enforces the section exists.** The spec names the project's OWN user
+  personas — domain roles (a producer, a gaffer, an edit assistant, a post supervisor), never software
+  roles — and planning simulates an interview with four of them, recording what each surfaced and
+  **which screen, flow, field or rule it changed**: the interviews are the input to design, not a
+  write-up after it. The artefact states plainly they are SIMULATED role-plays and is never written as
+  a real quote from a real person; a genuinely-interviewed real user supersedes the simulation and is
+  named. `docs/agents/_templates/spec.md` carries the section and a four-row table; `.agents/rules/spec.md`
+  (item 7 + the pass) makes it binding; `scripts/check-spec.sh` refuses a spec that omits it, loosely
+  matching the heading (either word order) and accepting the explicit `n/a — no user-facing surface`
+  form for a repo with no UI. Escape hatch `SPEC_INTERVIEWS_OFF=1`. The canary grew 16 → **21** checks,
+  including the adversarial case and three mutations (detection disabled, heading widened, off-switch
+  dead) proven to go red.
+
+- MAJOR — **the plan never brought in the industry the software is FOR, and 13 persona files were
+  invoked by nothing.** Two connected defects, one change. (1) The spec rung asked for software-role
+  input only; the spec template now carries a **`## Domain & outside experts`** section naming the
+  industry/domain (`{{DOMAIN}}`) and recording each consulted outside practitioner's role and what they
+  said (`<expert role>` / `<what they said>`) — placeholders only, never a fabricated quote — and
+  `.agents/rules/spec.md` (item 6 + the pass + honest limits) and `workflow.md` (Planning Workflow)
+  make it binding. (2) `.agents/personas/` held 12 personas + a README; **no gate, command, or rule
+  invoked any of them**, and `.agents/rules/workflow.md`'s "four default personas" (Security,
+  Performance, Maintainability, UX) mapped to zero files. **10 were deleted**, each mapped to the rule
+  module that already does its job (`ui-designer` restated `design-system.md` almost section for
+  section; `security-engineer`/`code-reviewer` → the Expert Review dimensions; `backend-architect`/
+  `database-optimizer`/`frontend-developer`/`software-architect` → their rule modules; `cto-review` →
+  `quality-bar.md`); **2 were kept and wired into planning** — `ux-designer` and `ux-researcher` are
+  now the spec-time consultations the `## Domain & outside experts` section names, so UI/UX is a
+  *planning* input, not a post-plan review. `workflow.md` now says plainly that its list is four review
+  *dimensions*, not personas. Adapted repos: the persona deletions and the plan/spec template changes
+  need attention; wire the domain section into your spec authoring. **No new gate** — whether a named
+  expert is real is unjudgeable by a section-presence check, which would pass on a fabricated expert
+  and block no real mistake (the honest residue is stated in `spec.md`, not automated). Persona count
+  12 → 2, a counted number.
 
 - MINOR — **the expert-review gate was a file-presence check wearing a review gate's name.** Its two
   required checks were TREE-GLOBAL: `find docs/agents -name plan.md` matched a plan for ANY feature,

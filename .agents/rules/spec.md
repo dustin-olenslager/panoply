@@ -51,6 +51,25 @@ the spine or set `SPEC_GLOB` to the sibling it does keep.
    implementation.
 4. **Measurable success criteria**, technology-agnostic. A number, not an adjective.
 5. **Assumptions**, named explicitly, so a reviewer can challenge a default nobody stated.
+6. **Domain & outside experts** — the industry or domain the software is built FOR, and who outside
+   software was consulted (the filmmaker for a film-production tool, the restaurateur for a restaurant
+   tool) plus what they said. Software-role input is not this: the kit already required architecture,
+   security and review; the mistakes a domain practitioner catches in one sentence are the ones no
+   framework knowledge sees. A project with no user-facing surface writes `n/a — no user-facing surface`;
+   a change with no genuinely-relevant outside expert says so **and why**, in the argued-empty form the
+   Algorithm pass already requires of a deletion list. **Placeholders until a real person was
+   consulted — never a fabricated quote or an invented name.**
+7. **User interviews (4 personas, simulated).** The spec names this project's OWN user personas, and
+   planning **simulates an interview with four of them** before any UI/UX or functionality decision is
+   made. Domain roles, not software roles: for a film-production tool a producer, a gaffer, an edit
+   assistant, a post supervisor. Each interview is recorded with what it surfaced and **which design,
+   screen, flow, field or rule it changed** — the interviews are the INPUT to design, not a summary
+   written after it. An interface decision with no interview behind it is an unreviewed guess, exactly
+   as a structural change with no spec is. **The artefact states plainly that the interviews are
+   SIMULATED role-plays**: they surface requirements and failure modes a software-only view misses,
+   and they are never written as a real quote from a real person. A genuinely-interviewed real user
+   supersedes the simulation for that persona, and is named. A project with no user-facing surface
+   writes `n/a — no user-facing surface` and says why; everything else gets four.
 
 ## The marker rule — the one hard part
 
@@ -77,7 +96,13 @@ that drifts, and the whole reason this kit exists is that unchecked rules drift.
    they expose gaps that a requirements list hides.
 3. **Resolve every marker.** Answer it, or delete the requirement. Ask the owner when the answer is
    genuinely theirs (see `.agents/rules/quality-bar.md` → two options plus a recommendation).
-4. **Then the plan.** `plan.md` in the same folder, linked from the roadmap row, with its `Spec:` field
+4. **Name the domain and the outside experts** (item 6 above) — before the plan, because their input
+   changes which stories and requirements survive, and a practitioner consulted after the plan exists
+   is consulted about a decision already made.
+5. **Interview four user personas** (item 7 above), simulated, and record what each changed. This sits
+   between the spec and the plan because UI/UX and functionality decisions are the ones the interviews
+   must feed — and a design decided before the interviews is a design the interviews cannot correct.
+6. **Then the plan.** `plan.md` in the same folder, linked from the roadmap row, with its `Spec:` field
    pointing at this file — in the same change.
 
 ## What counts as routine (no spec needed)
@@ -104,11 +129,16 @@ whether:
 - the stories are genuinely independently testable,
 - the acceptance scenarios are concrete enough to be tests,
 - the success criteria are measurable, or
+- **whether the named domain expert is real, or whether anyone was actually consulted** — a section-presence
+  check would pass on a fabricated expert and block no real mistake, which is exactly why no gate checks
+  it,
 - the requirements are worth what they cost.
 
 Those stay review questions and belong in the plan doc's review — the `check-expert-review.sh` gate and
-an SME read. **A gate that passes while a requirement went unexamined is a gate measuring the wrong
-thing**, and this one says so in its own source, the same way `check-algorithm.sh` does.
+an independent SME read (a domain practitioner where the feature is domain-facing; the skill's
+`adversary-review` rubric is the general form). **A gate that passes while a requirement went unexamined
+— or while the industry was never asked — is a gate measuring the wrong thing**, and this one says so in
+its own source, the same way `check-algorithm.sh` does.
 
 ## Enforcement — the honest version
 
@@ -123,6 +153,7 @@ Consistent with the kit everywhere else: prose is a suggestion, and the binding 
   `*.md` and can never block the write that satisfies it; the canary
   (`scripts/check-spec.test.sh`) asserts the refuse → apply the remedy → allow round trip closes.
 - **`SPEC_OFF=1`** is the stated escape hatch for a deliberate exception. Say plainly that you used it,
-  so the choice is reviewed rather than assumed.
+  so the choice is reviewed rather than assumed. **`SPEC_INTERVIEWS_OFF=1`** is the narrower exception
+  for the interview-section check alone, when the section is deliberately not required.
 - **The honest floor:** a client-side hook is convenience, never enforcement — any agent can bypass it
   with `git commit --no-verify`. Only a required CI status check actually holds.

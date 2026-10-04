@@ -1,26 +1,44 @@
 # Agent Library
 
-Subagents the agent can spawn for focused work. Each runs in its own context window and returns a written result to the caller — so the win is **isolation and depth**, and the cost is that the caller never sees the agent's reasoning, only its final report.
+Subagents the agent can spawn for focused work. Each runs in its own context window and returns a
+written result to the caller — so the win is **isolation and depth**, and the cost is that the caller
+never sees the agent's reasoning, only its final report.
 
-**The general rule:** do it inline when you already know the file and the fix. Spawn an agent when the work needs its own sweep of the codebase, its own long output, or a reviewer who has not already convinced themselves the code is fine.
+**The rule that shrank this library: a persona file nothing invokes does not survive.** Every file here
+is named as a required consultation by a rule, and the invocation is stated below. The library was
+previously 12 personas carried in by an agent-agnostic refactor; none was referenced by any rule, gate,
+or command, and six of them duplicated `.agents/rules/*.md` almost section for section. They were
+deleted rather than left to rot — the deletion mapping lives in the governance plan that landed this.
+**Do not add a persona here without naming, in a rule module, the step that invokes it.** A file with no
+invoker is the dead weight this library's own doctrine exists to remove.
 
-| Agent | What it's for | Reach for it when — vs. inline |
+| Persona | What it's for | How it is invoked (the rule that names it) |
 |---|---|---|
-| `backend-architect` | Server-side system design: services, schemas, APIs, caching, scale | **Agent:** a new subsystem, a data model that will outlive the sprint, an endpoint set to design. **Inline:** adding one field or one route to an existing pattern. |
-| `code-reviewer` | Correctness, security, maintainability, and performance review of a diff | **Agent:** any non-trivial diff, and always before merge — a fresh context catches what the author's cannot. **Inline:** a one-line change you can re-read in ten seconds. |
-| `cto-review` | Long-horizon review of a plan, design, or milestone; Critical/Significant/Minor verdict | **Agent:** milestone plans, architectural decisions, anything with cross-cutting impact. **Inline:** never — the value is the independent judgment. |
-| `database-optimizer` | Index selection, query plans, N+1 elimination, migration safety | **Agent:** a slow query, a schema for a table that will grow, a migration touching live data. **Inline:** adding a nullable column with an obvious index. |
-| `frontend-developer` | Building UI: components, state, performance, accessibility | **Agent:** a whole screen or feature, or a performance problem needing measurement. **Inline:** copy tweaks, one prop, a styling nudge. |
-| `security-engineer` | Threat modeling, secure code review, vulnerability assessment, hardening | **Agent:** anything touching auth, uploads, secrets, external input, or permissions. **Inline:** never for auth-adjacent code — that's where inline confidence is most often wrong. |
-| `software-architect` | Domain modeling, pattern selection, trade-off analysis, ADRs | **Agent:** a decision that is expensive to reverse, or where two credible options exist. **Inline:** decisions the project's rules already settle. |
-| `ui-designer` | Design systems, tokens, component specs, visual foundations | **Agent:** a new component family, a token/theme change, a design system from scratch. **Inline:** reusing an existing component as intended. |
-| `ui-reviewer` | Pixel-level review: spacing, type, hierarchy, design-system drift | **Agent:** after implementing any new screen, before calling it done. **Inline:** when you changed no layout or spacing. |
-| `ux-architect` | CSS architecture, layout frameworks, theming, information architecture | **Agent:** greenfield UI foundations, or a layout system that keeps getting re-litigated. **Inline:** a project with a mature design system already in place. |
-| `ux-designer` | Competitive research, user flows, interaction patterns | **Agent:** before building a feature whose interaction model is genuinely open. **Inline:** a flow that mirrors one the product already has. |
-| `ux-researcher` | Study design, usability testing, personas, evidence-graded findings | **Agent:** when a decision hinges on user behavior you're guessing at. **Inline:** never guess and call it research — if there's no data, ask this agent for a study plan. |
+| `ux-designer` | User flows, interaction patterns, information architecture, competitive research | **Planning.** `docs/agents/_templates/spec.md` → `## Domain & outside experts` records its flow/IA findings, and `.agents/rules/workflow.md` → Planning Workflow names it as the planning consultation whose output fills the acceptance scenarios — before the plan exists. |
+| `ux-researcher` | Study design, usability evidence for a claim resting on user behaviour | **Planning.** Same section, invoked when a requirement rests on a user-behaviour assumption; its evidence or study plan lands in the spec's `## Assumptions` / `[NEEDS CLARIFICATION: …]`. |
 
-All of them read `AGENTS.md` and the relevant `.agents/rules/*.md` modules first; project rules outrank agent defaults, and an agent that contradicts a rules module is reporting a bug in one of the two. Every agent operates under the `.agents/rules/clean-architecture.md` premise — the Dependency Rule and its four layers are assumed, not renegotiated per agent.
+Both read `AGENTS.md` and the relevant `.agents/rules/*.md` modules first; project rules outrank persona
+defaults, and a persona that contradicts a rules module is reporting a bug in one of the two. Both
+operate under the `.agents/rules/clean-architecture.md` premise — the Dependency Rule and its four layers
+are assumed, not renegotiated per persona.
 
-**Add an agent:** drop a new `.md` here with frontmatter (`name` matching the filename, plus `description` — the description is what the agent matches on when choosing an agent, so make it say *when* to use it, not just what it is), then give it a role, non-negotiable rules, a repeatable process, and an explicit output contract.
+## Review is dimensions, not personas
 
-**Delete the ones you don't need:** just remove the file — nothing imports it, and a smaller library makes agent selection sharper. A backend-only project should delete the five `u[ix]-*` design agents (`ui-designer`, `ui-reviewer`, `ux-architect`, `ux-designer`, `ux-researcher`) plus `frontend-developer`; a project with no database should delete `database-optimizer`.
+An earlier version of this library implied that review ran through personas named Security, Performance,
+Maintainability, and UX. Those are four review **dimensions** every non-trivial change is reviewed on
+(`.agents/rules/workflow.md` → Expert Review), and they map to no file — the confusion is what let 13
+files sit invoked by nothing. Review is done by a second reviewer or a review agent reading only the
+diff; the dimensions are what they check, not a roster to spawn.
+
+## Design authority is a rule, not a persona
+
+Pixel-level visual review, the design-system vocabulary, layout archetypes, and the type/spacing scale
+are `.agents/rules/design-system.md` — a rule module, deliberately not duplicated as a persona. A person
+or agent reviewing a screen runs that rule's "Consistency check"; there is no `ui-designer` or
+`ui-reviewer` persona to reach for, and adding one back would recreate the second copy of the rule.
+
+## If you prune further
+
+A project with no user-facing surface (a library, CLI, service, or job runner) deletes both files and
+the `MODULE:design-system` / `MODULE:frontend` blocks with them; `spec.md`'s UX row then reads
+`n/a — no user-facing surface`. There is nothing else to prune.

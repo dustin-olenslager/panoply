@@ -8,6 +8,10 @@
   change, and it must carry no unresolved `[NEEDS CLARIFICATION: …]` (`scripts/check-spec.sh` enforces
   this; see `.agents/rules/spec.md`). For routine work inside an existing pattern, write "n/a — routine"
   and say in Build notes why it qualified.
+- **Domain & experts:** the industry this serves and who outside software was consulted, recorded in
+  `spec.md` → `## Domain & outside experts` (`.agents/rules/spec.md`, item 6). If the spec's section
+  says no outside expert was consulted, restate that here in one line and why — a plan that reads only
+  as software roles is the gap this field exists to close.
 - **Parent plan:** _(link if this is a sub-milestone; otherwise delete)_
 
 ## Goal

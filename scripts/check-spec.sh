@@ -96,18 +96,22 @@ case "$MODE" in
   staged)
     FILES="$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null || true)"
     LABEL="staged change"
+    DIFF_BASE=""
     ;;
   since)
     FILES="$(diff_files "$SINCE")"
     LABEL="change since $SINCE"
+    DIFF_BASE="$SINCE"
     ;;
   git)
     if [ -n "${GITHUB_BASE_REF:-}" ]; then
       FILES="$(diff_files "origin/${GITHUB_BASE_REF}")"
       LABEL="change vs origin/${GITHUB_BASE_REF}"
+      DIFF_BASE="origin/${GITHUB_BASE_REF}"
     elif git rev-parse -q --verify HEAD~1 >/dev/null 2>&1; then
       FILES="$(git diff --name-only --diff-filter=ACMR HEAD~1...HEAD 2>/dev/null || true)"
       LABEL="change in HEAD"
+      DIFF_BASE="HEAD~1"
     else
       # No parent commit (a fixture's first commit, or a depth-1 checkout). Say so rather than reporting a
       # clean result about a comparison that never happened.
@@ -241,5 +245,87 @@ if [ -n "$UNRESOLVED" ]; then
   exit 1
 fi
 
-echo "check-spec: OK (spec present, no unresolved ambiguity in $LABEL)"
+# --- does the spec record the simulated user interviews? ---------------------
+# The spec rung requires four user personas to be interviewed (simulated) before UI/UX and
+# functionality decisions are made (`.agents/rules/spec.md` item 7). Like the `Deletion candidates`
+# section check-algorithm.sh enforces, this is the ONE part of that requirement that is not judgement:
+# the section either exists or it does not. Whether the interviews are GOOD — whether they surfaced
+# anything real, whether the design decisions genuinely follow — is review's question, and this gate
+# says so below rather than pretending to judge it.
+#
+# SCOPE — this is the part that cost a rewrite. The check applies to specs THIS CHANGE ADDED OR
+# MODIFIED, never to every spec in the tree. Requiring it of a pre-existing spec would fail a repo for
+# a spec it wrote before the rule existed, and would demand "user personas" of the kit's own internal
+# governance specs (which are about the kit, not about a product with users). Same scoping rule the
+# expert-review gate needed, for the same reason: a gate that measures the tree instead of the change
+# reports the repo's history, not the change under review.
+#
+# The heading is matched LOOSELY (case-insensitive, either word order, or the explicit n/a form), the
+# same way check-algorithm.sh matches its section heading: a gate that demands one exact string is a
+# gate that fails a repo for phrasing.
+#
+# Escape hatches, in the kit's usual spirit: a project with no user-facing surface says so explicitly
+# (`n/a — no user-facing surface`), and SPEC_INTERVIEWS_OFF=1 records a deliberate skip.
+INTERVIEWS_OFF="${SPEC_INTERVIEWS_OFF:-0}"
+_spec_has_interviews() {
+  _f="$1"
+  # Accept the deliberate n/a form: a pure library or cron job has no personas to interview.
+  grep -qiE 'n/a[^a-z0-9]*no user-facing surface' "$_f" && return 0
+  # Accept a heading naming user interviews (either word order) — the template's own heading and any
+  # reasonable paraphrase of it.
+  grep -qiE '^#+[[:space:]]*.*(user|persona).*(interview)|^#+[[:space:]]*.*(interview).*(user|persona)' "$_f" && return 0
+  return 1
+}
+
+if [ "$INTERVIEWS_OFF" != "1" ]; then
+  # Which specs did THIS change touch? A spec the change ADDED (diff-filter A) or MODIFIED (M). This is
+  # the change-scoping that keeps the gate about the change rather than about the whole tree.
+  TOUCHED_SPECS=""
+  for f in $(git diff --name-only --diff-filter=AM "$DIFF_BASE"...HEAD 2>/dev/null || true); do
+    case "$f" in */spec.md) TOUCHED_SPECS="$TOUCHED_SPECS $f" ;; esac
+  done
+  # In --staged mode the working index is the change; include staged spec additions/modifications.
+  for f in $(git diff --cached --name-only --diff-filter=AM 2>/dev/null || true); do
+    case "$f" in */spec.md) TOUCHED_SPECS="$TOUCHED_SPECS $f" ;; esac
+  done
+
+  MISSING_INTERVIEWS=""
+  for p in $TOUCHED_SPECS; do
+    [ -n "$p" ] || continue
+    _skip=0
+    for _ex in $SELF_EXCLUDE; do
+      [ "$p" = "$_ex" ] && _skip=1
+    done
+    [ "$_skip" -eq 1 ] && continue
+    # A spec the change DELETED is not our problem; only a spec that exists now.
+    [ -f "$p" ] || continue
+    _spec_has_interviews "$p" || MISSING_INTERVIEWS="$MISSING_INTERVIEWS$p
+"
+  done
+
+  if [ -n "$MISSING_INTERVIEWS" ]; then
+    echo "check-spec: spec does not record the simulated user interviews ($LABEL):" >&2
+    printf '%s' "$MISSING_INTERVIEWS" | sed 's/^/    /' >&2
+    echo "" >&2
+    echo "  Before any UI/UX or functionality decision, the spec interviews FOUR of this project's" >&2
+    echo "  own user personas (domain roles — a producer, a gaffer — not software roles) and records" >&2
+    echo "  what each surfaced and which decision it changed. The interviews are the INPUT to design," >&2
+    echo "  not a write-up after it." >&2
+    echo "" >&2
+    echo "  Add a section (see docs/agents/_templates/spec.md → 'User interviews (simulated, 4 personas)'):" >&2
+    echo "    ## User interviews (simulated, 4 personas)" >&2
+    echo "    | # | Persona | What they were asked | What they said (SIMULATED) | Decision it changed |" >&2
+    echo "" >&2
+    echo "  State plainly they are SIMULATED role-plays — never a real quote from a real person." >&2
+    echo "  No user-facing surface at all (a library, a cron job)? Write exactly:" >&2
+    echo "    n/a — no user-facing surface, so no personas to interview" >&2
+    echo "" >&2
+    echo "  This gate checks the section EXISTS. Whether the interviews are good, and whether the" >&2
+    echo "  decisions genuinely follow from them, is review's question — ask it there." >&2
+    echo "  Doctrine: .agents/rules/spec.md. Deliberate exception? SPEC_INTERVIEWS_OFF=1 — say so." >&2
+    exit 1
+  fi
+fi
+
+echo "check-spec: OK (spec present, no unresolved ambiguity, interviews recorded in $LABEL)"
 exit 0

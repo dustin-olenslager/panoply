@@ -78,6 +78,7 @@ gate_at() {
   case "$out" in
     *"has no spec"*)            printf 'fail-nospec' ;;
     *"unresolved ambiguity"*)   printf 'fail-unresolved' ;;
+    *"simulated user interviews"*) printf 'fail-nointerviews' ;;
     *"does not resolve"*|*"no parent commit"*) printf 'fail-unresolvable' ;;
     *)                          printf 'fail-errored' ;;
   esac
@@ -104,6 +105,12 @@ A caller can do the thing.
 
 ## Requirements
 - **FR-001**: The system MUST do the thing.
+
+## User interviews (simulated, 4 personas)
+
+| # | Persona | What they were asked | What they said (SIMULATED) | Decision it changed |
+|---|---|---|---|---|
+| 1 | Operator | how do you run it | wants one command | FR-001 |
 SPEC
 }
 
@@ -222,6 +229,9 @@ cat > "$r/docs/agents/core/meta/spec.md" <<'SPEC'
 ## Requirements
 - **FR-001**: An unknown is written `[NEEDS CLARIFICATION: …]` in a draft spec.
 - **FR-002**: A template uses the form [NEEDS CLARIFICATION: <the question>] as its placeholder.
+
+## User interviews (simulated, 4 personas)
+Prose section discussing the heading convention only.
 SPEC
 git -C "$r" add -A; cmit "$r" "feat: meta" || exit 2
 rc="$(gate_at "$r" "$base")"
@@ -264,6 +274,75 @@ git -C "$r" add -A; cmit "$r" "feat: g" || exit 2
 rc="$(gate_at "$r" "$base")"
 if [ "$rc" = "fail-nospec" ]; then ok "real code under src/ is still refused (negative control)"
 else bad "config exemption leaked: src/ change was not refused (got '$rc')"; fi
+
+# --- case 15: a spec that does not record the simulated user interviews ------
+# The spec rung requires four user personas to be interviewed before UI/UX and functionality decisions
+# (.agents/rules/spec.md item 7). The section either exists or it does not — the checkable half. A spec
+# with no interview section, on a structural change, must be refused: without this the requirement was
+# doctrine that nothing enforced, which is the drift this kit exists to catch.
+r="$(mkrepo fail-nointerviews)"; base="$(root_sha "$r")"
+mkdir -p "$r/docs/agents/feat/v1" "$r/src"
+printf '# Spec\\n\\n- **FR-1**: the system MUST do the thing.\\n' > "$r/docs/agents/feat/v1/spec.md"
+printf 'x\\n' > "$r/src/x.ts"
+git -C "$r" add -A; cmit "$r" "feat: x, spec without interviews" || exit 2
+rc="$(gate_at "$r" "$base")"
+if [ "$rc" = "fail-nointerviews" ]; then ok "a spec with no user-interview section is refused"
+else bad "spec without interviews was not refused (got '$rc')"; fi
+
+# --- case 16: the positive control — an interview section satisfies it -------
+# Guards against a gate that just refuses everything: the moment the section exists, it passes. Both
+# word orders count, so this proves the loose heading match works on a paraphrase.
+r="$(mkrepo pass-interviews)"; base="$(root_sha "$r")"
+mkdir -p "$r/docs/agents/feat/v1" "$r/src"
+{ printf '# Spec\\n\\n- **FR-1**: the system MUST do the thing.\\n\\n'
+  printf '## Interviews with users (simulated)\\n\\n'
+  printf '| # | Persona | What they said (SIMULATED) | Decision it changed |\\n'
+  printf '|---|---|---|---|\\n'
+  printf '| 1 | Producer | wants overrun visible | FR-1 |\\n'
+} > "$r/docs/agents/feat/v1/spec.md"
+printf 'x\\n' > "$r/src/x.ts"
+git -C "$r" add -A; cmit "$r" "feat: x with interviews" || exit 2
+rc="$(gate_at "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "an interview section satisfies the gate (any heading word order)"
+else bad "interview section did not satisfy the gate (got '$rc')"; fi
+
+# --- case 17: the deliberate n/a — a repo with no user-facing surface --------
+# A library or cron job has no personas to interview. The escape must be explicit and must work, or the
+# gate becomes always-red for a legitimate class of repo — the failure mode the kit's placeholder scan
+# already hit once.
+r="$(mkrepo pass-no-surface)"; base="$(root_sha "$r")"
+mkdir -p "$r/docs/agents/feat/v1" "$r/src"
+printf '# Spec\\n\\n- **FR-1**: the system MUST do the thing.\\n\\nn/a — no user-facing surface, so no personas to interview\\n' > "$r/docs/agents/feat/v1/spec.md"
+printf 'x\\n' > "$r/src/x.ts"
+git -C "$r" add -A; cmit "$r" "feat: x, no surface" || exit 2
+rc="$(gate_at "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "an explicit 'no user-facing surface' is accepted"
+else bad "the no-surface escape did not work (got '$rc')"; fi
+
+# --- case 18: the escape hatch off-switch ------------------------------------
+# SPEC_INTERVIEWS_OFF=1 is the declared escape. It must actually disarm the check — an escape hatch that
+# does not work is a documented lie, the defect class this kit keeps finding.
+r="$(mkrepo pass-off-switch)"; base="$(root_sha "$r")"
+mkdir -p "$r/docs/agents/feat/v1" "$r/src"
+printf '# Spec\\n\\n- **FR-1**: MUST do the thing.\\n' > "$r/docs/agents/feat/v1/spec.md"
+printf 'x\\n' > "$r/src/x.ts"
+git -C "$r" add -A; cmit "$r" "feat: x, no interviews" || exit 2
+out="$( ( cd "$r" && SPEC_INTERVIEWS_OFF=1 sh scripts/check-spec.sh --since "$base" ) 2>&1 )" && rc="ok" || rc="failed"
+if [ "$rc" = "ok" ]; then ok "SPEC_INTERVIEWS_OFF=1 disarms the interview check"
+else bad "SPEC_INTERVIEWS_OFF=1 did not disarm the check (got '$rc'): $out"; fi
+
+# --- case 19: the gate must not match its own documentation ------------------
+# The gate's refusal text, the rule module, the template and this canary all discuss the interview
+# section in prose. If the gate matched its own sources, every correct repo would be red — the
+# always-red failure the kit hit once already. SELF_EXCLUDE must cover them.
+r="$(mkrepo pass-selfdocs)"; base="$(root_sha "$r")"
+mkdir -p "$r/docs/agents/feat/v1" "$r/src"
+printf '# Spec\\n\\n- **FR-1**: MUST do the thing.\\n\\n## Interviews with users (simulated)\\nProse about the convention only.\\n' > "$r/docs/agents/feat/v1/spec.md"
+printf 'x\\n' > "$r/src/x.ts"
+git -C "$r" add -A; cmit "$r" "feat: x" || exit 2
+rc="$(gate_at "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "the gate does not match its own documentation (self-exclusion holds)"
+else bad "self-exclusion broke: the gate went red on its own prose (got '$rc')"; fi
 
 printf '\ncheck-spec canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1

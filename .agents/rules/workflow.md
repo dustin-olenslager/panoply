@@ -53,6 +53,7 @@ This carve-out is itself a setting: a project that chose the **strict** protocol
 - **The plan doc is the SINGLE place every agent reads and edits plans.** A kit repo's plan home is the `docs/agents/` spine: `roadmap.md` (the single canonical plan doc) with the `in-progress.md` queue row and a detailed plan doc under `docs/agents/<area>/<feature>/plan.md` linked from it. A project too small for that spine may keep ONE lightweight `docs/PLAN.md` (a status table + the worklog) as its plan home — same rule, fewer pieces. What is never the plan home: a root-level `PLAN.md` (that is the stray `check-plan-home.sh` exists to reject), a second parallel plan doc, and **GitHub Issues** — an issue is a note that gets folded into the plan doc, never the doc itself. Before planning anything, read it; when you plan anything, write there. `scripts/check-plan-home.sh` enforces the plan **home** mechanically in CI and pre-commit: no plan-shaped file outside the canonical tree (`docs/agents/roadmap.md`, `in-progress.md`, `_templates/*`, `reports/*`, `<area>/<feature>/plan.md`, and the completed archives), and `roadmap.md` must exist. It checks **location, not content** — that you actually added a roadmap row, linked the plan, and moved the initiative are prose obligations enforced by review, not by the script (`PLAN_HOME_ALLOW` for a legitimate exception, `PLAN_HOME_OFF=1` while adopting a repo with a backlog). Pre-commit (`--staged`) catches only *newly added* strays; the CI run over the tracked tree catches every one.
 
 - **A spec precedes the plan on anything structural.** Before `plan.md`, write `docs/agents/<area>/<slug>/spec.md` — what a user can do after this ships, prioritized stories each with an independent test, Given/When/Then acceptance scenarios, and numbered `MUST` requirements. An unknown is written `[NEEDS CLARIFICATION: …]` and may live only in a draft spec: resolve it, or delete the requirement, before the plan exists. `scripts/check-spec.sh` enforces presence and resolution in CI; routine work inside an existing pattern is exempt (say so). Full doctrine: `spec.md`.
+- **The spec names the domain and the outside experts — this is planning, not review.** The spec's `## Domain & outside experts` section records the industry the software is built for and which outside practitioners were consulted (the filmmaker, the restaurateur), with what they said. UI/UX is a **planning input** too: for a user-facing feature, the flow and information-architecture findings come from the `ux-designer` persona, and behaviour claims from the `ux-researcher` persona, before acceptance scenarios are written — design decided after the plan exists is design reviewed against a decision already made. Non-UI work writes `n/a — no user-facing surface`. **Placeholders until a real person was consulted; never a fabricated quote or an invented name.**
 - **Enter plan mode before any non-trivial or multi-step work.** Any feature, milestone, or task spanning more than a couple of files starts with a plan — use the planning tool, not an informal chat summary, so the plan is an artifact rather than a paragraph that scrolls away. Present it to the owner (plain language, above) and let the plan — not the chat memory — be what was approved.
 - **ALWAYS persist the plan to a file under `docs/agents/`.** A plan that exists only in chat context dies at the next compaction, and you will silently resume with a different plan than the one that was approved. The file is the source of truth; the chat is not.
   - Copy `docs/agents/_templates/plan.md` as the starting point.
@@ -73,7 +74,13 @@ you propose it.
 
 - **Every non-trivial change requires structured expert review before merge.** Trivial changes (per the list above, plus: single file, ≤15 lines added, no schema/API/interface file — the gate treats `.sql`, `.prisma`, `.graphql`, `.proto`, `.openapi`, `.yaml`, and `.yml` as schema, so a single 15-line workflow edit is NOT trivial — or PR labeled `trivial` / commit prefixed `trivial:`) skip this gate.
 - **An agent's self-report is not review evidence.** "Tests pass," "done," and "it works" from the agent that wrote the change verify nothing — authorship and evidence must be independent. Non-trivial work is re-reviewed independently (by a second reviewer or a review agent reading only the diff), and the gate below exists because that requirement is easy to claim and easy to skip.
-- **Four default personas must be considered:** Security, Performance, Maintainability, UX. Domain-specific personas may be added per project.
+- **Review dimensions are not personas.** The default review lenses are **Security, Performance,
+  Maintainability, and UX** — four *dimensions* every non-trivial change is reviewed on. They map to no
+  file, and this list deliberately does not claim they do. Domain-specific review is added per project,
+  and where a project keeps persona files (`.agents/personas/`), a persona named in review evidence must
+  be a file that exists. The kit ships two — `ux-designer` and `ux-researcher` — and both are **planning**
+  consultations (see "Planning Workflow"), so a review that only names a dimension is honest, and one
+  that names a missing file is a defect.
 - **Review evidence required (checked by `scripts/check-expert-review.sh` in CI, for the change under
   review):** the gate asks whether review evidence EXISTS for this change, and nothing more. Its
   contract:
@@ -82,8 +89,9 @@ you propose it.
      would block a repo that had *finished* its work — the definition of done — until someone added a
      fake open task, so the gate deliberately asks only that review evidence exist, not that work
      remain. The checklist lives in the plan doc; a separate `checklist.md` is not required.
-  3. persona sign-off in the PR description (≥2 named personas, e.g. `Security: ✓`, `Performance:
-     LGTM`) is checked **only when the repo opts in** (`EXPERT_REVIEW_REQUIRE_SIGNOFFS=1`). It is
+  3. review sign-off in the PR description (≥2 named reviewers, e.g. `Security: ✓`, `Performance:
+     LGTM` — a review *dimension* or a persona *file* that exists, per the bullet above) is checked
+     **only when the repo opts in** (`EXPERT_REVIEW_REQUIRE_SIGNOFFS=1`). It is
      off by default: an enforcement that switches on as a side effect of a `gh` credential is not
      enforcement anyone agreed to. Where it is off, sign-off is a review obligation, not a gate.
   The gate carries the kit's usual declared escape hatch (`EXPERT_REVIEW_OFF=1`) and the trivial
@@ -92,7 +100,11 @@ you propose it.
   is not evidence that *this* change was reviewed, so the gate scopes the evidence to the diff. Recording
   an architectural decision is a review obligation (see `documentation.md` → "When to write"), not
   something this gate verifies.
-- **Process:** Author drafts plan → opens PR → requests review from relevant personas → each persona
-  comments with sign-off → CI gate passes → merge.
-- **Conflict escalation:** If personas disagree on a fundamental trade-off, the ADR records both positions and the decision; the operator (human) breaks ties.
+- **Process:** Author drafts plan → opens PR → requests review from the relevant **dimensions** (and any
+  persona file that exists) → each reviewer comments with sign-off → CI gate passes → merge.
+- **Domain review is a planning input, not a review stage.** The outside expert for this project's
+  industry is named, and their input recorded, in the spec (see `spec.md` → "What a spec owes", item 6,
+  and the `## Domain & outside experts` section of `docs/agents/_templates/spec.md`). Reviewing that the
+  domain was *asked* is a review question; it cannot be gated, and no gate pretends to.
+- **Conflict escalation:** If reviewers disagree on a fundamental trade-off, the ADR records both positions and the decision; the operator (human) breaks ties.
 - **No rubber stamps:** A sign-off without reading the diff is a process violation. The adversary-review skill (§16) provides the grading rubric.
