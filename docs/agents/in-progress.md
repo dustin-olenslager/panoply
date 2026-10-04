@@ -25,6 +25,7 @@ entry to `completed-features.md`.
 | 5 | Domain expertise and design in the plan | governance | Domain expertise & design in planning | `governance/domain-expert-planning/plan.md` | In review | PR open on `feat/planning-panel`; next step = owner review + merge, then move the folder into `governance/completed/`, add the `completed-features.md` row, and delete row 5 |
 | 6 | Make the kit updateable — self-detecting doctor, truthful apply, recoverable force, migrate path | governance | Kit self-update | `governance/kit-self-update/plan.md` | In review | PR open on `fix/self-update`; next step = owner review + merge |
 | 7 | Restore the PR-context guard on the gate steps (kit + adopter template) | governance | PR-context guards on the gate steps | `governance/pr-context-guards/plan.md` | In review | PR open on `fix/coverage-wireframe-pr-guard`; next step = owner review + merge, then archive the folder and delete this row |
+| 8 | Gate the ship phase — a launch record + rollback line, and the secret scan turned ON | governance | Launch and verify phases gated | `governance/launch-gate/plan.md` | In review | PR open on `feat/launch-gate`; next step = owner review + merge, then move the folder into `governance/completed/`, add the `completed-features.md` row, delete this row |
 
 **Status vocabulary:** `Not started` · `In progress — milestone N of M` · `Blocked — <on what>` ·
 `In review` · `Done — archiving`.

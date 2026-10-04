@@ -42,4 +42,4 @@
 3	plan	Plan	plan.md with a Next step	scripts/check-plan-home.sh
 4	build	Build	open milestones, a branch off base	-
 5	verify	Verify	a fresh green verify on the branch	-
-6	ship	Ship	merged, folder in completed/	-
+6	ship	Ship	merged, folder in completed/	scripts/check-launch.sh

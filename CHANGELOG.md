@@ -21,6 +21,28 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- FEAT — **the ship phase is gated: a launch record, or the ship claim is refused.** Phase 6's gate
+  cell in `factory-phases.tsv` was `-` — a stated gap the kit calls "not a licence" — and the same was
+  true of `Verify`. Nothing stood between "verify passed" and "in production": a plan could tick its
+  ship milestone and every gate stayed green. `scripts/check-launch.sh` (new, with a mutation-tested
+  canary) closes it: a change that marks a **ship** milestone complete must record, in the feature
+  folder, that the thing was launched **and** a rollback line — a sibling `launch.md`, or a `## Launch`
+  section in the plan. It is presence-only and change-scoped, it never guesses the deploy mechanism
+  (Vercel / docker-compose / a bare box — a stack-agnostic kit cannot know), and a record that names
+  only the launch or only the rollback is refused. `factory-phases.tsv` now names
+  `scripts/check-launch.sh` for phase 6, and `factory-phases.md` says which phases remain ungated
+  (4 and 5) instead of lumping all three together. `LAUNCH_OFF=1` is the deliberate-exception hatch.
+- FIX — **the kit's own CI template shipped a secret scan it had COMMENTED OUT.** `ci-verify.yml`
+  (and this repo's `.github/workflows/verify.yml`) listed a `# - name: Secret scan` step that was
+  disabled — a stated capability the artifact did not provide, the exact "guarantee the code does not
+  give" defect class the kit exists to remove. Both are now **ON**, as a pinned, checksum-verified
+  **binary** rather than `gitleaks/gitleaks-action`: the action refuses organization repos on a free
+  plan ("License key is required"), so it fails on the very repos the template targets. The step
+  downloads `gitleaks_8.28.0_linux_x64.tar.gz`, checks it against the vendor-published SHA-256
+  (`a65b5253…a840eb`, verified against the release's own `checksums.txt`) before running it, and scans
+  only `base..HEAD`. Unlike an SCA tool it needs no stack and no lockfile — it scans a diff — so it is
+  the one supply-chain-adjacent gate that is genuinely stack-agnostic. Proven: a planted token makes
+  it exit 1, a clean commit exits 0.
 - FIX — **the doctor silently skipped inside a git WORKTREE.** `panoply.sh check` guarded itself with
   `[ ! -d .git ]`, but a linked worktree (and a submodule) has `.git` as a **file** — a gitdir pointer —
   not a directory. So inside every worktree the doctor printed `not a git working tree (nothing to

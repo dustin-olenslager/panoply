@@ -26,10 +26,14 @@ assumed or asked. `scripts/factory-detect.sh` reports it; `scripts/factory-phase
 | 3 | **Plan** | `plan.md` with a `Next step` and a coverage table | `scripts/check-plan-home.sh`, `scripts/check-coverage.sh` |
 | 4 | **Build** | open milestones and a branch off the trunk | `-` |
 | 5 | **Verify** | a fresh green verify on the branch | `-` |
-| 6 | **Ship** | merged, folder in `completed/`, queue row closed | `-` |
+| 6 | **Ship** | merged, folder in `completed/`, queue row closed | `scripts/check-launch.sh` |
 
-A `-` in the gate column is a **stated gap**, not a licence. Phases 4–6 have no gate yet; that is
-recorded rather than hidden, because "no gate" and "gate passed" must never look alike.
+A `-` in the gate column is a **stated gap**, not a licence. Phases 4 and 5 have no gate yet; that is
+recorded rather than hidden, because "no gate" and "gate passed" must never look alike. Phase 6 is
+gated by `scripts/check-launch.sh`: a change that marks a ship milestone complete must record, in the
+feature folder, that the thing was launched **and** a rollback line (a sibling `launch.md`, or a
+`## Launch` section in the plan). The gate checks the *record*, not the mechanism — it never guesses
+the deploy path, because a stack-agnostic kit cannot know it.
 
 ## The rule the detector applies
 

@@ -57,6 +57,13 @@ jobs:
         run: sh scripts/check-expert-review.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
+      # Launch gate — a change that marks a ship milestone complete must record a launch and a
+      # rollback line (a sibling launch.md, or a '## Launch' section in the plan). Fills phase 6's
+      # formerly-empty gate cell; presence only — it never guesses the deploy mechanism.
+      - name: Launch record
+        run: sh scripts/check-launch.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
+
       # Shell script lint — shellcheck if available. Scripts only: `.agents/commands/*.md` are
       # markdown, and linting prose as shell produced SC2148/SC1036/SC2215 noise on every run,
       # which is why this step had never once passed.
@@ -107,9 +114,23 @@ jobs:
       # - name: Architecture boundaries
       #   run: <ARCH_CHECK_CMD>
 
-      # Optional but recommended: a secret scan so a leaked credential fails the PR.
-      # - name: Secret scan
-      #   uses: gitleaks/gitleaks-action@v2
+      # Secret scan — a leaked credential fails the PR. Pinned, checksum-verified binary (no
+      # org-license gate, unlike gitleaks/gitleaks-action). SHA-256 is the vendor-published digest
+      # for this archive, verified against the release's own checksums.txt.
+      - name: Secret scan
+        env:
+          GITLEAKS_VERSION: "8.28.0"
+          GITLEAKS_SHA256: "a65b5253807a68ac0cafa4414031fd740aeb55f54fb7e55f386acb52e6a840eb"
+        run: |
+          set -euo pipefail
+          asset="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$asset" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${asset}"
+          echo "${GITLEAKS_SHA256}  ${asset}" | sha256sum -c -
+          tar -xzf "$asset" gitleaks
+          ./gitleaks detect --no-banner --redact --exit-code 1 \
+            --log-opts="--no-merges ${{ github.event.pull_request.base.sha }}..HEAD"
+        if: github.event_name == 'pull_request'
 
   # Gate self-tests live in their OWN job, gated on the kit's own tooling changing. The kit ships
   # gates adapted repos depend on, so a gate that silently stops detecting anything is a kit defect
@@ -230,3 +251,9 @@ jobs:
       - name: Panoply doctor self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/panoply.test.sh
+
+      # The launch gate's canary — proves it still refuses a ship claim with no launch record and no
+      # rollback line, passes one that carries both, and cannot go inert (mutation-tested).
+      - name: Launch gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-launch.test.sh

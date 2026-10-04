@@ -35,6 +35,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 | Domain expertise & design in planning | The plan names the industry/domain and records which outside experts were consulted; UI/UX is a planning input; dead personas deleted | row 5 | `governance/domain-expert-planning/plan.md` |
 | Kit self-update | An adopted repo can pull kit fixes deliberately: a copy that knows it is stale, a truthful `apply`, a recoverable forced overwrite, and a `migrate` path — each canary-proven | row 6 | `governance/kit-self-update/plan.md` |
 | PR-context guards on the gate steps | Every gate step that reads `pull_request.base.sha` carries its `if: github.event_name == 'pull_request'` — in the kit and in the shipped template — so a push to `main` is never red for a context it cannot use | row 7 | `governance/pr-context-guards/plan.md` |
+| Launch and verify phases gated | Fill phase 6's stated-empty gate cell: a change claiming it shipped must record a launch and a rollback line (`check-launch.sh` + canary); and turn the kit's own commented-out secret scan ON as a pinned, checksum-verified binary | row 8 | `governance/launch-gate/plan.md` |
 
 ## Next — committed, not yet started
 
