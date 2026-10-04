@@ -140,9 +140,16 @@ Consistent with the kit's rule everywhere else: prose is a suggestion, only what
 `scripts/check-algorithm.sh` is the mechanical floor for kit-governed repos — it checks what can be
 checked without judgement:
 
-- a non-trivial change exists (code, or a new automation/process file) — skip if not;
+- a **structural** change exists — a code-suffixed file (`.ts`, `.py`, `.sh`, `.yml`, …) or a path under
+  `src|apps|packages|lib|scripts|e2e|infra|migrations/` — skip if not. Docs/rules-only edits are exempt;
 - the plan doc for the area exists and carries a **Deletion candidates** section, so the step-2 artifact
   is present rather than assumed.
+
+It runs in git mode (diff against `origin/<base>` or `HEAD~1`), `--since <sha>`, or `--staged`;
+`ALGORITHM_FILES` overrides what counts as code and `ALGORITHM_PLAN_GLOB` where a plan lives. If the
+diff base does not resolve (a depth-1 checkout, a wrong ref), the gate **refuses with exit 2** rather
+than reporting a clean tree about a comparison that never happened — the same rule every gate here
+obeys.
 
 It cannot judge whether the deletion list is *good*, whether a rejection's *instead* names something
 real, whether the requirement's requester is real, or whether the measured number is honest. Those stay a

@@ -28,6 +28,18 @@ Copy the shape from `docs/agents/_templates/spec.md`.
 
 One feature has one spec and one plan, in one folder, linked from one `roadmap.md` row.
 
+**Wiring is exempt.** CI workflows (`.github/`), the pre-commit hook, tsconfig/eslint/vite/jest config,
+docker-compose, and `.agents/` are treated as **non-structural** by the gate: a change that alters
+*when a gate runs* is not a change to what a user can do, so it needs no spec — the same reason a typo
+fix does not. The exemption lives in `check-spec.sh`'s `CONFIG_RE` so it is auditable rather than buried
+in the code rule.
+
+**The lightweight plan home has no spec sibling.** A project too small for the `docs/agents/` spine may
+keep one `docs/PLAN.md` (`workflow.md` → Planning Workflow), and `check-algorithm.sh` /
+`check-expert-review.sh` accept it — but `check-spec.sh` searches only `docs/agents/*/*/spec.md`, so a
+`docs/PLAN.md` repo has no path the spec gate recognises. If such a repo adopts this rung, either grow
+the spine or set `SPEC_GLOB` to the sibling it does keep.
+
 ## What a spec owes
 
 1. **User stories, prioritized (P1, P2, …), each independently testable.** Implementing P1 alone must

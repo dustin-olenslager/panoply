@@ -51,9 +51,7 @@ In the SAME commit that lands work — any agent:
    (to Shipped if this was its last plan), and archive the plan folder.
 4. **On a new or reprioritised initiative**: add or move its `roadmap.md` row.
 
-This contract is plain-markdown, enforced by review and `/audit-agents-setup` — never a tool-only
-permission gate — it binds every agent exactly as much as any other. It is mirrored into
-`AGENTS.md` so every tool reads it. **Shipped-but-unlogged counts as not done** (see below).
+This contract has one mechanically-enforced core — the worklog line, checked by `scripts/check-docs.sh` (see "The landing gate" below) — and its remaining obligations are plain-markdown, enforced by review and `/audit-agents-setup`, never a tool-only permission gate. It binds every agent exactly as much as any other. It is mirrored into `AGENTS.md` so every tool reads it. **Shipped-but-unlogged counts as not done** (see below).
 
 ### The queue is the ONLY backlog — autonomous drivers included
 
@@ -87,7 +85,16 @@ binds every agent in every tool — the provider-neutral floor. The gate enforce
 **correctness**: a vague or wrong worklog line passes. Correctness is a review problem, not an
 automation problem — the honest limit of any git-native kit. The worklog target is auto-detected
 (`CHANGELOG.md`/`HISTORY.md` `[Unreleased]`, else `docs/agents/worklog.md`), overridable via
-`DOCS_WORKLOG`.
+`DOCS_WORKLOG`. Two further knobs: `DOCS_EXEMPT` (space-separated doc extensions, default `md` — a repo
+whose product *is* markdown, a docs site or blog, sets it empty so shipped `.md` counts as code), and
+the declared escape hatch `DOCS_OFF=1` for a deliberate exception. The `--since` mode walks every
+**non-merge** commit in the range; a merge commit is skipped.
+
+`scripts/check-rule-fork.sh` is the sibling audit for a **forked** rule set: an adopted repo keeps its
+own adapted copy of the modules (`.claude/rules/` or `.agents/rules/`), which will never be
+byte-identical, so the gate compares a curated set of **policy anchors** instead of a line diff and
+fails when a shared rung the kit gained after the fork is silently missing from the copy. It is an
+adoption-time audit, not a per-PR gate; its escape hatch is `RULE_FORK_OFF=1`.
 
 ## When to write
 

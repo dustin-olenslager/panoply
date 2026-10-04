@@ -12,6 +12,27 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — **the doctrine told agents five agent-readiness checks the gate does not run, and never
+  mentioned a required gate that does.** Same defect class as the expert-review lie (#31), swept
+  across all eight gates. `agent-readiness.md` claimed the gate runs a "smoke test with only
+  `LLM_BASE_URL`/`LLM_API_KEY`/`LLM_MODEL` set" (there is no smoke test; the gate never runs the app),
+  that MCP schemas are generated "**and in sync with the API schemas**" (only generation is checked),
+  and that "no vendor LLM endpoint **or model identifier**" is hardcoded (the pattern matches
+  endpoints/SDK imports only — a hardcoded `gpt-4o` passes; reproduced). The same module never named
+  two checks the gate DOES run (non-human scoped principal, `--since` surface drift) nor its
+  `AGENT_READINESS_ENFORCE=warn` opt-in. `workflow.md` said `check-plan-home.sh` "enforces this" where
+  the gate checks plan-file *location*, not "a plan is a roadmap row"; `documentation.md` framed the
+  same-change contract as "never a tool-only permission gate" while `check-docs.sh` does enforce its
+  worklog core; `git-workflow.md` said `check-docs.sh --since` "walks every commit" (it skips merges)
+  and never told agents `check-conflict-markers.sh` exists — a required per-PR gate with a
+  `CONFLICTS_OFF=1` hatch named nowhere they read. `spec.md` gained the gate's wiring exemption and the
+  `docs/PLAN.md`-has-no-spec-home limit; `algorithm.md` gained the real structural predicate, its
+  overrides and its exit-2 ref guard; `documentation.md` gained `DOCS_OFF`/`DOCS_EXEMPT` and the
+  rule-fork audit it never mentioned. Every claim was checked against the script and behavioural
+  reproductions; the full 30-row table is `AUDIT-promises.md`. Two behavioural defects are REPORTED,
+  not fixed (owner's call): `check-docs.sh`'s ref guard exits 1 where the other four gates exit 2, and
+  the conflict gate's `--since` path list can silently narrow. **No gate behaviour changed.**
+
 - MINOR — **the expert-review gate was a file-presence check wearing a review gate's name.** Its two
   required checks were TREE-GLOBAL: `find docs/agents -name plan.md` matched a plan for ANY feature,
   and `grep -rlE '^[[:space:]]*- \[[ xX]\]' docs/agents` matched any checklist line anywhere. Once a

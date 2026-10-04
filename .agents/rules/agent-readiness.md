@@ -91,11 +91,20 @@ The mechanical consequences:
 
 Prose does not hold a line; a required CI gate does (see AGENTS.md → "Enforcement — the honest version"). `scripts/check-agent-readiness.sh` is the mechanical floor, and it checks what can be checked without judgement:
 
-- the agent card exists and is valid JSON declaring the required fields, and is served at the well-known path;
-- every mutation route accepts an idempotency key;
-- the MCP tool schemas are generated (not hand-written) and in sync with the API schemas;
-- no vendor LLM endpoint or model identifier is hardcoded outside the LLM adapter;
-- the app starts and passes a smoke test with only `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` set — the standalone-with-one-key proof.
+- the agent card exists and is valid JSON declaring the required fields, and sits in a path that is served at the well-known path (the gate judges the path's *shape* — `public/.well-known/`, a route handler, an API dir — it does not fetch the card; JSON validation SKIPs loudly rather than passing when no `jq`/`python3`/`node` is present);
+- a mutation surface exists **and** an idempotency mechanism is global (a middleware/plugin/lib path) or named in each mutation file — static, best-effort detection, not a per-route runtime proof;
+- the MCP tool schemas are **generated** (a generation helper is present), not hand-written — the gate does NOT verify the generated output is in sync with the API schemas;
+- no vendor LLM **endpoint or vendor SDK import** is hardcoded outside the LLM adapter — the gate does not pattern-match model identifiers;
+- a non-human principal exists (API-key / service-token auth) with a scope or permission model alongside it;
+- with `--since <base>`: an agent-surface change (API/MCP/card) shipped without its counterpart or its doc update in the same change.
+
+The gate is opt-out (`AGENT_READINESS=off`, for a repo that pruned the module and left the script) and warn-able (`AGENT_READINESS_ENFORCE=warn`, for a repo mid-adoption — never leave it on; it reports without blocking, which makes it a silent gate). Both knobs are working defaults; set only what your repo deviates from.
+
+**What the gate canNOT check — do these yourself, or the green run means nothing:**
+
+- that the generated MCP schemas are genuinely **in sync with the API schemas** (only that generation exists);
+- that the app **starts and works with only `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` set** — the standalone-with-one-key proof. The gate never runs the app;
+- that a mutation route's idempotency key is actually wired end to end, only that a mechanism is reachable from the file.
 
 The parts that need judgement are the review checklist below and the **agent-perspective smoke test**: point a real harness at the app with a fresh scoped key and attempt a representative goal end to end — discover, read, write, observe the write in the UI, undo it. Do this before calling an app agent-ready, and record the result in the plan doc. A gate that passes while a real agent cannot complete a task is a gate measuring the wrong thing.
 
