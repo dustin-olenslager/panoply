@@ -221,6 +221,67 @@ if ( cd "$d" && FACTORY_PHASE_OFF=1 sh scripts/factory-detect.sh ) >/dev/null 2>
   ok "FACTORY_PHASE_OFF=1 disarms the detector"
 else bad "FACTORY_PHASE_OFF=1 did not disarm the detector"; fi
 
+# case 14: the METASYNTAX rule. A spec that merely DOCUMENTS the marker convention must not count as
+# carrying an unresolved question. Found the hard way: the first run of this detector reported four
+# blocked specs in the kit, all four being the template sentence "written only AFTER every
+# [NEEDS CLARIFICATION: …] below is resolved". A detector that matches its own documentation reports
+# every healthy repo as blocked — the always-red failure, and the same shape as a gate matching its
+# own refusal text.
+d="$(mkrepo metasyntax)"
+mkdoctor "$d" 0
+mkdir -p "$d/docs/agents/core/thing"
+printf '# roadmap\n' > "$d/docs/agents/roadmap.md"
+printf '| thing | active |\n' > "$d/docs/agents/in-progress.md"
+# shellcheck disable=SC2016  # backticks are markdown in the fixture text, deliberately unexpanded
+printf '# Spec\n\n- **Plan:** written only AFTER every `[NEEDS CLARIFICATION: …]` below is resolved.\n- **FR-001**: internal tool.\nWireframe: n/a — no user-facing surface.\n\n## Milestones\n- [x] done\n' > "$d/docs/agents/core/thing/spec.md"
+printf '# Plan\n\n- [x] M1\n' > "$d/docs/agents/core/thing/plan.md"
+cmit "$d" "spec documents the convention"
+p="$(phase_of "$d")"
+if [ "$p" != "1" ]; then ok "a spec that only DOCUMENTS the marker is not counted as blocked"
+else bad "the detector counted metasyntax prose as an unresolved marker (phase $p)"; fi
+
+# case 15: but a marker with REAL content still blocks — the rule must not be weakened into silence
+d="$(mkrepo real-marker)"
+mkdoctor "$d" 0
+mkdir -p "$d/docs/agents/core/thing"
+printf '# roadmap\n' > "$d/docs/agents/roadmap.md"
+printf '| thing | active |\n' > "$d/docs/agents/in-progress.md"
+printf '# Spec\n\n- **Plan:** after [NEEDS CLARIFICATION: …] are resolved.\n- **FR-001**: [NEEDS CLARIFICATION: which store do we use?]\n' > "$d/docs/agents/core/thing/spec.md"
+cmit "$d" "real marker"
+p="$(phase_of "$d")"
+if [ "$p" = "1" ]; then ok "a marker carrying real content still blocks at phase 1"
+else bad "a real unresolved marker was not detected (phase $p)"; fi
+
+# case 16: BACKFILL vs SPEC. A feature with a plan but no spec must be told to draft-and-mark, not
+# asked to write a spec as if nothing existed — the distinction is what stops a working repo being
+# blocked on a retroactive spec.
+d="$(mkrepo backfill)"
+mkdoctor "$d" 0
+mkdir -p "$d/docs/agents/core/thing"
+printf '# roadmap\n' > "$d/docs/agents/roadmap.md"
+printf '| thing | active |\n' > "$d/docs/agents/in-progress.md"
+printf '# Plan\n\n- [ ] M1\n' > "$d/docs/agents/core/thing/plan.md"
+cmit "$d" "plan no spec"
+if why_of "$d" | grep -qi 'backfill'; then
+  ok "a feature with a plan but no spec is flagged BACKFILL"
+else bad "a feature with a plan but no spec was not flagged backfill" "$(why_of "$d")"; fi
+p="$(phase_of "$d")"
+if [ "$p" = "1" ]; then ok "backfill still reports phase 1 (flagged, not silently advanced)"
+else bad "backfill reported phase $p, wanted 1"; fi
+
+# case 17: but with NOTHING to draft from, it is a plain spec task — the flag must not appear for
+# every Phase-1 feature, or it stops meaning anything.
+d="$(mkrepo plain-spec)"
+mkdoctor "$d" 0
+mkdir -p "$d/docs/agents/core/thing"
+printf '# roadmap\n' > "$d/docs/agents/roadmap.md"
+printf '| thing | active |\n' > "$d/docs/agents/in-progress.md"
+printf 'x\n' > "$d/docs/agents/core/thing/notes.txt"
+cmit "$d" "no artifacts yet"
+if why_of "$d" | grep -qi 'backfill'; then
+  bad "backfill was flagged for a feature with nothing to draft from"
+else ok "a feature with no artifacts is a plain spec task, not backfill"; fi
+
 printf '\nfactory-detect canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

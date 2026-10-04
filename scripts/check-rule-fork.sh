@@ -141,6 +141,7 @@ module_file() {
 }
 
 fail=0
+unaudited=0
 
 for target in $TARGETS; do
   tdir=""
@@ -148,8 +149,13 @@ for target in $TARGETS; do
     [ -d "$d" ] && { tdir="$d"; break; }
   done
   if [ -z "$tdir" ]; then
-    echo "check-rule-fork: $target has no .claude/rules or .agents/rules — cannot audit" >&2
-    fail=1
+    # A sibling with no rules directory is NOT drift: there was nothing to compare against, so the
+    # comparison never happened. Reporting it as "drift detected" asserts a finding the run did not
+    # establish — the same defect as a doctor saying "applied and current" without comparing contents.
+    # Three different facts need three different verdicts: drift found, nothing to compare, and the
+    # audit itself failing. This is the second of those, and it renders as itself.
+    echo "check-rule-fork: $target has no .claude/rules or .agents/rules — NOT AUDITED (nothing to compare)" >&2
+    unaudited=$((unaudited + 1))
     continue
   fi
 
@@ -217,6 +223,11 @@ done
 
 if [ "$fail" -eq 1 ]; then
   echo "check-rule-fork: drift detected — see above; this script is read-only and changed nothing." >&2
+  exit 1
+fi
+if [ "$unaudited" -gt 0 ]; then
+  # Distinct from both "drift" and "clean": the run established LESS than a clean result would imply.
+  echo "check-rule-fork: no drift found, but $unaudited sibling(s) could not be audited — this is not a clean bill." >&2
   exit 1
 fi
 echo "check-rule-fork: no policy drift." >&2

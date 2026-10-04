@@ -12,6 +12,14 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **the wireframe rung (M3)**: `.agents/rules/wireframe-first.md` (the fixed sequence, the
+  path contract, the one-sentence skip test, and the interview protocol with the mandatory refuter and
+  the "changed what" column), plus `wireframe/index.html` and `interviews.md` templates. Proven with a
+  real wireframe and a real interview against the factory's own US-1 — 4 design changes and 3 recorded
+  non-changes. Figma was tested and removed on evidence: its REST API cannot author a design, so an
+  agent could not produce the artifact. Also: the detector's O6 metasyntax rule and BACKFILL flag, and
+  `check-rule-fork.sh` separating "drift found" from "could not audit".
+
 - MINOR — **the factory phase model and detector (M2)**: `scripts/factory-phases.tsv` (the seven phases
   as data) + `scripts/factory-detect.sh` (the 12 observations and a fixed precedence rule, reporting the
   phase, the evidence, and the next step) + `.agents/rules/factory-phases.md`. Detection only — acting on

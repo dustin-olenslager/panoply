@@ -124,10 +124,34 @@ NFEAT=0
 for f in $FEATURES; do NFEAT=$((NFEAT + 1)); done
 ev "O5 feature folders carrying a spec or plan: $NFEAT"
 
+# O6 needs the SAME metasyntax rule check-spec.sh uses, or the detector counts its own documentation as
+# an unresolved question. A marker is unresolved only when it carries REAL content: the template
+# sentence "written only AFTER every [NEEDS CLARIFICATION: …] below is resolved" is prose about the
+# convention, not a question — and a detector that counts it reports four healthy specs as blocked.
+# (Found exactly that way: the first run of this detector reported 4 blocked specs, all four being the
+# template line. Same failure shape as the gate that matched its own refusal text.)
+_is_metasyntax_body() {
+  _b="$1"
+  _b="$(printf '%s' "$_b" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  [ -z "$_b" ] && return 0
+  case "$_b" in
+    "…"|"..."|"<"*">"|"["*"]"|"TODO"|"TBD"|"todo"|"tbd"|"?"*) return 0 ;;
+  esac
+  return 1
+}
+
 NEEDS_CLAR=0
 for f in $FEATURES; do
   [ -f "$f/spec.md" ] || continue
-  grep -qE '\[NEEDS CLARIFICATION' "$f/spec.md" 2>/dev/null && NEEDS_CLAR=$((NEEDS_CLAR + 1))
+  _unresolved=0
+  while IFS= read -r _line; do
+    [ -n "$_line" ] || continue
+    _body="$(printf '%s' "$_line" | sed -n 's/.*\[NEEDS[[:space:]]*CLARIFICATION[:]\([^]]*\)\].*/\1/p')"
+    _is_metasyntax_body "$_body" || { _unresolved=1; break; }
+  done <<EOF
+$(grep -Ei '\[NEEDS[[:space:]]+CLARIFICATION' "$f/spec.md" 2>/dev/null || true)
+EOF
+  [ "$_unresolved" -eq 1 ] && NEEDS_CLAR=$((NEEDS_CLAR + 1))
 done
 ev "O6 specs with an unresolved marker: $NEEDS_CLAR"
 
@@ -237,8 +261,21 @@ else
 
   if [ -n "$ACTIVE" ] && [ "$HAS_SPEC" -eq 0 ]; then
     PHASE="1"
-    WHY="active feature $ACTIVE has no spec.md"
-    NEXT="write $ACTIVE/spec.md (backfill from the implementation if the work already exists)"
+    # BACKFILL vs SPEC. "No spec.md" is two different situations, and the device that separates them is
+    # whether there is any other artifact to draft FROM:
+    #   - a plan (or code) already exists -> BACKFILL: draft a spec reflecting what was actually built,
+    #     and mark it backfilled. Do NOT block a working feature on a retroactive spec — that is ceremony
+    #     the scope test forbids — and do NOT proceed with no spec at all, which is the failure the spec
+    #     rung exists to prevent. Draft-and-mark is the honest middle path.
+    #   - nothing exists -> plain SPEC: write it first, as the rung intends.
+    # The distinction is reported, not applied: this milestone detects, it does not act.
+    if [ -n "$ACTIVE" ] && [ -f "$ACTIVE/plan.md" ]; then
+      WHY="active feature $ACTIVE has a plan but no spec — BACKFILL (draft a spec from what exists, mark it backfilled; do not block)"
+      NEXT="draft $ACTIVE/spec.md from the plan and implementation, and mark it 'backfilled' in the header"
+    else
+      WHY="active feature $ACTIVE has no spec.md"
+      NEXT="write $ACTIVE/spec.md"
+    fi
   elif [ -n "$ACTIVE" ] && [ "$USER_FACING" -eq 1 ] && [ "$HAS_WIRE" -eq 0 ]; then
     PHASE="2"
     WHY="active feature has a spec with a user-facing surface and no wireframe"
