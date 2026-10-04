@@ -12,6 +12,14 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- FIX — **the doctor silently skipped inside a git WORKTREE.** `panoply.sh check` guarded itself with
+  `[ ! -d .git ]`, but a linked worktree (and a submodule) has `.git` as a **file** — a gitdir pointer —
+  not a directory. So inside every worktree the doctor printed `not a git working tree (nothing to
+  check)` and **exited 0**: the check did not run, and the exit code said everything was fine. That is
+  the exact false green this kit exists to remove, in exactly the environment parallel agent work uses
+  (the adopters create one worktree per task). It now asks git — `git rev-parse --is-inside-work-tree` —
+  instead of stat-ing `.git`. `PANOPLY.TEST` gains an adversarial case that builds a real worktree and
+  asserts the doctor does NOT skip; mutation-tested, it goes red against the old guard.
 - FIX — **a truncation budget, and an accurate statement of what each mirror is.** `doc-map.sh --check`
   now refuses when `AGENTS.md` reaches the ~20,000-char cap its own loader truncates at — a truncated
   read is silently wrong, and it had only ~2.5KB of headroom. A truncated file is worse than a large

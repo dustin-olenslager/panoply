@@ -311,7 +311,10 @@ cmd_check() {
     printf 'panoply: OFF (PANOPLY_OFF=1) — check skipped\n' >&2
     exit 0
   fi
-  if [ ! -d .git ]; then
+  # A git WORKTREE has `.git` as a FILE (a gitdir pointer), not a directory — as do submodules.
+  # Testing `[ -d .git ]` therefore reports "not a git working tree" inside every worktree and exits 0,
+  # silently skipping the check in exactly the environment parallel agent work uses. Ask git instead.
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     printf 'panoply: not a git working tree (nothing to check)\n' >&2
     exit 0
   fi

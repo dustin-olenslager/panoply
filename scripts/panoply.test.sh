@@ -412,6 +412,28 @@ else
 fi
 assert_exit "after correction the repo is current" 0 "$R"
 
+# --- case 17 (ADVERSARIAL): the doctor must not silently skip inside a git WORKTREE -------------
+# A worktree has `.git` as a FILE (a gitdir pointer), not a directory, so a `[ -d .git ]` guard reports
+# "not a git working tree" and exits 0 — the check silently does not run, in exactly the environment
+# parallel agent work uses. A skipped check that exits 0 is the false green this kit exists to remove.
+R="$(_new_repo worktree)"
+_make_adopted "$R"
+# Turn the repo into a linked worktree of itself: `.git` becomes a file, the tree stays valid.
+WT="$WORK/worktree-linked"
+( cd "$R" && git worktree add -q "$WT" -b wt-probe ) >/dev/null 2>&1
+if [ -f "$WT/.git" ]; then
+  _ok "the probe really is a worktree (.git is a file)"
+  # Run the DOCTOR UNDER TEST, not the worktree's own stale copy — otherwise this probe passes
+  # whatever the fix does and is decoration (mutation-tested: it must go red against the old guard).
+  _out="$( cd "$WT" && sh "$DOC" check 2>&1 )"
+  case "$_out" in
+    *"not a git working tree"*) _bad "the doctor checks inside a worktree" "skipped: $_out" ;;
+    *)                          _ok "the doctor checks inside a worktree (did not skip)" ;;
+  esac
+else
+  _bad "the worktree probe set up" "git worktree add did not produce a .git file"
+fi
+
 echo
 if [ "$fail" = 0 ]; then printf 'PANOPLY.TEST: all green (%d checks)\n' "$pass"; exit 0; fi
 printf 'PANOPLY.TEST: FAILED (%d ok, %d failed)\n' "$pass" "$fail"; exit 1
