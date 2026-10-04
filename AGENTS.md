@@ -4,13 +4,21 @@ Canonical, provider-neutral instructions for ANY coding agent or LLM working in 
 (any agent).
 `AGENTS.md` is the canonical hub; the generated agent hub imports this file.
 
-The tool-native generated mirrors are **generated** and
-**self-contained**: `scripts/sync-agents.sh` inlines the `MIRROR` block below (the universal preamble)
-followed by the full body of every `.agents/rules/*.md` module, so each tool gets the COMPLETE ruleset
-from its own native file — never a pointer it cannot follow. This file is the hub those tools
-read: it carries the preamble, the guardrails, and a generated **index** of the rule modules (name →
-what it governs → path) between the `PANOPLY:RULES` markers, not a second copy of the rule text — the
-text lives once under `.agents/rules/*.md`. Do not edit the generated files or the marked block; edit
+The tool-native generated mirrors carry the `MIRROR` block below (the universal preamble) followed by a
+generated **index** of the rule modules (name → what it governs → path) — never a second copy of the
+rule text, which lives once under `.agents/rules/*.md`. What "self-contained" means differs by format,
+and `scripts/sync-agents.sh` is the single home for that distinction:
+
+- **Single-file mirrors** (`CLAUDE.md`, `.github/copilot-instructions.md`, `GEMINI.md`,
+  `CONVENTIONS.md`, `.clinerules/`, `.windsurf/`) carry the **index only**. Inlining every body made a
+  ~184KB file that harnesses **silently truncated** at their cap, so it was neither small nor complete
+  while claiming to be both — the same defect `AGENTS.md` had already shed. They point at the modules,
+  which any tool with file access can open.
+- **Per-rule modules** (`.cursor/rules/*.mdc`, `.agents/rules/*.mdc`) carry each rule's **FULL body**
+  verbatim, one rule per file, scoped by the rule's own `Applies when:` condition.
+
+This file is the hub those tools read: the preamble, the guardrails, and the same generated index
+between the `PANOPLY:RULES` markers. Do not edit the generated files or the marked block; edit
 `AGENTS.md` (preamble) or `.agents/rules/*.md` (bodies) and run `sh scripts/sync-agents.sh`.
 
 ## Start here — onboarding contract (read in this order, before writing anything)
@@ -212,11 +220,12 @@ Every `.agents/rules/` module is listed below (name → what it governs → the 
 `scripts/sync-agents.sh` from the modules themselves. The **full text is not reproduced here** — it
 lives once under `.agents/rules/*.md`, plain markdown any agent can open, so this file and the modules
 cannot drift apart. A tool that reads `AGENTS.md` but cannot follow `@`-imports still gets the map: the
-preamble above, this list, and the guardrails; open the module for the depth. (The tool-native mirrors
-generated for Cursor, Copilot, Gemini, etc. ARE self-contained — `sync-agents.sh` still inlines the
-complete bodies into each of those, so a single-file tool gets the whole ruleset.) **Do not edit between
-the markers** — edit the modules and re-run `sh scripts/sync-agents.sh` (`--check` fails CI if this
-block drifts).
+preamble above, this list, and the guardrails; open the module for the depth. The tool-native mirrors
+are generated from the same source and split the same way `AGENTS.md` is: the **single-file** ones
+(`CLAUDE.md`, Copilot, Gemini, …) carry this index, while the **per-rule** ones
+(`.cursor/rules/*.mdc`) carry each rule's full body — `sync-agents.sh` names a file's format, never a
+claim about its size. **Do not edit between the markers** — edit the modules and re-run
+`sh scripts/sync-agents.sh` (`--check` fails CI if this block drifts).
 
 <!-- PANOPLY:RULES:BEGIN — generated index from .agents/rules/*.md by scripts/sync-agents.sh. Edit the modules, not here. -->
 

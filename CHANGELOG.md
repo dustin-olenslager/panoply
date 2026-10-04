@@ -28,6 +28,14 @@ Semver, applied to governance:
   with `refusing --since with an empty base SHA`. The guard was lost when PR #41 inserted the Wireframe
   step between the `Spec coverage` step's `run:` and its `if:` line, re-binding the `if:` to the new
   step. Both files are now guarded, and the adopter template no longer ships the same defect.
+- FIX — **the stale self-description AGENTS.md carried about its own mirrors.** The preamble still said
+  the tool-native mirrors were "self-contained" by way of `sync-agents.sh` inlining every rule body, and
+  the rules section repeated it verbatim ("ARE self-contained — `sync-agents.sh` still inlines the
+  complete bodies"). Both were false since the mirror-index change: single-file mirrors carry the index,
+  only per-rule `.mdc` files carry full bodies. `AGENTS.md` now states the real, format-dependent split
+  itself and points at `sync-agents.sh`, the one place that decides a file's format. **17937 → 18151
+  chars** — the fix grew the file and still clears the 20,000-char loader cap by ~1.8KB, so `--check`
+  stays green.
 - FIX — **a truncation budget, and an accurate statement of what each mirror is.** `doc-map.sh --check`
   now refuses when `AGENTS.md` reaches the ~20,000-char cap its own loader truncates at — a truncated
   read is silently wrong, and it had only ~2.5KB of headroom. A truncated file is worse than a large
