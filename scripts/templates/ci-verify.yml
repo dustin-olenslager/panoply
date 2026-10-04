@@ -70,15 +70,18 @@ jobs:
 
       - name: Spec
         run: sh scripts/check-spec.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
 
       # Spec coverage — every spec requirement must be claimed by a milestone in its plan.
       - name: Spec coverage
         run: sh scripts/check-coverage.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
 
       # Wireframe gate — a user-facing change needs a wireframe and its interviews before backend.
       # Presence only: it cannot judge whether the screen is good, which stays a review question.
       - name: Wireframe
         run: sh scripts/check-wireframe.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
 
       # Milestone evidence — a plan-to-code reconciliation: a COMPLETED milestone must name
       # resolvable evidence (a path that exists, or a PR that resolves). Grade only the
@@ -110,6 +113,7 @@ jobs:
       # docs/agents/in-progress.md — it reports without blocking, and leaving it on is a silent gate.
       - name: Agent readiness
         run: sh scripts/check-agent-readiness.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
 
       # Expert-review gate — fails if non-trivial PR lacks review evidence:
       # plan.md exists, checklist.md has items, adr.md has new section, PR has ≥2 persona sign-offs.

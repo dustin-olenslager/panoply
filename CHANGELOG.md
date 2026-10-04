@@ -20,6 +20,14 @@ Semver, applied to governance:
   (the adopters create one worktree per task). It now asks git — `git rev-parse --is-inside-work-tree` —
   instead of stat-ing `.git`. `PANOPLY.TEST` gains an adversarial case that builds a real worktree and
   asserts the doctor does NOT skip; mutation-tested, it goes red against the old guard.
+- FIX — **restore the PR-context guard on the gate steps.** `Spec coverage` and `Wireframe` in
+  `.github/workflows/verify.yml` (and `Spec`, `Spec coverage`, `Wireframe`, `Agent readiness` in
+  `scripts/templates/ci-verify.yml`) ran without `if: github.event_name == 'pull_request'`. Every one
+  consumes `${{ github.event.pull_request.base.sha }}` as `--since`, which is empty on a `push`, and
+  every gate refuses an empty base SHA by design — so each push to `main` went red in `Spec coverage`
+  with `refusing --since with an empty base SHA`. The guard was lost when PR #41 inserted the Wireframe
+  step between the `Spec coverage` step's `run:` and its `if:` line, re-binding the `if:` to the new
+  step. Both files are now guarded, and the adopter template no longer ships the same defect.
 - FIX — **a truncation budget, and an accurate statement of what each mirror is.** `doc-map.sh --check`
   now refuses when `AGENTS.md` reaches the ~20,000-char cap its own loader truncates at — a truncated
   read is silently wrong, and it had only ~2.5KB of headroom. A truncated file is worse than a large
