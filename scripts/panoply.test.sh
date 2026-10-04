@@ -246,12 +246,16 @@ fi
 # CURRENT doctor.
 R="$(_new_repo stalecopydoctor)"
 _make_adopted "$R"
-# The repo's committed doctor, as an old kit generation shipped it: the pre-marker doctor from the
-# kit's own main, which has no _PANOPLY_GENERATION anywhere (a real old copy, not a stub).
-git -C "$KIT" show origin/main:scripts/panoply.sh > "$R/scripts/panoply.sh"
+# The repo's committed doctor, as an old kit generation shipped it: a copy with NO
+# `_PANOPLY_GENERATION` anywhere. Build it by STRIPPING the marker from the current doctor rather than
+# reading it out of `origin/main` — main moves, so a fixture sourced from it stops being "old" the
+# moment the marker lands there (which is exactly what happened: this case passed on its branch and
+# went red on merge). A fixture built from a moving ref tests the ref, not the behaviour. Any line that
+# READS the marker must be stripped too, or the copy would reintroduce one.
+{ printf '#!/usr/bin/env sh\n'; grep -v '^_PANOPLY_GENERATION=' "$DOC" | grep -vF "$_PANOPLY_GENERATION"; } > "$R/scripts/panoply.sh"
 chmod +x "$R/scripts/panoply.sh"
 if grep -q '_PANOPLY_GENERATION' "$R/scripts/panoply.sh"; then
-  _bad "case 13 fixture is a marker-less old doctor" "origin/main already carries a marker — the fixture is not an old copy"
+  _bad "case 13 fixture is a marker-less old doctor" "the marker survived the strip — the fixture is not an old copy"
 else
   # The CURRENT doctor, run in that repo, must call it self-stale — never OK.
   ( cd "$R" && sh "$DOC" check ) >/dev/null 2>&1
@@ -348,9 +352,12 @@ mkdir -p "$R/docs/claude" "$R/.claude/rules"
 mv "$R"/docs/agents/* "$R/docs/claude/" 2>/dev/null || true
 mv "$R"/.agents/rules/* "$R/.claude/rules/" 2>/dev/null || true
 rm -rf "$R/docs/agents" "$R/.agents/rules"
-# Give the fixture a REAL old doctor (from the kit's own main — a pre-marker copy), as an adopter would
-# actually carry, so the self-stale tell (c) is exercised and migrate's doctor-refresh has work to do.
-git -C "$KIT" show origin/main:scripts/panoply.sh > "$R/scripts/panoply.sh"
+# Give the fixture a REAL old doctor — a marker-less copy built by stripping the marker from the
+# current one, as an adopter of the old generation would actually carry. NOT read from `origin/main`:
+# main now carries the marker, so a fixture sourced there is no longer "old" (this exact idiom broke
+# case 13 on merge). Stripping is state-independent and keeps the self-stale tell (c) exercised, so
+# migrate's doctor-refresh has work to do.
+{ printf '#!/usr/bin/env sh\n'; grep -v '^_PANOPLY_GENERATION=' "$DOC" | grep -vF "$_PANOPLY_GENERATION"; } > "$R/scripts/panoply.sh"
 chmod +x "$R/scripts/panoply.sh"
 # sanity: the CURRENT doctor must call it self-stale (the repo runs an old copy) — exit 15, not 11.
 assert_exit "old-layout repo with an old doctor is self-stale to the current doctor" 15 "$R"

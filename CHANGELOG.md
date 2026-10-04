@@ -12,6 +12,12 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- PATCH — the kit's own `panoply.test.sh` no longer builds its "old doctor" fixture out of
+  `origin/main`. Main now carries `_PANOPLY_GENERATION`, so a fixture sourced from it stopped being an
+  old copy the moment #35 merged — the case passed on its branch and went red on main. A fixture built
+  from a moving ref tests the ref, not the behaviour; it now strips the marker from the current doctor,
+  which is state-independent. Found by running the suite on merged main, not by CI.
+
 - PATCH — the `n/a — no user-facing surface` form is stated to cover internal tooling, CI, a script or
   documentation, not only a library. Found when the new interview check (correctly) refused the kit's
   own `kit-self-update` spec: the rule said what the `n/a` form accepts but did not say that a
