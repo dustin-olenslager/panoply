@@ -74,6 +74,11 @@ jobs:
       # Spec coverage — every spec requirement must be claimed by a milestone in its plan.
       - name: Spec coverage
         run: sh scripts/check-coverage.sh --since "${{ github.event.pull_request.base.sha }}"
+
+      # Wireframe gate — a user-facing change needs a wireframe and its interviews before backend.
+      # Presence only: it cannot judge whether the screen is good, which stays a review question.
+      - name: Wireframe
+        run: sh scripts/check-wireframe.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
       - name: Typecheck
@@ -158,6 +163,12 @@ jobs:
       - name: Factory phase detector self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/factory-detect.test.sh
+
+      # The wireframe gate's canary — proves it still refuses a user-facing change with no
+      # wireframe, and still accepts a reasoned n/a.
+      - name: Wireframe gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-wireframe.test.sh
 
       # Proves the plan-home gate still refuses a stray plan doc outside the doc spine and passes one
       # in the spine. Drop this step if you pruned the plan-home gate.

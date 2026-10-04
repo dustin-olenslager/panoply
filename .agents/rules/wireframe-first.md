@@ -122,6 +122,25 @@ screen's own users said about it without switching context.
 - It cannot stop the skip rule eroding under "it's just a fix". The `n/a` reason is a speed bump: it
   makes the skip a written claim someone can disagree with, which is the most a rule can do.
 
+## The gate — presence only
+
+`scripts/check-wireframe.sh` enforces the rung. It answers **one** question: for a change with a
+user-facing surface, does the artifact exist? A spec that is about something a user looks at must have
+`wireframe/index.html` and `interviews.md` beside it, or must record `n/a — <reason>`.
+
+**What it cannot see — read before trusting a green run:** not whether the wireframe is any good, not
+whether the layout suits the user, not whether the interviews were honest, not whether the personas were
+the right ones, and not whether the screen serves the spec's stories. Those are review questions and are
+asked in the expert-review gate. This gate measures presence only, and a gate that claimed to judge
+design would be measuring the wrong thing while looking rigorous.
+
+**A bare `n/a` is refused.** The reason is required, because an `n/a` without one cannot be told apart
+from skipping the rung by accident — which is the whole failure this line exists to prevent.
+
+**The spec's own declaration wins over vocabulary.** A spec that explicitly records a reasoned `n/a` is
+never dragged into the rung by a keyword, so "internal CLI — no screen in this tool" is not read as
+requiring a screen. Vocabulary is the fallback, never the decider.
+
 ## Escape hatch
 
 `WIREFRAME_OFF=1` for a deliberate exception, and the exception gets said out loud. A repo-wide off

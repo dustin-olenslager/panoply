@@ -12,6 +12,14 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- MINOR — **the wireframe gate (M4)**: `scripts/check-wireframe.sh` + 12 canaries, wired into CI and the
+  adopter template. Presence only — a user-facing change must have `wireframe/index.html` and
+  `interviews.md`, or a reasoned `n/a`. It cannot judge whether the screen is good, which stays a review
+  question. A bare `n/a` is refused (the reason distinguishes a deliberate opt-out from an accidental
+  skip), and the spec's own reasoned `n/a` wins over keyword vocabulary, so "internal CLI, no screen" is
+  not read as requiring one. Proven on real artifacts: the actual factory spec is refused without its
+  wireframe and passes with the real pair. Escape hatch `WIREFRAME_OFF=1`.
+
 - MINOR — **the wireframe rung (M3)**: `.agents/rules/wireframe-first.md` (the fixed sequence, the
   path contract, the one-sentence skip test, and the interview protocol with the mandatory refuter and
   the "changed what" column), plus `wireframe/index.html` and `interviews.md` templates. Proven with a
