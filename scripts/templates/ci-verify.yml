@@ -70,6 +70,10 @@ jobs:
 
       - name: Spec
         run: sh scripts/check-spec.sh --since "${{ github.event.pull_request.base.sha }}"
+
+      # Spec coverage — every spec requirement must be claimed by a milestone in its plan.
+      - name: Spec coverage
+        run: sh scripts/check-coverage.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
       - name: Typecheck
@@ -143,6 +147,11 @@ jobs:
       - name: Spec gate self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-spec.test.sh
+
+      # The coverage rivet's canary — proves it still refuses an uncovered requirement, both ways.
+      - name: Coverage gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-coverage.test.sh
 
       # Proves the plan-home gate still refuses a stray plan doc outside the doc spine and passes one
       # in the spine. Drop this step if you pruned the plan-home gate.

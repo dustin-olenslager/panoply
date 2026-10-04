@@ -81,6 +81,14 @@ jobs:
         run: sh scripts/check-spec.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
+      # Coverage gate — the spec→plan rivet. Fails when a requirement in a spec is claimed by no
+      # milestone in its plan, or when a plan cites a requirement the spec never declared. Without this
+      # the two rungs are sound individually and blind to each other, which is how a plan omits a third
+      # of the requirements with every gate green.
+      - name: Spec coverage
+        run: sh scripts/check-coverage.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
+
       # Architecture-boundary check — not applicable for shell-script kit (no boundary linter)
       # - name: Architecture boundaries
       #   run: <ARCH_CHECK_CMD>
@@ -140,6 +148,11 @@ jobs:
       - name: Spec gate self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-spec.test.sh
+
+      # The coverage rivet's canary — proves it still refuses an uncovered requirement, both ways.
+      - name: Coverage gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-coverage.test.sh
 
       # The plan-home gate was CI-wired with no canary of its own; this proves it refuses a stray
       # plan doc outside the doc spine, passes a plan in the spine, and honors PLAN_HOME_OFF.

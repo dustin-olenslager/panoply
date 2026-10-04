@@ -72,6 +72,25 @@ and the row is what stops the same idea being re-proposed every month.
 |---|---|---|---|
 | <part, step, job, gate, or doc> | yes/no/rejected | <the reason — or what depends on it> | <the decision or part that replaced it — required when `rejected`, else `—`> |
 
+## Spec coverage
+
+**Required when this plan has a sibling `spec.md` — the seam check-coverage.sh reads.** Every `FR-NNN`
+the spec declares must appear here against a milestone, and every requirement named here must exist in
+the spec. The spec rung and the plan rung are individually sound and blind to each other; this table is
+the only place the two are joined, so a plan cannot quietly omit a third of the requirements with every
+gate green. A requirement with no milestone is either a milestone you have not written or a requirement
+you have decided not to serve — in which case delete it from the spec, so the artifact states what is
+actually being built.
+
+What this does **not** prove: that the named milestone genuinely delivers the requirement. That residue
+is a review question and gets asked there — not answered by a green run.
+
+| Requirement | Milestone |
+|---|---|
+| FR-001 | M1 |
+| FR-002 | M1, M3 |
+| FR-003 | deferred — <why, and what triggers it> |
+
 ## Milestones
 
 Each milestone is independently reviewable and leaves the system working. Re-read this section at

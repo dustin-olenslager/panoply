@@ -17,6 +17,30 @@ comfortably all the way into implementation, where it silently became a guess no
 A spec is small on purpose. It is the cheapest possible place to discover that a requirement is
 undefined, and the only place where "we have not decided this yet" is legal.
 
+## The spec and the plan must agree — the coverage rivet
+
+The spec rung and the plan rung are each sound and each **blind to the other**. Nothing has ever checked
+that a plan covers what its spec requires, so a plan can look thorough, pass every gate, and quietly omit
+a third of the requirements. That failure is silent by construction, which is why it survives.
+
+So a plan with a sibling `spec.md` carries a **`## Spec coverage`** table: every `FR-NNN` in the spec
+against the milestone that serves it. `scripts/check-coverage.sh` enforces both directions — a
+requirement claimed by no milestone fails, and a plan citing a requirement the spec never declared also
+fails. The second half is what makes the pair *agree* rather than merely look complete.
+
+A requirement with no milestone is a decision, not an oversight: either write the milestone, or **delete
+the requirement from the spec**. Deleting it is usually right — the artifact should state what is
+actually being built, and an uncovered requirement is a promise the plan has already declined to keep.
+If a requirement is deliberately deferred, say so in the row (`FR-014 | deferred`,
+`FR-015 | not served — superseded by FR-020`) rather than leaving the cell empty.
+
+**What the gate cannot see:** whether the named milestone genuinely delivers the requirement, whether the
+milestone is any good, or whether the requirement is worth its cost. It closes *"was it mentioned at
+all"* — the *"is it true"* half is a review question and gets asked there. A green run is not evidence
+the plan is good.
+
+Escape hatch: `COVERAGE_OFF=1`, for a deliberate exception. Say so out loud when you use it.
+
 ## Where a spec lives
 
 `docs/agents/<area>/<feature>/spec.md` — a **sibling of the plan it belongs to**, in the same folder.

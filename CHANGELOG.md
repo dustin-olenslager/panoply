@@ -12,6 +12,23 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- DOCS — plan doc for the coverage rivet (`docs/agents/governance/spec-plan-coverage/`), with the review
+  checklist the expert-review gate requires of a structural change.
+
+- FIX — a CI step cannot carry two `run:` keys. Inserting the coverage canary inline after a `run:` line
+  with no trailing newline produced a duplicate key; GitHub rejected the whole workflow and reported a
+  failure with ZERO jobs in 0s (invalid YAML, not a failing test). Same defect was in the adopter
+  template. Guard: validate a workflow parses before pushing — zero jobs means the file, not the code.
+
+- MINOR — **the spec→plan coverage rivet** (`scripts/check-coverage.sh` + `scripts/check-coverage.test.sh`,
+  11 canaries). The spec rung and the plan rung were each sound and each blind to the other: nothing
+  verified that a plan covers what its spec requires, so a plan could look thorough and omit a third of
+  the requirements with every gate green. The gate enforces BOTH directions — a requirement claimed by no
+  milestone fails, and a plan citing a requirement the spec never declared fails — which is what makes
+  the pair agree rather than merely look complete. Wire into CI beside the spec gate; plan doc gains the
+  `## Spec coverage` table (template + `.agents/rules/spec.md` doctrine). Escape hatch `COVERAGE_OFF=1`.
+  Cannot see: whether a cited milestone genuinely delivers the requirement — that stays a review question.
+
 - MINOR — **the software factory: spec + plan for consolidating panoply and the archived harness into
   one phase-aware factory, with wireframe-first design.** Written under the method it describes (expert
   debate -> persona interviews -> wireframe -> plan), per the owner's instruction to build it with the
