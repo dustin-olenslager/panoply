@@ -12,6 +12,37 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- FEATURE — **`doc-map.sh` + context-budget canary.** `sh scripts/doc-map.sh` indexes every document
+  in the repo — declared purpose, size, freshness — so an agent reads ~2k tokens of index instead of
+  grepping and opening files blind. `--json`, `--dir`, `--check`, `DOC_MAP_OFF`; no dependencies.
+- FIX — **the generated mirrors were inlined corpora, and are now indexes.** `CLAUDE.md`,
+  `CONVENTIONS.md`, `GEMINI.md`, `.clinerules/`, `.github/copilot-instructions.md` and the Windsurf
+  mirror each carried all ~184KB of rule bodies (~47,000 tokens read at session start) while claiming
+  to be self-contained — they were **silently truncated** by harnesses that cap the file, so they
+  neither fit nor were complete. `AGENTS.md` had already been converted to an index for exactly this
+  reason; the mirrors had been left behind. **47,187 → 1,769 tokens each (27x).**
+- FIX — **conditional rules no longer force-load.** Every Cursor `.mdc` was `alwaysApply: true`, so a
+  session loaded the whole ~189KB corpus regardless of the task. A module now carries the activation
+  condition from its own `Applies when:` line; 8 of 20 are always-on, 12 load only when the work
+  matches. **~47,000 → ~20,592 tokens forced at session start.**
+- FIX — **`doc-map.sh`'s own flag parser only read `$1`**, so `--dir X --check` silently ignored
+  `--check` and printed a table — a run that looked like it validated a subtree and had not. Flags are
+  parsed in a loop now, and the canary covers the multi-flag form.
+- FIX — **the doc classifier matched relative paths only**, so `--dir /abs/path --check` classified
+  every file as an ordinary doc and **passed a repo whose rules were unindexable**. Same failure class
+  as a check that runs somewhere other than where it believes it is.
+
+
+- PATCH — **three verified SME findings fixed**: (1) the adoption runbook said the kit repo was
+  *public* and told you to use `npx degit` — it is **private**, so that 401s at the first step of every
+  adoption; the path is now an authenticated clone with an explicit "verify the clone succeeded" step.
+  (2) `factory-phases.tsv` claimed "the detector never hard-codes the sequence" while the detector
+  hard-codes it in **10** places — the header now states exactly what is data (ids, names, artifacts,
+  gates) and what is code (the decision rule), because a stated guarantee the code does not provide is
+  the defect class this kit exists to refuse. (3) `stat -c` is GNU-only, so the newest-by-mtime fallback
+  silently ranked nothing on BSD/macOS while looking like it had compared — now dialect-tolerant.
+
+
 - PATCH — **fix two gates that ignored a markdown-wrapped `n/a`**: `check-wireframe.sh` and
   `factory-detect.sh` matched the wireframe opt-out only when whitespace followed the colon, but a real
   spec line reads `- **Wireframe:** \`n/a — reason\``. The opt-out silently did not match and the keyword

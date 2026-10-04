@@ -183,6 +183,13 @@ jobs:
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-milestone-evidence.test.sh
 
+      # The context-budget canary — proves a generated mirror is an INDEX and not the inlined rule
+      # corpus, that every rule module is named in it, and that conditional rules are not
+      # force-loaded. These all regressed silently before anything measured them.
+      - name: Doc-map / context-budget self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/doc-map.test.sh
+
       # Proves the plan-home gate still refuses a stray plan doc outside the doc spine and passes one
       # in the spine. Drop this step if you pruned the plan-home gate.
       - name: Rule-fork drift self-test

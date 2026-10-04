@@ -17,16 +17,21 @@ or second-guess the adapt logic here — read the kit's file and execute it.
    git history, manifests). This new-vs-existing read is context the adapt step
    uses; note it and pass it along.
 
-2. **Fetch the kit into `<TARGET>/.agents-kit-tmp`.** The repo is public, so use
-   `degit` (lighter, no upstream git history to entangle with yours):
+2. **Fetch the kit into `<TARGET>/.agents-kit-tmp`.**
+
+   **The repo is PRIVATE, so `degit` will 401 and does not work.** This was previously documented as
+   public; that was wrong, and it fails at the first step of every adoption for any agent without a
+   token in its environment. Use an authenticated clone:
 
    ```sh
-   npx degit dustin-olenslager/panoply "<TARGET>/.agents-kit-tmp"
+   git clone --depth 1 https://github.com/dustin-olenslager/panoply "<TARGET>/.agents-kit-tmp"
+   rm -rf "<TARGET>/.agents-kit-tmp/.git"
    ```
 
-   (If `degit` is unavailable, an authenticated clone works too:
-   `git clone --depth 1 https://github.com/dustin-olenslager/panoply "<TARGET>/.agents-kit-tmp"`
-   then `rm -rf "<TARGET>/.agents-kit-tmp/.git"`.)
+   That requires credentials for the private repo (`gh auth setup-git`, an SSH remote, or a token in the
+   URL for a non-interactive run). If `gh` is present and authenticated, this is already satisfied.
+   **Check `git clone` succeeded before continuing** — a failed fetch followed by the next step produces
+   an empty kit directory and a confusing failure further along.
 
 3. **Read and EXECUTE the kit's adapt command against TARGET.** Open
    `<TARGET>/.agents-kit-tmp/.agents/commands/adapt-agents-setup.md` and follow its

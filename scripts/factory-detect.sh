@@ -195,12 +195,16 @@ if [ -z "$ACTIVE" ]; then
   done
 fi
 if [ -z "$ACTIVE" ] && [ -n "$(printf '%s' "$FEATURES" | tr -d ' ')" ]; then
-  # Newest by mtime, resolved in the shell rather than by `ls`: no external process, no assumptions
-  # about filenames, and the tie-break is deterministic (first wins) instead of depending on sort order.
+  # Newest by mtime, resolved in the shell rather than by `ls`: no assumptions about filenames, and
+  # the tie-break is deterministic (first wins) instead of depending on sort order. It does shell out
+  # to `stat`, which is not a POSIX utility — hence the two dialects attempted below.
   NEWEST=""; NEWEST_T=""
   for f in $FEATURES; do
     [ -f "$f/plan.md" ] || [ -f "$f/spec.md" ] || continue
-    _m="$(stat -c '%Y' "$f" 2>/dev/null || echo 0)"
+    # `stat -c` is GNU-only (`-f` on BSD/macOS). Trying both keeps the "POSIX sh, runs anywhere"
+    # claim true; a bare `-c` silently returned 0 on BSD, which made this fallback rank nothing and
+    # pick arbitrarily while looking like it had compared timestamps.
+    _m="$(stat -c '%Y' "$f" 2>/dev/null || stat -f '%m' "$f" 2>/dev/null || echo 0)"
     if [ -z "$NEWEST_T" ] || [ "$_m" -gt "$NEWEST_T" ]; then NEWEST_T="$_m"; NEWEST="$f"; fi
   done
   ACTIVE="$NEWEST"

@@ -10,6 +10,22 @@
 
 The distinction is not about secrecy, it is about durability: committed docs are versioned alongside the code they describe, so they can be reviewed, corrected, and blamed.
 
+## Know the cost before you open the file
+
+`sh scripts/doc-map.sh` prints an index of every document in the repo: what each one is for (its
+declared `Applies when`), its size, and when it changed. Use it before a docs task and before
+orienting in an unfamiliar repo. It answers *which* document and *what it costs* — never substitute it
+for reading a doc you intend to edit.
+
+Two facts it makes visible, both of which cost real context when ignored:
+
+- **Some files are cold storage.** The changelog and `completed/` archives are history. They are
+  listed so they stay findable, and marked so you do not pay for them during orientation.
+- **A generated mirror is an index, not the ruleset.** Files like `CLAUDE.md` carry the preamble and
+  name each `.agents/rules/` module; the bodies live once, under `.agents/rules/`, and you read the
+  ones this task touches. Inlining every body made a ~184KB file that harnesses truncated, so it was
+  neither small nor complete. Do not "fix" a mirror by inlining the corpus back into it.
+
 ## Read order (start here, in this order)
 
 1. **`docs/agents/in-progress.md`** — the queue, ONE FILE, an ordered table where each row carries a task's status and its exact next step. Always read this first; it tells you what the current work actually is, which is the one thing a fresh context window cannot infer from the code.
