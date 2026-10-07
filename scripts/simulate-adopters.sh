@@ -5,12 +5,12 @@
 # Not a canary: it is the owner-requested simulation harness. It never touches a real adopter repo;
 # every fixture lives under SCRATCH. Prints a readable transcript to stdout (also tee-able to a file).
 #
-#   bash scripts/simulate-adopters.sh <scratch>/
+#   bash scripts/simulate-adopters.sh <worktree-dir>
 set -u
 
 KIT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
 DOC="$KIT/scripts/panoply.sh"
-SIM="<scratch>/"
+SIM="${SIM_DIR:-/tmp/sim-adopters}"
 rm -rf "$SIM"; mkdir -p "$SIM"
 export PANOPLY_KIT_ROOT="$KIT"   # so the fixtures can reach the kit source
 
