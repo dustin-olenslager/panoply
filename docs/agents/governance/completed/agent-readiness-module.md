@@ -2,7 +2,7 @@
 
 - **Area:** `governance`  ·  **Started:** 2026-09-26  ·  **Shipped:** 2026-09-26 (PR #6, squash `f58e936`)
 - **Owner:** the owner (driven by Hermes)
-- **Next step (follow-up, separate repo):** apply the module to Pilot app (a separate private repo) as the pilot — its gap list drives a plan doc in that repo, not here.
+- **Next step (follow-up, separate repo):** apply the module to a pilot application in its own private repo — its gap list drives a plan doc in that repo, not here.
 - **Roadmap initiative:** Agent-readiness doctrine (Shipped)
 
 ## Goal
@@ -11,7 +11,7 @@ Every an organization app becomes **dual-mode**: usable by a human in its own UI
 
 Success = an agent picking up an adapted repo learns the three required surfaces from `AGENTS.md`, and a PR that removes idempotency or hardcodes a vendor endpoint fails CI.
 
-**Out of scope:** applying the module to any specific app (Pilot app is a separate follow-up in its own repo); the A2A/MCP protocol specifications themselves; runtime agent behavior.
+**Out of scope:** applying the module to any specific app (the pilot app is a separate follow-up in its own repo); the A2A/MCP protocol specifications themselves; runtime agent behavior.
 
 ## Context
 

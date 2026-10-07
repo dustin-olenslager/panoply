@@ -142,7 +142,7 @@ None blocking.
 > than shipping a budget that would guard nothing. The real measured risk was `AGENTS.md` itself —
 > 17,492 bytes against a ~20,000-char cap, ~2.5KB of headroom — which is now the thing checked.
 
-> **Build note:** 2026-10-04 — `kit-repo` and the other kit repos are **not** propagated to, despite
+> **Build note:** 2026-10-04 — the other kit repos are **not** propagated to, despite
 > having the same inlining. Its `AGENTS.md` documents the mirrors as deliberately self-contained
 > ("never a pointer it cannot follow"), so overriding that is the owner's decision, not a fix I apply
 > quietly. Held pending that decision.
