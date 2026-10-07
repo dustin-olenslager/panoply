@@ -1,5 +1,14 @@
 # Changelog — panoply
 
+MIT LICENSE — the kit now carries an explicit license. It is a drop-in artifact people copy into
+their own projects, and "no license" means nobody may legally reuse it, which defeats the purpose.
+Adds `LICENSE` (MIT, 2026 the owner).
+
+De-identified the publishing script. `scripts/init-template-repo.sh` hard-coded a personal work
+address (`94700316+dustin-olenslager@users.noreply.github.com`) as the commit identity it bakes into a new repo. It now reads the
+operator's own `git config user.email`, overridable with `$AUTHOR_EMAIL` — the script's job is to
+set up *someone's* template repo, not to stamp one person's employer address into it.
+
 FIX — the kit's own two false statements about the context-file cap.
 
 `doc-map.sh` and `sync-agents.sh` both presented 20,000 as a flat ceiling and described

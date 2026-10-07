@@ -6,7 +6,7 @@ set -euo pipefail
 
 REPO_SLUG="dustin-olenslager/panoply"
 AUTHOR_NAME="the owner"
-AUTHOR_EMAIL="94700316+dustin-olenslager@users.noreply.github.com"
+AUTHOR_EMAIL="${AUTHOR_EMAIL:-$(git config user.email)}"
 
 cd "$(dirname "$0")/.." 2>/dev/null || cd "$(pwd)"
 
