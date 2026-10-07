@@ -167,7 +167,7 @@ which prints exactly what it will change before it changes it.
 ## Assumptions
 
 - The "kit source" a copy can reach is exactly the existing `_canonical_kit_root` search
-  (`.panoply`, `.cache/panoply`, `~/panoply`, `<kit>`, `$PANOPLY_KIT_ROOT`) — no new
+  (`.panoply`, `.cache/panoply`, `~/panoply`, `$PANOPLY_KIT_ROOT`) — no new
   network access, no auto-pull. The owner's doctrine is that a rule change is reviewed, not silently
   overwritten.
 - The new self-stale state gets a NEW exit code so existing tooling that keys on 10–14 is unaffected.

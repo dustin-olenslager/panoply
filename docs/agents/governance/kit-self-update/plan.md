@@ -2,7 +2,7 @@
 
 - **Area:** `governance`  ·  **Started:** 2026-10-03  ·  **Status:** In progress
 - **Owner:** the owner (approved scope and priority order) / Hermes (drafting + building)
-- **Next step:** run the local gate suite (`sh scripts/panoply.test.sh`, `for t in scripts/*.test.sh; do sh $t; done`, `sh scripts/sync-agents.sh --check`, `sh scripts/check-docs.sh --since origin/main`, `shellcheck scripts/panoply.sh scripts/*.sh`), test `migrate` against the throwaway adopter copy at `<scratch>/`, then open exactly ONE PR on `fix/self-update`.
+- **Next step:** run the local gate suite (`sh scripts/panoply.test.sh`, `for t in scripts/*.test.sh; do sh $t; done`, `sh scripts/sync-agents.sh --check`, `sh scripts/check-docs.sh --since origin/main`, `shellcheck scripts/panoply.sh scripts/*.sh`), test `migrate` against a throwaway adopter copy, then open exactly ONE PR on `fix/self-update`.
 - **Roadmap initiative:** Kit self-update (new initiative — see `../../roadmap.md`).
 - **Spec:** `spec.md` in this folder.
 

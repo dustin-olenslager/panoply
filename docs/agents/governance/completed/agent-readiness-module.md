@@ -2,7 +2,7 @@
 
 - **Area:** `governance`  ·  **Started:** 2026-09-26  ·  **Shipped:** 2026-09-26 (PR #6, squash `f58e936`)
 - **Owner:** the owner (driven by Hermes)
-- **Next step (follow-up, separate repo):** apply the module to Pilot app (`an organization/pilot-app`) as the pilot — its gap list drives a plan doc in that repo, not here.
+- **Next step (follow-up, separate repo):** apply the module to Pilot app (a separate private repo) as the pilot — its gap list drives a plan doc in that repo, not here.
 - **Roadmap initiative:** Agent-readiness doctrine (Shipped)
 
 ## Goal

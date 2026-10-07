@@ -45,7 +45,7 @@ adopters are told to run.
 **Constraint that shapes the fix:** a false red in that gate is worse than no gate — it trains people to
 ignore a failure. The fix must make the two trees agree *by construction*, not by a special case.
 
-Read as user-visible: `<kit>` (a real clone) is at the tagged-and-untagged commit `c0dee04`
+Read as user-visible: the canonical kit clone is at the tagged-and-untagged commit `c0dee04`
 with `v1.4.0` an ancestor, so it reported `v1.4.0`; the worktree source reported `unreleased`. Both were
 answering the question they were asked; only one question was the right one.
 
@@ -121,7 +121,7 @@ owner and, with no answer returned, the recommended option was taken as the safe
 ## Build notes
 
 > **Build note:** 2026-10-01 — the first diagnosis in this session was **wrong** and had to be retracted: I
-> attributed the failure to a stale `<kit>`. Refreshing that clone to `main` did not fix it,
+> attributed the failure to a stale canonical kit clone. Refreshing that clone to `main` did not fix it,
 > which falsified the theory. Recorded because a wrong root cause that ships a fix is the failure mode
 > `systematic-debugging` exists to prevent.
 

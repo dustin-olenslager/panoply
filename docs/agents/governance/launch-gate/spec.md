@@ -81,6 +81,6 @@ agents; there is no screen to design.
 **Outside experts consulted:** none applicable — the kit governs software development, and its domain
 input is software-practitioner input, recorded here rather than in a non-software persona file. The
 practitioner input that shaped these requirements is the 2026-10-03 SME gap analysis
-(`<scratch>/gap-analysis.md`), which itself cites DORA/Accelerate, Google SRE, Amazon ORR, and
+(the gap-analysis doc), which itself cites DORA/Accelerate, Google SRE, Amazon ORR, and
 Microsoft SDL. No fabricated expert is named; the requirements trace to the analysis and to the kit's
 own stated gaps.

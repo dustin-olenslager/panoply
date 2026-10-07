@@ -30,7 +30,7 @@ app; out of scope for this change).
 ## Context
 
 The list this work comes from is a ranked enterprise-readiness gap analysis produced by two SME
-subagents on 2026-10-03, written to `<scratch>/gap-analysis.md` (22.5 KB) and captured in that
+subagents on 2026-10-03, written to a gap-analysis doc (22.5 KB) and captured in that
 session's delegation transcript. Its Tier-1 set was five items; its own Algorithm pass already deleted
 several larger ones (staging pipelines, CAB, full observability, SBOM). Nothing on the list had been
 implemented when this plan was written.
