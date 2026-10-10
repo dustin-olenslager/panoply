@@ -115,6 +115,15 @@ jobs:
         run: sh scripts/check-agent-readiness.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
+      # Comment slop — a change that adds a decorative banner, an emoji marker, a narration comment,
+      # an end marker, or an empty label is refused, with the file and line named. Change-scoped on
+      # purpose: the rule postdates this tree, whose pre-existing banners are not this PR's debt, so
+      # only the lines this PR adds are graded. Doctrine: .agents/rules/code-style.md, Comments.
+      # Doctrine names the escape hatch: COMMENTS_OFF=1, for a deliberate exception.
+      - name: Comment slop
+        run: sh scripts/check-comments.sh --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
+
       # Expert-review gate — fails if non-trivial PR lacks review evidence:
       # plan.md exists, checklist.md has items, adr.md has new section, PR has ≥2 persona sign-offs.
       # Trivial escape: PR label "trivial", commit prefix "trivial:", or 1-file ≤15-line no-schema change.
@@ -242,6 +251,12 @@ jobs:
       - name: Expert-review gate self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-expert-review.test.sh
+
+      # The comment gate's canary — proves it still refuses each banned shape, still passes a doc that
+      # quotes the shapes, still counts what it compared, and still refuses an unresolvable base.
+      - name: Comment gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-comments.test.sh
 
       # Proves the algorithm gate still refuses a structural change with no deletion section.
       # Drop this step if you pruned the Algorithm rule.

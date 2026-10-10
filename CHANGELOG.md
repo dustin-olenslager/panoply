@@ -65,6 +65,12 @@ Semver, applied to governance:
   read a trailing `#` or `--` comment. Adopter impact: the gate runs on pull requests over the lines a
   change adds; set `COMMENTS_OFF=1` deliberately while a pre-existing backlog is folded in.
 
+- FEAT — **the comment gate is wired where it can actually block.** One step in this repo's
+  `.github/workflows/verify.yml` and the same step in the shipped `scripts/templates/ci-verify.yml`, both
+  scoped to pull requests and using the PR base SHA, plus the canary in both self-tests jobs. The gate's
+  own pull request is therefore the first thing it grades, and a gate that silently stopped detecting
+  would be caught by CI rather than by an adopter.
+
 - FEAT — **the ship phase is gated: a launch record, or the ship claim is refused.** Phase 6's gate
   cell in `factory-phases.tsv` was `-` — a stated gap the kit calls "not a licence" — and the same was
   true of `Verify`. Nothing stood between "verify passed" and "in production": a plan could tick its
