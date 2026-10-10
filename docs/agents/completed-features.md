@@ -81,9 +81,10 @@ Add an entry when a feature is tested and signed off, at the same time you move 
   carries the `## Launch` section the phase-six rung demands — an honest merge record for a docs change,
   not a dressed-up deployment.
 - **Known gaps:** a script cannot notice that a merged PR left a stale row — folding on merge stays a habit,
-  and the queue's header now says so. `chore/reconcile-plan-spine` remains on the remote as a superseded
-  branch (the change was re-landed as one commit because `check-docs.sh` is per-commit and the kit forbids
-  force-pushing a published branch).
+  and the queue's header now says so. the superseded branch
+  `chore/reconcile-plan-spine` was deleted on the owner's word after the merge (the change had been
+  re-landed as one commit because `check-docs.sh` is per-commit and the kit forbids force-pushing a
+  published branch).
 - **Durable lesson:** **a gate that diffs files re-grades history the moment you archive it** — exempt the
   archive, and prove the exemption with a canary, or every fold re-opens decisions the rules postdate. See
   the `governance-kit-maintenance` skill.
