@@ -1,9 +1,8 @@
 # Plan: the PR-context guard on the gate steps
 
-- **Area:** `governance`  ·  **Started:** 2026-10-04  ·  **Status:** In progress
+- **Area:** `governance`  ·  **Started:** 2026-10-04  ·  **Status:** Done — archived 2026-10-10
 - **Owner:** Hermes (inbox-triage autonomous fix)
-- **Next step:** owner review + squash-merge this PR. Then move this folder into
-  `governance/completed/`, add the `completed-features.md` row, and delete the queue row.
+- **Next step:** None for M1 and M3 — the three guards and the `CHANGELOG` FIX line are on `main`. M2 (a structural check for the whole class) remains a deliberate gap, recorded below and in the `completed-features.md` entry. Folded by the spine reconciliation PR (2026-10-10): the queue row is gone, this folder is archived, and `completed-features.md` carries its entry.
 - **Spec:** `n/a — routine` — a two-key regression fix inside an existing pattern (see Build notes).
 - **Domain & experts:** n/a — no outside domain; this is a CI-workflow structural defect in the kit.
 - **Parent plan:** `../software-factory/plan.md` (the factory rungs this guards).
@@ -81,7 +80,7 @@ n/a — no sibling `spec.md` (routine fix, per the Spec field above).
 - [~] **M2 — structural check for the class** — a validator that fails when a step consuming the PR base
   SHA has no following guard; written and run this change (see Evidence). Wiring it into the workflow's
   self-tests is deferred to a follow-up so this PR stays a minimal, reviewable fix.
-- [ ] **M3 — CHANGELOG entry** — an Unreleased FIX line naming the defect and the fix.
+- [x] **M3 — CHANGELOG entry** — an Unreleased FIX line naming the defect and the fix. Evidence: `CHANGELOG.md`
 
 **Evidence:** `.github/workflows/verify.yml`, `scripts/templates/ci-verify.yml`, `CHANGELOG.md`,
 `docs/agents/roadmap.md`, `docs/agents/in-progress.md`

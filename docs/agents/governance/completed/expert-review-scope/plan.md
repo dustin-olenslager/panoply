@@ -1,9 +1,8 @@
 # Plan: Scope the expert-review gate to the change, not the tree
 
-- **Area:** `governance`  ·  **Started:** 2026-10-03  ·  **Status:** In progress
+- **Area:** `governance`  ·  **Started:** 2026-10-03  ·  **Status:** Done — archived 2026-10-10
 - **Owner:** the owner (reported the defect, approved the scope) / Hermes (implementing)
-- **Next step:** land this PR (`fix/expert-review-gate`), then move the folder into
-  `governance/completed/` and add a `completed-features.md` row.
+- **Next step:** None — `scripts/check-expert-review.sh` scopes to the diff on `main`, and its canary carries the adversarial cases. Folded by the spine reconciliation PR (2026-10-10): the queue row is gone, this folder is archived, and `completed-features.md` carries its entry.
 - **Roadmap initiative:** Mechanical enforcement of the governance rules — a green gate must mean the
   rule was followed, not that the rule's shape was ever seen.
 - **Spec:** n/a — routine. This is a bug fix whose acceptance criterion is the gate's stated contract

@@ -30,6 +30,17 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- DOCS — **the queue tells the truth again.** Seven initiatives whose pull requests had already merged
+  were still sitting in `in-progress.md` claiming an open branch, so the spine read as though nine
+  features were in flight when one actually was. Each is folded into `governance/completed/` with its
+  status and next step rewritten, `completed-features.md` gains an entry per feature, `roadmap.md`
+  carries them under **Shipped** with their merge dates, and the only live row is the Algorithm's
+  M4/M5. Ticked where the work is verifiably on `main`; left unticked, with the reason written down,
+  where a classifier cannot tell the plan's subject from the claim it refuses (the launch gate's own
+  milestones) or where the artifact lives outside this repo (the Hermes plugin). `scripts/panoply.sh`'s
+  pointer to the self-update plan follows the folder, and `completed-features.md` retires its own
+  example entry, which its footer says to delete once a real feature ships.
+
 - FEAT — **claims are evidence, and comments are not decoration: the two gaps worth taking from the
   public `anti-slop` rulebook.** MINOR — a new rule module and a new gate; no rule reverses and no
   required placeholder changes shape, so an already-adapted repo pulls this one without rewriting

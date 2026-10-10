@@ -130,7 +130,12 @@ DONE_TOTAL=0
 
 for plan in $TOUCHED; do
   [ -f "$plan" ] || continue
-  case "$plan" in */_templates*|*/_template*|*/templates/*|*/examples/*|*/_examples*) continue ;; esac
+  # An ARCHIVED pair (`docs/agents/<area>/completed/<slug>/`) is history, not a live claim. The rungs
+  # judge a change's claim when it is MADE; a move into the archive makes every file in it "changed"
+  # without making a new claim, so grading it again re-opens a decision already taken — against rules
+  # that may postdate the artifact (this is how the launch rung read `[Unreleased]` as a claim and the
+  # wireframe rung read a reversed opt-out as silence). check-plan-home.sh exempts the same path.
+  case "$plan" in */_templates*|*/_template*|*/templates/*|*/examples/*|*/_examples*|*/completed/*) continue ;; esac
 
   CHECKED=$((CHECKED + 1))
 

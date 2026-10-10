@@ -1,8 +1,8 @@
 # Plan: Lock the 2026-09-29 dev-workflow policy into the kit rules + mirrors
 
-- **Area:** `governance`  ·  **Started:** 2026-09-29  ·  **Status:** In review
+- **Area:** `governance`  ·  **Started:** 2026-09-29  ·  **Status:** Done — archived 2026-10-10
 - **Owner:** the owner (approving) / Hermes SME subagent (drafting)
-- **Next step:** Owner reviews PR `chore/dev-workflow-rules`, then squash-merge (branch auto-deletes). If wording on any policy point is off, it is corrected on the same branch before merge — points 1–10 are a locked owner decision, not open for re-litigation.
+- **Next step:** None — the rule modules and every tool-native mirror carry the locked policy on `main`. Folded by the spine reconciliation PR (2026-10-10): the queue row is gone, this folder is archived, and `completed-features.md` carries its entry.
 - **Roadmap initiative:** Locked dev-workflow policy in kit rules + every mirror.
 
 ## Goal

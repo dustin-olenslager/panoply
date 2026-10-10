@@ -152,7 +152,12 @@ for spec in $TOUCHED_SPECS; do
   dir="$(dirname "$spec")"
 
   # Scaffolding is not a live spec — same exemption the coverage gate needed after its first real run.
-  case "$dir" in */_templates*|*/_template*|*/templates/*|*/examples/*|*/_examples*) continue ;; esac
+  # An ARCHIVED pair (`docs/agents/<area>/completed/<slug>/`) is history, not a live claim. The rungs
+  # judge a change's claim when it is MADE; a move into the archive makes every file in it "changed"
+  # without making a new claim, so grading it again re-opens a decision already taken — against rules
+  # that may postdate the artifact (this is how the launch rung read `[Unreleased]` as a claim and the
+  # wireframe rung read a reversed opt-out as silence). check-plan-home.sh exempts the same path.
+  case "$dir" in */_templates*|*/_template*|*/templates/*|*/examples/*|*/_examples*|*/completed/*) continue ;; esac
 
   if _n_a_reason "$spec" >/dev/null 2>&1; then
     CHECKED=$((CHECKED + 1))

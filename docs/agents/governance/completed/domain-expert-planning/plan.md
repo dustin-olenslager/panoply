@@ -1,10 +1,8 @@
 # Plan: Domain expertise and design in the plan
 
-- **Area:** `governance`  ·  **Started:** 2026-10-03  ·  **Status:** In progress
+- **Area:** `governance`  ·  **Started:** 2026-10-03  ·  **Status:** Done — archived 2026-10-10
 - **Owner:** the owner (reported the gap, made the delete-and-reconcile decision) / Hermes (implementing)
-- **Next step:** land this PR (`feat/planning-panel`). M1–M3 are done and gate-green; on merge, move
-  this folder to `governance/completed/`, add the `completed-features.md` row, and delete the
-  `in-progress.md` row.
+- **Next step:** None — the spec template's domain section and the two planning personas are on `main`; the eleven dead persona files are gone. Folded by the spine reconciliation PR (2026-10-10): the queue row is gone, this folder is archived, and `completed-features.md` carries its entry.
 - **Roadmap initiative:** Mechanical enforcement of the governance rules — but here the finding is
   that the missing thing is *doctrine and a template section*, not another gate (see the Algorithm pass
   and "Enforcement" below).
@@ -125,7 +123,7 @@ not a persona, and is untouched here.
 - [x] **M3 — personas decided.** Delete the 11 dead files, keep and wire `ux-designer` /
   `ux-researcher`, rewrite `personas/README.md`; regenerate mirrors; update the shipped
   `AGENTS.md`-adjacent references if any name a deleted file.
-- [x] **M4 — verify and ship.** Run `sync-agents.sh --check`, the full canary suite, `check-docs.sh`,
+- [x] **M4 — verify and land it.** Run `sync-agents.sh --check`, the full canary suite, `check-docs.sh`,
   `check-spec.sh`, `check-algorithm.sh`, plain `shellcheck`; update `CHANGELOG.md`; open the PR.
 
 ## Open questions
