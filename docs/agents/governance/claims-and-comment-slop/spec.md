@@ -138,6 +138,12 @@ and they say which they did.
 - `LC_ALL=C` byte matching is acceptable for emoji detection because the kit is POSIX sh with no
   runtime dependencies; the limits of that choice are stated in the module rather than hidden.
 
+## Wireframe
+
+Wireframe: n/a — no user-facing surface. This change adds a shell gate and markdown doctrine consumed
+by agents and maintainers; there is no screen, flow, or form for a person to look at, so the screen is
+not a decision this change could get wrong before fitting the backend to it.
+
 ## Domain & outside experts
 
 | Question | Answer |

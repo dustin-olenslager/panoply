@@ -139,6 +139,12 @@ made by the owner before M1 and is recorded in the deletion candidates above.
 > Narrowed to the `Step N` and ordinal-word forms; the false-positive class is now recorded in the
 > module as a stated limit rather than fixed by widening an exemption.
 
+> **Build note:** 2026-10-10 — the wireframe gate refused THIS spec on its first real run, for the
+> reason the governance doctrine predicts: the spec classifies as user-facing because its own sentences
+> contain "what a user can do", "screen" and "flow" while declaring it has none. The fix is the
+> documented opt-out in the artifact's real formatting (`Wireframe: n/a — <reason>`), not a wider
+> exemption in the gate.
+
 > **Build note:** 2026-10-10 — the canary is mutation-tested, eight mutations of the gate's own
 > detection paths (separator case, emoji prefix list, narration regex, base-resolution guard, the
 > nothing-compared path, `SELF_EXCLUDE`, the docs exemption, the note bucket): each turned the suite
