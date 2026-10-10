@@ -27,7 +27,7 @@
 # The generation marker is compared, never the version string: between releases both the copy and the
 # source report `unreleased`, so a version comparison detects nothing in the exact case (a kit between
 # tags) where the false green appears. The marker changes exactly when the doctor's layout expectation
-# changes, which is what "this copy is stale" means. See docs/agents/governance/kit-self-update/plan.md.
+# changes, which is what "this copy is stale" means. See docs/agents/governance/completed/kit-self-update/plan.md.
 
 
 set -eu

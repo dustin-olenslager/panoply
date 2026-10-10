@@ -172,7 +172,31 @@ if printf '%s' "$out" | grep -q 'no plan touched'; then
   ok "a change touching no plan defers explicitly"
 else bad "the gate did not defer explicitly when no plan was touched" "$out"; fi
 
-# case 12: THE MUTATION CASE — prove the canary is testing the gate's BEHAVIOUR, not merely that a
+# case 13: THE FALSE-POSITIVE CONTROL — the kit's own vocabulary must not read as a ship claim. A
+# completed milestone naming the CHANGELOG's `[Unreleased]` heading (or containing "relationship") is
+# not a claim that anything went out; only a word-boundary match is. Without this case the gate could
+# regress to a substring match and refuse every plan whose docs milestone cites the CHANGELOG.
+r="$(mkrepo pass-unreleased)"; base="$(git -C "$r" rev-parse HEAD)"
+mkdir -p "$r/docs/agents/core/thing" "$r/src"
+printf '# Plan\n\n- [x] **M3 — the CHANGELOG [Unreleased] entry** — one line under the heading, and the relationship between the two files recorded — `CHANGELOG.md`\n' > "$r/docs/agents/core/thing/plan.md"
+printf 'x\n' > "$r/src/x.ts"
+cmit "$r" "no ship claim, only the kit's own vocabulary"
+rc="$(gate_class "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "a milestone naming [Unreleased] or relationship is not read as a ship claim"
+else bad "the kit's own CHANGELOG vocabulary was read as a ship claim (got '$rc')"; fi
+
+# case 14: the fix must not have gone too far — the inflected forms still fire. "shipped" and a bare
+# "live" claim are real claims; only words that merely CONTAIN those letters are exempt.
+r="$(mkrepo pass-inflected)"; base="$(git -C "$r" rev-parse HEAD)"
+mkdir -p "$r/docs/agents/core/thing" "$r/src"
+printf '# Plan\n\n- [x] shipped it to production — `src/x.ts`\n' > "$r/docs/agents/core/thing/plan.md"
+printf 'x\n' > "$r/src/x.ts"
+cmit "$r" "shipped, no record"
+rc="$(gate_class "$r" "$base")"
+if [ "$rc" = "fail-norecord" ]; then ok "an inflected ship claim with no record is still refused"
+else bad "the word-boundary fix stopped catching an inflected ship claim (got '$rc')"; fi
+
+# case 15: THE MUTATION CASE — prove the canary is testing the gate's BEHAVIOUR, not merely that a
 # script exits 0. We mutate the fixture's copy of the gate so its failure path can never fire (force
 # FAILED=0 before the verdict), run the SAME adversarial scenario as case 2, and assert the canary's
 # own classifier now reports 'ok' — i.e. had the gate regressed this way, the canary WOULD have caught

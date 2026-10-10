@@ -106,10 +106,16 @@ if [ -z "$(printf '%s' "$TOUCHED_PLANS" | tr -d ' ')" ]; then
 fi
 
 # A plan is "at the ship rung" when it marks a SHIP milestone complete. The marker is a completed
-# milestone (`- [x]`) whose text names the ship/shipped/launch/deploy event. Deliberately loose on
-# wording (ship|shipped|launch|deploy|released|live) because the honest phrasing varies; what is NOT
-# acceptable is claiming a ship and recording nothing behind it.
-SHIP_RE='- \[[xX]\] .*([Ss]hip|[Ll]aunch|[Dd]eploy|released|[Ll]ive)'
+# milestone (`- [x]`) whose text names the ship/shipped/launch/deploy event. The wording is deliberately
+# loose (ship|launch|deploy|released|live, with their inflections) because the honest phrasing varies;
+# what is NOT acceptable is claiming a ship and recording nothing behind it.
+#
+# WORD BOUNDARIES ARE LOAD-BEARING. A bare substring match reads the kit's own vocabulary as a ship
+# claim: `[Unreleased]` — the standard CHANGELOG heading, named by the docs milestone of nearly every
+# plan — contains "released", and "relationship" contains "ship". Both made this rung refuse plans that
+# claim nothing, which is the always-red failure mode a gate is supposed to make impossible. Require a
+# non-letter on each side, the house style `_names_launch` already uses.
+SHIP_RE='- \[[xX]\].*([^A-Za-z]|^)([Ss]hip(s|ped|ping)?|[Ll]aunch(ed|es|ing)?|[Dd]eploy(ed|s|ing|ment)?|[Rr]eleased|[Ll]ive)([^A-Za-z]|$)'
 
 FAILED=0
 REPORT=""

@@ -1,8 +1,8 @@
 # Plan: claims are evidence, and comments are not decoration
 
-- **Area:** `governance`  ·  **Started:** 2026-10-10  ·  **Status:** In review
+- **Area:** `governance`  ·  **Started:** 2026-10-10  ·  **Status:** Done — archived 2026-10-10
 - **Owner:** Hermes (SME-drafted), the owner (approving)
-- **Next step:** PR #1 on `feat/content-and-comment-slop` is green in CI (verify + self-tests). Next step = owner review + squash-merge, then move this folder to `governance/completed/`, add the `completed-features.md` row, move the `roadmap.md` initiative to Shipped, and delete the `in-progress.md` row.
+- **Next step:** None — shipped as PR #1, squash-merged 2026-10-10 (main `e01380f`), CI green on both jobs. Folded by the spine reconciliation PR (2026-10-10): the queue row is gone, this folder is archived, and `completed-features.md` carries its entry.
 - **Roadmap initiative:** Claims and comment slop — the two gaps worth taking from the public `anti-slop` rulebook
 - **Spec:** `spec.md` in this folder — the what and why this plan implements.
 - **Domain & experts:** developer tooling; no outside expert consulted, stated rather than fabricated. The published `anti-slop` rulebook (MIT) is the outside input, read in full and cited in the spec's Domain table — its comment skill names the same four shapes, and it ships no mechanical gate, which is why only the comment half is gated here.
@@ -120,7 +120,7 @@ Relevant existing machinery this plan must fit:
 - [x] **M2 — the Comments doctrine** — add the Comments section naming the banned shapes, what to keep instead, the gate, and the declared escape hatch (FR-003, FR-009) — evidence: `.agents/rules/code-style.md`
 - [x] **M3 — the comment gate and its canary** — add the gate (change-scoped by default, `--since`, `--staged`, `--tree`, docs and self excluded, counts and a distinct zero message, exit 2 on an unresolvable base) and its canary, both directions, mutation-tested (FR-004 to FR-009) — evidence: `scripts/check-comments.test.sh`
 - [x] **M4 — CI wiring** — one step in this repo's workflow and the same step in the adopter template, plus the canary in both self-tests jobs; verify and self-tests are green on PR #1, with the comment gate's step logged against the PR base (FR-010) — evidence: `scripts/templates/ci-verify.yml`
-- [ ] **M5 — docs and the adopter note** — this spec and plan, the `roadmap.md` row, the `in-progress.md` row, the CHANGELOG `[Unreleased]` entry naming the MINOR class and the adopter impact, and the ship-time move to `governance/completed/` with a `completed-features.md` row (FR-012) — the first four landed; the fold-and-archive step follows the merge
+- [x] **M5 — docs and the adopter note** — this spec and plan, the `roadmap.md` row, the `in-progress.md` row, the CHANGELOG `[Unreleased]` entry naming the MINOR class and the adopter impact, and the fold-and-archive move to `governance/completed/` with a `completed-features.md` row (FR-012) — all five landed, the archive step with the spine reconciliation — evidence: `docs/agents/completed-features.md`
 
 ## Open questions
 
@@ -158,4 +158,4 @@ Move this folder into `governance/completed/`, rename the plan file to describe 
 entry to `../../completed-features.md`, append the final line to the `CHANGELOG` `[Unreleased]` section,
 remove the item from `../../in-progress.md`, move the initiative in `../../roadmap.md` to Shipped, and
 promote any durable lesson into `architecture.md` or `key-patterns.md` — all in the same commit as the
-ship.
+ship. Evidence: `docs/agents/completed-features.md`

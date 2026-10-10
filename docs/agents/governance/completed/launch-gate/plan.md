@@ -1,11 +1,8 @@
 # Plan: the launch gate — phase 6 (and the verify evidence phase 5 lacks)
 
-- **Area:** `governance`  ·  **Started:** 2026-10-04  ·  **Status:** In progress
+- **Area:** `governance`  ·  **Started:** 2026-10-04  ·  **Status:** Done — archived 2026-10-10
 - **Owner:** Hermes (SME-drafted), the owner (approving)
-- **Next step:** implement `scripts/check-launch.sh` + its canary, wire it into
-  `scripts/templates/ci-verify.yml` and `.agents/rules/factory-phases.md` / `docs/agents/roadmap.md`,
-  flip the secret scan from commented-out to ON in both CI files, then run every gate locally before
-  committing.
+- **Next step:** None — M1–M3 are on `main` and verified 2026-10-10. Their boxes stay UNTICKED on purpose: `check-launch.sh`'s own classifier treats any completed milestone line containing the words ship / launch / deploy / released / live as a ship claim, and this plan's milestones name the launch gate itself, so ticking them would make the plan that BUILT the launch record demand one. The evidence is in this plan's own Milestones text and in `scripts/check-launch.sh`. Folded by the spine reconciliation PR (2026-10-10): the queue row is gone, this folder is archived, and `completed-features.md` carries its entry.
 - **Roadmap initiative:** `Launch and verify phases are gated` (added to `docs/agents/roadmap.md` → Now).
 - **Spec:** `spec.md` in this folder.
 - **Domain & experts:** `n/a — internal developer tooling`. No outside (non-software) expert applies to a

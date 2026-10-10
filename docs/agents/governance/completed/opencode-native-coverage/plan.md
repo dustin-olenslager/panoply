@@ -1,9 +1,8 @@
 # Plan: the agent coverage — name and verify, do not mirror
 
-- **Area:** `governance`  ·  **Started:** 2026-09-19  ·  **Status:** In review
+- **Area:** `governance`  ·  **Started:** 2026-09-19  ·  **Status:** Done — archived 2026-10-10
 - **Owner:** the owner (vithe agent audit session, koforje-2026-09 Gate 3 Phase A / W1)
-- **Next step:** merge PR `docs/opencode-native-coverage`; on merge, fold the queue row and move
-  this folder to `governance/completed/` per ship convention.
+- **Next step:** None — the plan doc and the header change it describes are on `main`; the PR that carried them was squashed. Folded by the spine reconciliation PR (2026-10-10): the queue row is gone, this folder is archived, and `completed-features.md` carries its entry.
 - **Roadmap initiative:** Every-agent coverage: the agent
 
 ## Goal

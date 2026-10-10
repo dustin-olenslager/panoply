@@ -29,14 +29,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 
 | Initiative | Intent (one line) | Queue rows (`in-progress.md`) | Plan docs |
 |---|---|---|---|
-| Locked dev-workflow policy | Encode the 2026-09-29 owner-locked dev-workflow policy (points 1–10) into the rule modules and regenerate every tool-native mirror | row 2 | `governance/dev-workflow-locked-policy/plan.md` |
-| The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 3 | `governance/execution-algorithm/plan.md` |
-| Every-agent coverage: the agent | Name and verify the agent as an AGENTS.md-native tool; no new mirror required | row 1 | `governance/opencode-native-coverage/plan.md` |
-| Domain expertise & design in planning | The plan names the industry/domain and records which outside experts were consulted; UI/UX is a planning input; dead personas deleted | row 5 | `governance/domain-expert-planning/plan.md` |
-| Kit self-update | An adopted repo can pull kit fixes deliberately: a copy that knows it is stale, a truthful `apply`, a recoverable forced overwrite, and a `migrate` path — each canary-proven | row 6 | `governance/kit-self-update/plan.md` |
-| PR-context guards on the gate steps | Every gate step that reads `pull_request.base.sha` carries its `if: github.event_name == 'pull_request'` — in the kit and in the shipped template — so a push to `main` is never red for a context it cannot use | row 7 | `governance/pr-context-guards/plan.md` |
-| Launch and verify phases gated | Fill phase 6's stated-empty gate cell: a change claiming it shipped must record a launch and a rollback line (`check-launch.sh` + canary); and turn the kit's own commented-out secret scan ON as a pinned, checksum-verified binary | row 8 | `governance/launch-gate/plan.md` |
-| Claims and comment slop | Take the two real gaps from the public `anti-slop` rulebook: a claim a reader sees must be evidence (doctrine, no gate — no script can detect an invented number), and a comment must not be decoration (doctrine + `check-comments.sh` on added lines) | row 9 | `governance/claims-and-comment-slop/plan.md` |
+| The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 1 | `governance/execution-algorithm/plan.md` |
 
 ## Next — committed, not yet started
 
@@ -60,6 +53,14 @@ into the feature log.
 
 | Initiative | Shipped | Features (`completed-features.md`) |
 |---|---|---|
+| Claims and comment slop | 2026-10-10 | Claims are evidence, and comments are not decoration |
+| Kit self-update | 2026-10-06 | Kit self-update — a copy that knows it is stale, and an apply that tells the truth |
+| Launch and verify phases gated | 2026-10-06 | The launch gate — phase 6 records a launch, and the secret scan is ON |
+| PR-context guards on the gate steps | 2026-10-04 | The PR-context guard on the gate steps |
+| Mechanical enforcement of the governance rules | 2026-10-03 | Scope the expert-review gate to the change, not the tree |
+| Domain expertise & design in planning | 2026-10-03 | Domain expertise and design in the plan |
+| Locked dev-workflow policy | 2026-10-01 | The locked dev-workflow policy in the rules and every mirror |
+| Every-agent coverage: the agent | 2026-10-01 | Every-agent coverage: the agent, named and verified |
 | Spec artifacts — a spec before a plan | 2026-10-03 | Spec before plan — a structural change carries a spec, and an unresolved ambiguity cannot reach the plan |
 | Version resolution answers one question | 2026-10-01 | Version resolution answers one question — the source and the copied doctor agree |
 | Rejections are first-class | 2026-10-01 | Rejections are first-class — the step-2 candidate list is also the rejections ledger |
