@@ -17,6 +17,43 @@
 - **Three similar lines beat a premature abstraction.** Duplicate until the shape of the variation is actually known; an abstraction built from one example encodes an accident as a rule and is harder to unwind than the duplication was.
 - Keep call depth shallow. If a change requires editing four files to add one field, the layering is the bug — say so rather than adding a fifth.
 
+## Comments
+
+A comment earns its place by saying **why** — the reason, the constraint, the gotcha, the thing a
+reader cannot see in the code. Everything else in a comment is decoration, and decoration costs the
+next reader attention it never gets back.
+
+- **No comment that restates the line below it.** `// Initialize the variable` above `let count = 0`,
+  `// User class` above `class User {}`, `/** @param price The price. */`. The code already says it;
+  the comment doubles the reading load and adds nothing. This is the most common slop of all.
+- **No decorative separators or banners.** A run of punctuation around a section name
+  (`// ================ Authentication ================`, `# ---- ROUTES ----`, `/* --- helpers --- */`),
+  a box drawn with line characters, or an ALL-CAPS label wrapped in one. The decoration IS the message:
+  the label should be a plain line at most, and a file that needs visual sections usually needs
+  splitting instead. A single plain line naming what follows is fine; four equals signs are not.
+- **No emoji in a comment.** `// ✅ Validation`, `# 🚀 Performance`. Emoji is not information, and the
+  set that shows up first (checkmark, rocket, lock, sparkle) is the same set every model reaches for.
+- **No workflow narration.** `// Step 1: validate the input`, `// First…`, `// Next…`, `// Finally…`.
+  The control flow is visible in the code itself; numbering it reads as a checklist rather than an
+  explanation. If the flow is genuinely hard to follow, that is a structure problem, not a missing
+  comment.
+- **No end markers.** `} // end if`, `# End of function`, `// end processOrder`. The closing brace
+  already ends the block.
+- **No empty labels.** `// Main logic`, `// Business logic`, `// Helper function`, `// Note: this is
+  important`. A label that names a category instead of a fact tells the reader nothing they could not
+  infer. `// Note: retries happen only on 5xx` earns its place; `// Note: this is important` does not.
+- **Keep the comments that carry information:** why this exists, why not the obvious alternative, the
+  invariant that must hold, the upstream quirk, the ticket or ADR that explains it, and a TODO that
+  names a specific task ("retire once the v1 client is gone") rather than a feeling ("improve this").
+- **Never commit commented-out code.** Version control is the archive; a commented block is read as
+  live context by everyone who comes after. Delete it — the history keeps it.
+
+`scripts/check-comments.sh` enforces the mechanical half — banners, emoji, narration, end markers,
+empty labels — over **the lines a change adds**, with `COMMENTS_OFF=1` as the declared exception. Two
+things it deliberately does not do: it cannot judge whether a comment is *worth* keeping (a restating
+comment passes it), and it does not read a trailing `#` or `--` comment. Both are review questions, and
+they stay review questions rather than becoming a gate that measures the easy half and reports coverage.
+
 ## Import direction
 
 - **An import that points outward is a style violation, and it is visible in the diff.** Source-code dependencies point inward only (see `clean-architecture.md`), so a domain or use-case file importing an ORM, HTTP framework, UI library, or vendor SDK is wrong on sight — a reviewer can catch it from the import block alone, with no test run and no debate.

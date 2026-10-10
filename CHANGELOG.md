@@ -30,6 +30,24 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- FEAT — **claims are evidence, and comments are not decoration: the two gaps worth taking from the
+  public `anti-slop` rulebook.** MINOR — a new rule module and a new gate; no rule reverses and no
+  required placeholder changes shape, so an already-adapted repo pulls this one without rewriting
+  anything it has already written. Read in full and compared module by module, the upstream project
+  (MIT, 38 prose rules across five skills) overlaps this kit almost everywhere: the accessibility floor
+  and the loading/empty/error trio already live in `frontend.md`, the visual axes in `design-system.md`,
+  the no-fabrication prohibition in `spec.md` and `wireframe-first.md`, and its own premise — a filter,
+  not a style guide — is what the design-system module already says. It also ships **no mechanical
+  gate**, which is the whole reason only one of the two gaps below could be gated.
+  `.agents/rules/claims.md` (new) forbids any claim a reader sees that is not real and traceable:
+  invented statistics and metrics, fake terminal or dashboard decoration, fabricated testimonials and
+  logo walls, unverifiable security or compliance claims, pricing that has drifted from behaviour, and
+  sample data presented as production. It states its own honest limit in the module — **no script can
+  tell a real number from a plausible invented one without already knowing the truth** — so the claims
+  half is doctrine plus the review question ("says who?"), not a gate that would pass while the claim
+  went unexamined. Adopter impact: nothing to change; the module is pruned like any other if a project
+  ships no user-visible text.
+
 - FEAT — **the ship phase is gated: a launch record, or the ship claim is refused.** Phase 6's gate
   cell in `factory-phases.tsv` was `-` — a stated gap the kit calls "not a licence" — and the same was
   true of `Verify`. Nothing stood between "verify passed" and "in production": a plan could tick its
