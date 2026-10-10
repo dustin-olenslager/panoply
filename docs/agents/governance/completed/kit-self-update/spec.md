@@ -105,6 +105,13 @@ which prints exactly what it will change before it changes it.
   3. **Given** the refresh path has run, **when** the repo is checked, **then** it is no longer
      self-stale and reports the reachable kit's layout expectation.
 
+## Wireframe
+
+Wireframe: n/a — no user-facing surface. The deliverable is a doctor, a per-file disposition report and
+a `migrate` path in POSIX shell; a person reads the command's output on a terminal, and no screen, flow
+or form is being designed here (the spec's user stories are about what the command reports, not about an
+interface).
+
 ## Edge cases
 
 - What happens when the adopter has NO reachable kit source at all (a fresh CI runner, a machine with

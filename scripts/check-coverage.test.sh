@@ -197,6 +197,19 @@ rc="$(gate_at "$r" "$base")"
 if [ "$rc" = "ok" ]; then ok "a template spec with no sibling plan is not judged as a pair"
 else bad "a template spec was judged as a live pair (got '$rc')"; fi
 
+
+# case 10: an ARCHIVED pair is history — the archive move must not re-grade it. The same disagreement
+# that case 2 refuses live must be skipped once the pair sits under `<area>/completed/`.
+r="$(mkrepo pass-archived)"; base="$(root_sha "$r")"
+mkdir -p "$r/docs/agents/core/completed/thing" "$r/src"
+mkspec "$r/docs/agents/core/completed/thing/spec.md"
+mkplan "$r/docs/agents/core/completed/thing/plan.md" "| FR-001 | M1 |"
+printf 'x\n' > "$r/src/x.ts"
+cmit "$r" "archived pair with uncovered requirements"
+rc="$(gate_at "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "an archived pair is not re-graded by the archive move"
+else bad "an archived pair was graded as if it were live (got '$rc')"; fi
+
 printf '\ncheck-coverage canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

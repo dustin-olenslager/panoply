@@ -198,6 +198,18 @@ rc="$(gate_class "$r" "$base")"
 if [ "$rc" = "ok" ]; then ok "a markdown-wrapped reasoned n/a is honoured"
 else bad "a markdown-wrapped reasoned n/a was ignored (got '$rc')"; fi
 
+
+# case 14: an ARCHIVED spec is history — a user-facing surface with no wireframe must not be re-graded
+# once the spec sits under `<area>/completed/`. The same spec live is refused by case 2.
+r="$(mkrepo pass-archived)"; base="$(git -C "$r" rev-parse HEAD)"
+mkdir -p "$r/docs/agents/core/completed/thing" "$r/src"
+printf '# Spec\n\n- **FR-001**: the records screen lists the rows.\n' > "$r/docs/agents/core/completed/thing/spec.md"
+printf 'x\n' > "$r/src/x.ts"
+cmit "$r" "archived spec, no wireframe"
+rc="$(gate_class "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "an archived spec is not re-graded by the wireframe rung"
+else bad "an archived spec was re-graded (got '$rc')"; fi
+
 printf '\ncheck-wireframe canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

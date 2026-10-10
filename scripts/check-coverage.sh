@@ -178,7 +178,12 @@ for pair_dir in $(printf '%s' "$TOUCHED" | tr ' ' '\n' | grep -v '^$' | xargs -n
   # the shape is visible; joining them would fail every repo that ships the kit the moment one template
   # example stopped matching another. The same applies to any directory whose name is a template or an
   # example. Exempt by path, not by content — a content rule would be gameable.
-  case "$pair_dir" in */_templates*|*/_template*|*/templates/*|*/examples/*|*/_examples*) continue ;; esac
+  # An ARCHIVED pair (`docs/agents/<area>/completed/<slug>/`) is history, not a live claim. The rungs
+  # judge a change's claim when it is MADE; a move into the archive makes every file in it "changed"
+  # without making a new claim, so grading it again re-opens a decision already taken — against rules
+  # that may postdate the artifact (this is how the launch rung read `[Unreleased]` as a claim and the
+  # wireframe rung read a reversed opt-out as silence). check-plan-home.sh exempts the same path.
+  case "$pair_dir" in */_templates*|*/_template*|*/templates/*|*/examples/*|*/_examples*|*/completed/*) continue ;; esac
 
   # Only judge a pair where BOTH sides exist. A spec with no plan yet is the spec rung's state (legal,
   # and check-plan-home.sh's business); a plan with no spec is likewise not this gate's to invent.

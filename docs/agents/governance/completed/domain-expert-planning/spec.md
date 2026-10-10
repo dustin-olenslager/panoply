@@ -64,6 +64,12 @@ honest statement that the name is a review dimension, not a persona.
   2. **Given** `workflow.md` → Planning Workflow, **when** design is discussed, **then** it states that
      UI/UX consultation is a **planning** input (per the spec section), not only a review step.
 
+## Wireframe
+
+Wireframe: n/a — no user-facing surface. The deliverable is a rule module and a spec template; the
+closest thing to an interface is the `## Domain & outside experts` section a later spec fills in, and
+that is prose, not a screen with a flow or a form to decide.
+
 ## Edge cases
 
 - A change with **no user interface** (a library, CLI, service) — the spec's UX row is written

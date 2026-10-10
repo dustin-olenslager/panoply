@@ -157,6 +157,19 @@ if printf '%s' "$out" | grep -q '2 completed milestone'; then
   ok "the pass message reports how many milestones it checked"
 else bad "the pass message does not report a count" "$out"; fi
 
+
+# case 12: an ARCHIVED plan is history — a completed milestone naming a path that does not exist must not
+# be re-graded once the plan sits under `<area>/completed/`. Case 2 refuses exactly this live.
+r="$(mkrepo pass-archived)"; base="$(git -C "$r" rev-parse HEAD)"
+mkdir -p "$r/docs/agents/core/completed/thing" "$r/src"
+# shellcheck disable=SC2016  # markdown backticks inside the fixture text
+printf '# Plan\n\n- [x] **M1 — the thing** — evidence: `does/not/exist.md`\n' > "$r/docs/agents/core/completed/thing/plan.md"
+printf 'x\n' > "$r/src/x.ts"
+cmit "$r" "archived plan, unresolvable evidence"
+rc="$(gate_class "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "an archived plan is not re-graded for its milestone evidence"
+else bad "an archived plan was re-graded (got '$rc')"; fi
+
 printf '\ncheck-milestone-evidence canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

@@ -106,10 +106,16 @@ if [ -z "$(printf '%s' "$TOUCHED_PLANS" | tr -d ' ')" ]; then
 fi
 
 # A plan is "at the ship rung" when it marks a SHIP milestone complete. The marker is a completed
-# milestone (`- [x]`) whose text names the ship/shipped/launch/deploy event. Deliberately loose on
-# wording (ship|shipped|launch|deploy|released|live) because the honest phrasing varies; what is NOT
-# acceptable is claiming a ship and recording nothing behind it.
-SHIP_RE='- \[[xX]\] .*([Ss]hip|[Ll]aunch|[Dd]eploy|released|[Ll]ive)'
+# milestone (`- [x]`) whose text names the ship/shipped/launch/deploy event. The wording is deliberately
+# loose (ship|launch|deploy|released|live, with their inflections) because the honest phrasing varies;
+# what is NOT acceptable is claiming a ship and recording nothing behind it.
+#
+# WORD BOUNDARIES ARE LOAD-BEARING. A bare substring match reads the kit's own vocabulary as a ship
+# claim: `[Unreleased]` — the standard CHANGELOG heading, named by the docs milestone of nearly every
+# plan — contains "released", and "relationship" contains "ship". Both made this rung refuse plans that
+# claim nothing, which is the always-red failure mode a gate is supposed to make impossible. Require a
+# non-letter on each side, the house style `_names_launch` already uses.
+SHIP_RE='- \[[xX]\].*([^A-Za-z]|^)([Ss]hip(s|ped|ping)?|[Ll]aunch(ed|es|ing)?|[Dd]eploy(ed|s|ing|ment)?|[Rr]eleased|[Ll]ive)([^A-Za-z]|$)'
 
 FAILED=0
 REPORT=""
@@ -128,7 +134,12 @@ for plan in $TOUCHED_PLANS; do
   dir="$(dirname "$plan")"
 
   # Scaffolding is not a live plan — same exemption every other rung carries.
-  case "$dir" in */_templates*|*/_template*|*/templates/*|*/examples/*|*/_examples*) continue ;; esac
+  # An ARCHIVED pair (`docs/agents/<area>/completed/<slug>/`) is history, not a live claim. The rungs
+  # judge a change's claim when it is MADE; a move into the archive makes every file in it "changed"
+  # without making a new claim, so grading it again re-opens a decision already taken — against rules
+  # that may postdate the artifact (this is how the launch rung read `[Unreleased]` as a claim and the
+  # wireframe rung read a reversed opt-out as silence). check-plan-home.sh exempts the same path.
+  case "$dir" in */_templates*|*/_template*|*/templates/*|*/examples/*|*/_examples*|*/completed/*) continue ;; esac
 
   # Is this plan claiming a ship? Only then does the rung apply.
   if ! grep -Eq -- "$SHIP_RE" "$plan" 2>/dev/null; then

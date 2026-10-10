@@ -1,8 +1,8 @@
 # Plan: Make the kit updateable — self-detection, a truthful apply, recoverable overwrite, and a migrate path
 
-- **Area:** `governance`  ·  **Started:** 2026-10-03  ·  **Status:** In progress
+- **Area:** `governance`  ·  **Started:** 2026-10-03  ·  **Status:** Done — archived 2026-10-10
 - **Owner:** the owner (approved scope and priority order) / Hermes (drafting + building)
-- **Next step:** run the local gate suite (`sh scripts/panoply.test.sh`, `for t in scripts/*.test.sh; do sh $t; done`, `sh scripts/sync-agents.sh --check`, `sh scripts/check-docs.sh --since origin/main`, `shellcheck scripts/panoply.sh scripts/*.sh`), test `migrate` against a throwaway adopter copy, then open exactly ONE PR on `fix/self-update`.
+- **Next step:** None — all five milestones are verifiably on `main` (self-detection with exit 15, per-file apply dispositions, `.panoply-bak` on a forced overwrite, the `migrate` path, and the docs), each ticked below with the file that carries it. Folded by the spine reconciliation PR (2026-10-10): the queue row is gone, this folder is archived, and `completed-features.md` carries its entry.
 - **Roadmap initiative:** Kit self-update (new initiative — see `../../roadmap.md`).
 - **Spec:** `spec.md` in this folder.
 
@@ -95,23 +95,11 @@ adopter repo (fixtures only).
 
 ## Milestones
 
-- [ ] **M1 — Self-detection (US-1).** Embed `_EXPECTED_LAYOUT` in `scripts/panoply.sh`; add a
-  `selfstale` inspect state (exit 15) computed by comparing the copy's marker against a reachable kit
-  source's; make an unreachable source a loud "cannot verify" rather than a green. Canary: stale copy
-  reports self-stale, matching copy unchanged, no-source refuses green. Mutation-proven.
-- [ ] **M2 — Truthful apply (US-2).** Per-file `ADDED`/`KEPT`/`DRIFTED` dispositions; a `_drifted`
-  flag; `cmd_stamp` refuses to write a current stamp when `_drifted=1` (writes a non-current marker).
-  Canary: drifted repo prints drift and stamp is not current. Mutation-proven.
-- [ ] **M3 — Recoverable force (US-3).** `--force-scripts` writes `.panoply-bak` before overwriting and
-  prints the path; collision-safe suffix; no backup when nothing is overwritten. Canary asserts the
-  backup bytes and the printed path. Mutation-proven.
-- [ ] **M4 — Migrate path (US-4).** `migrate` subcommand: detect an old-layout repo, report the
-  translation it will perform, seed the new layout with the same no-clobber contract, then delegate to
-  `apply`. Canary: reports translation, does not clobber, reaches a non-self-stale state. Mutation-proven.
-- [ ] **M5 — Docs, CHANGELOG, mirrors, cleanup.** Update `README.md`, `AGENTS.md` if needed, the
-  `adapt-agents-setup` command if needed, `CHANGELOG.md` `[Unreleased]`, regenerate mirrors
-  (`sh scripts/sync-agents.sh`), wire the canary into CI if it is not already covered, and run the
-  full gate suite.
+- [x] **M1 — Self-detection (US-1).** `_EXPECTED_LAYOUT` embedded in `scripts/panoply.sh`; a `selfstale` inspect state (exit 15) computed by comparing the copy's marker against a reachable kit source's; an unreachable source is a loud "cannot verify", never a green. Canary: stale copy reports self-stale, matching copy unchanged, no-source refuses green. Mutation-proven. Evidence: `scripts/panoply.sh`
+- [x] **M2 — Truthful apply (US-2).** Per-file `ADDED`/`KEPT`/`DRIFTED` dispositions; a `_drifted` flag; `cmd_stamp` refuses to write a current stamp while `_drifted=1`. Canary: a drifted repo prints drift and its stamp is not current. Mutation-proven. Evidence: `scripts/panoply.sh`
+- [x] **M3 — Recoverable force (US-3).** `--force-scripts` writes `.panoply-bak` before overwriting and prints the path; collision-safe suffix; no backup when nothing is overwritten. Canary asserts the backup bytes and the printed path. Mutation-proven. Evidence: `scripts/panoply.sh`
+- [x] **M4 — Migrate path (US-4).** `migrate` subcommand: detect an old-layout repo, report the translation it will perform, seed the new layout under the same no-clobber contract, then delegate to `apply`; it never deletes the old tree. Canary: reports the translation, does not clobber, reaches a non-self-stale state. Mutation-proven. Evidence: `scripts/panoply.sh`
+- [x] **M5 — Docs, mirrors, cleanup.** `README.md`, `AGENTS.md` and the adapt command updated, the `CHANGELOG` entry written, mirrors regenerated, the canary wired into CI, the full gate suite run. Evidence: `scripts/panoply.test.sh`
 
 ## Open questions
 
