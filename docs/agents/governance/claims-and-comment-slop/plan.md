@@ -1,8 +1,8 @@
 # Plan: claims are evidence, and comments are not decoration
 
-- **Area:** `governance`  ·  **Started:** 2026-10-10  ·  **Status:** In progress
+- **Area:** `governance`  ·  **Started:** 2026-10-10  ·  **Status:** In review
 - **Owner:** Hermes (SME-drafted), the owner (approving)
-- **Next step:** run the landing suite on this branch (`sh scripts/check-comments.test.sh`, then every `check-*.sh --since $(git rev-parse origin/main)`), squash-merge, move this folder to `governance/completed/`, add the `completed-features.md` row, delete the `in-progress.md` row.
+- **Next step:** PR #1 on `feat/content-and-comment-slop` is green in CI (verify + self-tests). Next step = owner review + squash-merge, then move this folder to `governance/completed/`, add the `completed-features.md` row, move the `roadmap.md` initiative to Shipped, and delete the `in-progress.md` row.
 - **Roadmap initiative:** Claims and comment slop — the two gaps worth taking from the public `anti-slop` rulebook
 - **Spec:** `spec.md` in this folder — the what and why this plan implements.
 - **Domain & experts:** developer tooling; no outside expert consulted, stated rather than fabricated. The published `anti-slop` rulebook (MIT) is the outside input, read in full and cited in the spec's Domain table — its comment skill names the same four shapes, and it ships no mechanical gate, which is why only the comment half is gated here.
@@ -116,11 +116,11 @@ Relevant existing machinery this plan must fit:
 
 ## Milestones
 
-- [ ] **M1 — the claims module** — add `.agents/rules/claims.md` (claims are evidence, with the honest limit stated), list it in `sync-agents.sh`'s `ORDER`, refill the index, and add a row to the `AGENTS.md` routing table (FR-001, FR-002, FR-011)
-- [ ] **M2 — the Comments doctrine** — add the Comments section to `.agents/rules/code-style.md`, naming the banned shapes, what to keep instead, the gate, and `COMMENTS_OFF=1` (FR-003, FR-009)
-- [ ] **M3 — the comment gate and its canary** — add `scripts/check-comments.sh` (change-scoped by default, `--since`, `--staged`, `--tree`, docs and self excluded, counts and a distinct zero message, exit 2 on an unresolvable base) and `scripts/check-comments.test.sh` (34 assertions, both directions, mutation-tested) (FR-004 to FR-009)
-- [ ] **M4 — CI wiring** — add one step to `.github/workflows/verify.yml` and the same step to `scripts/templates/ci-verify.yml`, plus the canary in both self-tests jobs (FR-010)
-- [ ] **M5 — docs and the adopter note** — this spec and plan, the `roadmap.md` row, the `in-progress.md` row, the CHANGELOG `[Unreleased]` entry naming the MINOR class and the adopter impact, and the ship-time move to `governance/completed/` with a `completed-features.md` row (FR-012)
+- [x] **M1 — the claims module** — add the claims module (claims are evidence, with the honest limit stated), list it in the sync-agents read order, refill the index, and add a row to the AGENTS.md routing table (FR-001, FR-002, FR-011) — evidence: `.agents/rules/claims.md`
+- [x] **M2 — the Comments doctrine** — add the Comments section naming the banned shapes, what to keep instead, the gate, and the declared escape hatch (FR-003, FR-009) — evidence: `.agents/rules/code-style.md`
+- [x] **M3 — the comment gate and its canary** — add the gate (change-scoped by default, `--since`, `--staged`, `--tree`, docs and self excluded, counts and a distinct zero message, exit 2 on an unresolvable base) and its canary, both directions, mutation-tested (FR-004 to FR-009) — evidence: `scripts/check-comments.test.sh`
+- [x] **M4 — CI wiring** — one step in this repo's workflow and the same step in the shipped adopter template, plus the canary in both self-tests jobs; verify and self-tests are green on PR #1, with the comment gate's step logged against the PR base (FR-010) — evidence: `scripts/templates/ci-verify.yml`
+- [ ] **M5 — docs and the adopter note** — this spec and plan, the `roadmap.md` row, the `in-progress.md` row, the CHANGELOG `[Unreleased]` entry naming the MINOR class and the adopter impact, and the ship-time move to `governance/completed/` with a `completed-features.md` row (FR-012) — the first four landed; the fold-and-archive step follows the merge
 
 ## Open questions
 
