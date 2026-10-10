@@ -30,6 +30,47 @@ Semver, applied to governance:
 
 ## [Unreleased]
 
+- FEAT — **claims are evidence, and comments are not decoration: the two gaps worth taking from the
+  public `anti-slop` rulebook.** MINOR — a new rule module and a new gate; no rule reverses and no
+  required placeholder changes shape, so an already-adapted repo pulls this one without rewriting
+  anything it has already written. Read in full and compared module by module, the upstream project
+  (MIT, 38 prose rules across five skills) overlaps this kit almost everywhere: the accessibility floor
+  and the loading/empty/error trio already live in `frontend.md`, the visual axes in `design-system.md`,
+  the no-fabrication prohibition in `spec.md` and `wireframe-first.md`, and its own premise — a filter,
+  not a style guide — is what the design-system module already says. It also ships **no mechanical
+  gate**, which is the whole reason only one of the two gaps below could be gated.
+  `.agents/rules/claims.md` (new) forbids any claim a reader sees that is not real and traceable:
+  invented statistics and metrics, fake terminal or dashboard decoration, fabricated testimonials and
+  logo walls, unverifiable security or compliance claims, pricing that has drifted from behaviour, and
+  sample data presented as production. It states its own honest limit in the module — **no script can
+  tell a real number from a plausible invented one without already knowing the truth** — so the claims
+  half is doctrine plus the review question ("says who?"), not a gate that would pass while the claim
+  went unexamined. Adopter impact: nothing to change; the module is pruned like any other if a project
+  ships no user-visible text.
+
+- FEAT — **the comment half is gated, and only over the lines a change adds.** `scripts/check-comments.sh`
+  (new), with a mutation-tested canary at `scripts/check-comments.test.sh` (34 assertions), refuses a
+  change that adds a decorative banner, an emoji marker, a workflow-narration comment, an end marker, or
+  an empty label — naming the file, the line, and the shape, with `COMMENTS_OFF=1` as the declared
+  escape hatch. It grades only the lines this change adds, and that is the design, measured before it
+  was chosen: this repo's own tree carries **177 pre-existing banner comments** (found with the gate's
+  `--tree` audit mode), so a tree-wide gate would have been red on the pull request that introduced it
+  and on every pull request after. Documentation files are never scanned, and the gate excludes its own
+  sources by path, so a rule module or a changelog quoting `// ===== Auth =====` is read as discussing
+  the convention rather than using it. It exits 2 rather than reporting a pass when its diff base does
+  not resolve or `--since` arrives empty, it prints how many comment lines it inspected and says
+  distinctly when it inspected none, it never mutates the tree it judges, and an all-caps label is a
+  note that cannot fail the build because TODO/FIXME and acronyms share its shape. Its stated limits:
+  it cannot judge whether a comment is worth keeping (a restating comment passes it), and it does not
+  read a trailing `#` or `--` comment. Adopter impact: the gate runs on pull requests over the lines a
+  change adds; set `COMMENTS_OFF=1` deliberately while a pre-existing backlog is folded in.
+
+- FEAT — **the comment gate is wired where it can actually block.** One step in this repo's
+  `.github/workflows/verify.yml` and the same step in the shipped `scripts/templates/ci-verify.yml`, both
+  scoped to pull requests and using the PR base SHA, plus the canary in both self-tests jobs. The gate's
+  own pull request is therefore the first thing it grades, and a gate that silently stopped detecting
+  would be caught by CI rather than by an adopter.
+
 - FEAT — **the ship phase is gated: a launch record, or the ship claim is refused.** Phase 6's gate
   cell in `factory-phases.tsv` was `-` — a stated gap the kit calls "not a licence" — and the same was
   true of `Verify`. Nothing stood between "verify passed" and "in production": a plan could tick its

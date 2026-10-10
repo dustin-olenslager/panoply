@@ -186,6 +186,8 @@ whatever the repo has wired server-side (branch protection + required CI). Honor
 | Architecture premise | `.agents/rules/clean-architecture.md` |
 | Whether a thing should exist at all (question/delete/simplify/accelerate/automate) | `.agents/rules/algorithm.md` |
 | What a user can do after this ships, and how we'll know it worked | `.agents/rules/spec.md` + the feature's `spec.md` |
+| Whether a claim a reader sees is real (stats, testimonials, metrics, fake terminal decoration) | `.agents/rules/claims.md` |
+| How a comment should read, and what not to comment | `.agents/rules/code-style.md` → Comments |
 | The industry/domain this is for, and which outside experts were consulted | the feature's `spec.md` → `## Domain & outside experts` |
 | Planning personas (UX flows, behaviour evidence) | `.agents/personas/README.md` (`ux-designer`, `ux-researcher`) |
 | Code / tests / errors | `.agents/rules/code-style.md`, `testing.md`, `error-handling.md` |
@@ -244,6 +246,7 @@ claim about its size. **Do not edit between the markers** — edit the modules a
 - `api-design` — API & Event Payload Design — `.agents/rules/api-design.md`
 - `frontend` — Front-End Engineering — `.agents/rules/frontend.md`
 - `design-system` — UI Design System — `.agents/rules/design-system.md`
+- `claims` — Claims: Evidence Before Assertion — `.agents/rules/claims.md`
 - `ai-features` — AI Features & Data Enrichment — `.agents/rules/ai-features.md`
 - `agent-readiness` — Agent Readiness (dual-mode apps) — `.agents/rules/agent-readiness.md`
 - `factory-phases` — The factory phases — `.agents/rules/factory-phases.md`

@@ -28,7 +28,7 @@ CHECK=0
 # --- The rule modules, in read order. Curated order first (clean-architecture is the premise every
 #     other module inherits from), then any other .agents/rules/*.md not listed, so a newly added module
 #     is never dropped without a marker. Missing modules (pruned by /adapt) are skipped. ---
-ORDER="algorithm spec clean-architecture workflow quality-bar git-workflow documentation code-style testing error-handling database data-modeling api-design frontend design-system ai-features agent-readiness"
+ORDER="algorithm spec clean-architecture workflow quality-bar git-workflow documentation code-style testing error-handling database data-modeling api-design frontend design-system claims ai-features agent-readiness"
 MODULES=""
 for m in $ORDER; do
   [ -f "$RULES_DIR/$m.md" ] && MODULES="$MODULES $m"
