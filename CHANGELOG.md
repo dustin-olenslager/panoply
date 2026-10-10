@@ -48,6 +48,23 @@ Semver, applied to governance:
   went unexamined. Adopter impact: nothing to change; the module is pruned like any other if a project
   ships no user-visible text.
 
+- FEAT — **the comment half is gated, and only over the lines a change adds.** `scripts/check-comments.sh`
+  (new), with a mutation-tested canary at `scripts/check-comments.test.sh` (34 assertions), refuses a
+  change that adds a decorative banner, an emoji marker, a workflow-narration comment, an end marker, or
+  an empty label — naming the file, the line, and the shape, with `COMMENTS_OFF=1` as the declared
+  escape hatch. It grades only the lines this change adds, and that is the design, measured before it
+  was chosen: this repo's own tree carries **177 pre-existing banner comments** (found with the gate's
+  `--tree` audit mode), so a tree-wide gate would have been red on the pull request that introduced it
+  and on every pull request after. Documentation files are never scanned, and the gate excludes its own
+  sources by path, so a rule module or a changelog quoting `// ===== Auth =====` is read as discussing
+  the convention rather than using it. It exits 2 rather than reporting a pass when its diff base does
+  not resolve or `--since` arrives empty, it prints how many comment lines it inspected and says
+  distinctly when it inspected none, it never mutates the tree it judges, and an all-caps label is a
+  note that cannot fail the build because TODO/FIXME and acronyms share its shape. Its stated limits:
+  it cannot judge whether a comment is worth keeping (a restating comment passes it), and it does not
+  read a trailing `#` or `--` comment. Adopter impact: the gate runs on pull requests over the lines a
+  change adds; set `COMMENTS_OFF=1` deliberately while a pre-existing backlog is folded in.
+
 - FEAT — **the ship phase is gated: a launch record, or the ship claim is refused.** Phase 6's gate
   cell in `factory-phases.tsv` was `-` — a stated gap the kit calls "not a licence" — and the same was
   true of `Verify`. Nothing stood between "verify passed" and "in production": a plan could tick its
