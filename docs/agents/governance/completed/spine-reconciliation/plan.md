@@ -1,10 +1,8 @@
 # Plan: the spine tells the truth — fold seven merged initiatives, and stop two gates refusing honest work
 
-- **Area:** `governance`  ·  **Started:** 2026-10-10  ·  **Status:** In review
+- **Area:** `governance`  ·  **Started:** 2026-10-10  ·  **Status:** Done — archived 2026-10-10
 - **Owner:** the owner (asked for the reconcile) / Hermes (implementing)
-- **Next step:** merge this PR (`chore/reconcile-plan-spine`), then fold THIS folder too — its own queue
-  row is the last one the change adds, and its `## On ship` section is the record — per the convention the
-  change restores.
+- **Next step:** None — merged as PR #3 (squash commit `f2a7407` on `main`), CI green on both jobs. The queue row, the archive move and the `completed-features.md` entry are this follow-up change.
 - **Roadmap initiative:** Spine reconciliation — the queue reflects what actually merged.
 - **Spec:** `spec.md` in this folder — the what and why this plan implements.
 
@@ -88,7 +86,7 @@ No production code path changes: the only executable change is a classification 
 - [x] **M3 — the classifier stops reading the CHANGELOG heading as a claim.** Word boundaries in the pattern, the house style the launch-record check already used; two canary cases added — the false positive must not fire, the inflected true positive must still be refused; 15 passed, 0 failed, mutation case green — evidence: `scripts/check-launch.test.sh`
 - [x] **M4 — the wireframe opt-out in the form the gate reads.** Stated with its reason in the two archived specs that carried it in the other word order — evidence: `docs/agents/governance/completed/kit-self-update/spec.md`
 - [x] **M5 — the archive is not re-graded.** The four rungs that grade plans and specs skip an archived pair, each skip proved by a canary case — the same fixture refused live passes once it sits in the archive: coverage 12/0, milestone-evidence 12/0, wireframe 14/0, launch 15/0 — evidence: `scripts/check-launch.test.sh`
-- [ ] **M6 — verify and fold this row.** Run the spine gates and the canary suite over the change, land it, then move this folder into governance/completed/ and delete the queue row this change adds.
+- [x] **M6 — verify and fold this row.** The spine gates and the canary suite were run over the change, it landed as PR #3, and this follow-up moves the folder into governance/completed/ and deletes the queue row — evidence: `docs/agents/completed-features.md`
 
 ## Open questions
 
@@ -109,7 +107,7 @@ _(none — the reconcile direction is the owner's, and the two defects reproduce
 
 ## Launch
 
-Released to `main` by squash-merging `chore/reconcile-plan-spine`. This is a documentation-and-classifier
+Released to `main` by squash-merging `chore/spine-reconcile` as commit `f2a7407` (2026-10-10). This is a documentation-and-classifier
 change, so the launch is a merge to the default branch and nothing more: no service, no package, no
 environment, no promotion. The section is here because this plan's own subject is the phase-six rung,
 whose classifier reads the words in a milestone as a merge claim — the defect the change documents.

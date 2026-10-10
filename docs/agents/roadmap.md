@@ -30,7 +30,6 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 | Initiative | Intent (one line) | Queue rows (`in-progress.md`) | Plan docs |
 |---|---|---|---|
 | The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 1 | `governance/execution-algorithm/plan.md` |
-| Spine reconciliation — the queue reflects what actually merged | The queue is corrected against the remote's open-pull-request list and the merged history, folded into the archive with one entry each in `completed-features.md`, and the two rungs that refused legitimate archived work are fixed with canary cases | row 2 | `governance/spine-reconciliation/plan.md` |
 
 ## Next — committed, not yet started
 
@@ -54,6 +53,7 @@ into the feature log.
 
 | Initiative | Shipped | Features (`completed-features.md`) |
 |---|---|---|
+| Spine reconciliation — the queue reflects what actually merged | 2026-10-10 | The spine tells the truth — seven merged initiatives folded, and the doc rungs stop refusing honest work |
 | Claims and comment slop | 2026-10-10 | Claims are evidence, and comments are not decoration |
 | Kit self-update | 2026-10-06 | Kit self-update — a copy that knows it is stale, and an apply that tells the truth |
 | Launch and verify phases gated | 2026-10-06 | The launch gate — phase 6 records a launch, and the secret scan is ON |

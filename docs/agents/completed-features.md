@@ -60,6 +60,35 @@ Add an entry when a feature is tested and signed off, at the same time you move 
 
 <!-- New entries go directly below this line, newest first. -->
 
+### The spine tells the truth — seven merged initiatives folded, and the doc rungs stop refusing honest work — 2026-10-10
+- **What shipped:** `in-progress.md` reconciles against reality — **nine rows claim seven open pull
+  requests; none exist**. The seven whose branches had already been squashed into `main` are folded into
+  `governance/completed/` with their status and next step rewritten, an entry each here, and a Shipped row
+  in `roadmap.md`; the queue is one live row. Milestones are ticked only where the work is verifiably on
+  `main`, and left unticked — with the reason written into the plan — where ticking would misrepresent.
+- **Area:** `governance`
+- **Archived plan:** `governance/completed/spine-reconciliation/plan.md` (with the shipped `spec.md` beside it)
+- **Notable decisions:** three gate defects were found by doing this and fixed at the source instead of
+  worked around. (1) The phase-six ship classifier matched `ship|launch|deploy|released|live` as bare
+  substrings, so the CHANGELOG heading `[Unreleased]` — named by nearly every plan's docs milestone — and
+  the word "relationship" read as claims that something had gone out; word boundaries now apply, with two
+  canary cases. (2) Moving a folder makes every file in it "changed", so the rungs re-graded artifacts
+  written before their rules existed (the coverage rung demanded a `## Spec coverage` table from two plans
+  that predate it); the four rungs that grade plans and specs now skip `docs/agents/<area>/completed/**`,
+  the path `check-plan-home.sh` already exempts, each skip proved by a canary case. (3) The wireframe rung
+  could not read an opt-out phrased as "n/a — no user-facing surface"; the two archived specs now state it
+  in the form the gate reads. Also recorded: a plan whose subject is a rung trips that rung, so this plan
+  carries the `## Launch` section the phase-six rung demands — an honest merge record for a docs change,
+  not a dressed-up deployment.
+- **Known gaps:** a script cannot notice that a merged PR left a stale row — folding on merge stays a habit,
+  and the queue's header now says so. `chore/reconcile-plan-spine` remains on the remote as a superseded
+  branch (the change was re-landed as one commit because `check-docs.sh` is per-commit and the kit forbids
+  force-pushing a published branch).
+- **Durable lesson:** **a gate that diffs files re-grades history the moment you archive it** — exempt the
+  archive, and prove the exemption with a canary, or every fold re-opens decisions the rules postdate. See
+  the `governance-kit-maintenance` skill.
+
+
 ### Claims are evidence, and comments are not decoration — 2026-10-10
 - **What shipped:** `.agents/rules/claims.md` — a claim a reader sees (a metric, a testimonial, a terminal
   transcript, a security or compliance statement, a price, sample data) is real and traceable or it is
