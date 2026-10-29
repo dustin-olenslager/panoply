@@ -20,6 +20,7 @@
 #   sh scripts/check-comments.sh --staged        # the index (pre-commit context)
 #   sh scripts/check-comments.sh --tree          # audit every tracked text file (reports history)
 #   COMMENTS_OFF=1                               # deliberate exception (say so out loud)
+#   COMMENTS_EXCLUDE="glob glob"                  # vendored paths we do not author (shell globs)
 #
 # WHAT IT CANNOT DO — read this before trusting a green run
 #   It cannot judge whether a comment is WORTH keeping. A comment restating the line below it is the
@@ -282,6 +283,11 @@ for f in $FILES; do
   [ -n "$f" ] || continue
   [ -f "$f" ] || continue
   case " $SELF_EXCLUDE " in *" $f "*) continue ;; esac
+  set -f
+  for _g in ${COMMENTS_EXCLUDE:-}; do
+    case "$f" in $_g) set +f; continue 2 ;; esac
+  done
+  set +f
   printf '%s' "$f" | grep -Eq "$DOC_RE" && continue
   printf '%s' "$f" | grep -Eq "$BIN_RE" && continue
 
