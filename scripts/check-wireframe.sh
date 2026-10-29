@@ -115,7 +115,7 @@ fi
 TOUCHED_SPECS=""
 for f in $FILES $STAGED_FILES; do
   [ -n "$f" ] || continue
-  case "$f" in */spec.md) TOUCHED_SPECS="$TOUCHED_SPECS $f" ;; esac
+  case "$f" in .agents/rules/spec.md|docs/agents/_templates/spec.md) ;; */spec.md) TOUCHED_SPECS="$TOUCHED_SPECS $f" ;; esac
 done
 
 if [ -z "$(printf '%s' "$TOUCHED_SPECS" | tr -d ' ')" ]; then
