@@ -10,7 +10,7 @@ No agent plans or writes code before knowing the repo's current state. In order:
 - **`git fetch --prune` first.** Stale refs lie about what exists: a branch deleted on the remote still looks live locally, and someone else's new branch is invisible until fetched.
 - **Then survey the repo:** `git status --porcelain` (whose work is in the tree?), `git branch -a` and `git worktree list` (what branches and worktrees exist), and `gh pr list --state open` (what is already in flight).
 - **Then read, in order: the central plan doc (the roadmap under `docs/agents/`), the running worklog, then the code you are about to change.** Planning from memory of a repo you know is planning from a repo that has since moved.
-- **Carry forward in-flight work.** If the task is already queued in the plan doc, or an open branch/PR already covers it, continue that work — never open a parallel track for something already in progress. One open PR per repo at a time (see Merging), so new work waits behind what is open.
+- **Carry forward in-flight work.** If the task is already queued in the plan doc, or an open branch/PR already covers it, continue that work — never open a parallel track for something already in progress. Any number of PRs may be open at once, each based on `{{DEFAULT_BRANCH}}` (see Merging).
 
 ## Plan first — presented before code
 
@@ -54,8 +54,8 @@ Merging is gated, and the gate is the same in every repo, for every agent, in ev
 
 - **One branch per batch, always cut fresh from an up-to-date `{{DEFAULT_BRANCH}}`.** Name the branch for the batch (`fix/<slug>`, `feat/<slug>`, `chore/<slug>`), and a branch lives only while its work is live — not as a storage area for finished work. Fetch first: `git fetch origin && git switch -c <branch> origin/{{DEFAULT_BRANCH}}`. Branching from a stale local copy imports every conflict that landed since you last pulled.
 - **Parallel writers get one worktree (or fresh clone) EACH — never two agents writing in one checkout.** Two mutating agents in one tree corrupt each other's index and stashes no matter how careful each one is; a private checkout is the only isolation git actually provides.
-- **Do not branch from another feature branch or an open PR's branch (no stacked PRs) — the default with exactly one exception, below.** PRs are squash-merged, which rewrites the base PR's commits into a single new SHA. The stacked branch still carries the *original* commits, so after the base merges, your branch will conflict with its own already-merged changes — a conflict that looks impossible and wastes an afternoon.
-- If new work depends on an unmerged PR, the rule is: wait for it to merge, then branch fresh from `{{DEFAULT_BRANCH}}`. The one exception: you are truly blocked and waiting is not an option — then stack, flag it prominently in the PR description so the reviewer knows the base is moving, and expect to run the recovery below after the base squash-merges.
+- **Do not branch from another feature branch or an open PR's branch (no stacked PRs). No exceptions.** PRs are squash-merged, which rewrites the base PR's commits into a single new SHA. The stacked branch still carries the *original* commits, so after the base merges, your branch will conflict with its own already-merged changes — a conflict that looks impossible and wastes an afternoon.
+- If new work depends on an unmerged PR, ship both as one PR, or wait for the first to merge and then branch fresh from `{{DEFAULT_BRANCH}}`. A stacked PR is never merged: the `flow` check fails it and the merge train comments instead of merging. Stacks are what froze a whole repo for a night (six PRs behind one conflict); the recovery below exists for branches stacked before this rule.
 
 ### Recovery: already stacked on a squash-merged branch
 
@@ -86,7 +86,10 @@ A branch showing commits "ahead" of `{{DEFAULT_BRANCH}}` is *not* proof it holds
 ## Merging
 
 - **Squash-merge to `{{DEFAULT_BRANCH}}` only — and the branch is deleted in the same operation (delete-branch-on-merge).** One compact commit per PR on main; the full commits, diff, review, and check run remain on the PR page. Never a merge commit, never a rebase-merge: per-commit history on the default branch is noise at review time, and rebase-merging recreates the stacked-branch conflict described above. Squash-only is repo-level policy, set centrally on the repository (including on forked/adapted copies); do not flip it per PR, and never work around it with a merge commit.
-- **One open PR per repo at a time; no stacked PRs.** Parallel reviewable units land serially, so each merges against a stable base and reviewable size. The only exception is when the owner explicitly grants it — and the grant is recorded in the plan doc, so a later session does not read the exception as the rule.
+- **Any number of open PRs; every one based on `{{DEFAULT_BRANCH}}`; none stacked.** Parallel sessions each open their own PR against the default branch. One-PR-at-a-time serialised a dozen sessions and pushed them into stacking, so it is gone.
+- **A green PR merges without a human in the loop — through the merge train.** One mechanism merges: GitHub auto-merge with a merge queue where the plan allows it, otherwise a **merge-train bot** (on GitHub Free private repos there is no auto-merge, queue, protection or required check, so the bot is the only merger). Per repo, oldest first, one PR in flight: behind the default branch → the bot updates the branch and waits for CI; green, clean and current → squash-merge and delete the branch; conflicting over 24 hours or stacked → one comment naming the fix. A `hold` label parks a PR. Sessions do not gate merges by hand and never merge their own PR around the train. Where a merge deploys production, the train starts in dry-run and goes live per repo on the owner's go.
+- **The `flow` check is required on every PR.** It fails when the base is not `{{DEFAULT_BRANCH}}`, the branch is more than 25 commits behind it, or the PR conflicts with it. It runs on the project's own runners. Keep it as one reusable workflow (`workflow_call`) in a shared repo, called from each repo's `.github/workflows/flow.yml`, so the rule has one home.
+- **A session never ends with uncommitted or unpushed work**, and nothing is pushed straight to `{{DEFAULT_BRANCH}}`. Agent hooks refuse both (PreToolUse on `git push` to the default branch and `gh pr create --base <other>`; Stop on a dirty or unpushed tree), and a breach scan reports direct pushes, stacked PRs, branches stale over 24 hours, merged-but-undeleted branches and leftover worktrees.
 - **Push each batch as the batch completes.** A PR that arrives once, complete, is one unreviewable dump; incremental pushes show the plan progress as it lands, and review can start on the first batch.
 
 ## Repo hygiene & credentials
@@ -95,9 +98,11 @@ A branch showing commits "ahead" of `{{DEFAULT_BRANCH}}` is *not* proof it holds
 - **Never put a credential in the remote URL, and never commit a secret.** Keep secrets in env or a secret store; keep git auth in a credential helper (`git config credential.helper`, `~/.git-credentials`, or the OS keychain) so the remote stays `https://github.com/<owner>/<repo>.git` — never `https://<user>:<token>@github.com/...`. A token in the URL leaks through `git remote -v`, shell history, CI logs, and the reflog, and removing it does not un-expose it: if one was ever embedded, **rotate it.**
 - **The `.agents/policy.md` deny-list binds only the agent.** It does nothing for other agents. The tool-agnostic guardrail is **server-side**:
   branch protection on `{{DEFAULT_BRANCH}}` (blocks force-push and direct pushes no matter who typed
-  them) plus **required status checks** (`scripts/templates/ci-verify.yml`). Turn both on — that is
+  them) plus **required status checks** (`scripts/templates/ci-verify.yml` and `flow`). Turn both on — that is
   what actually stops a non-agent, and the cross-tool `MUST NOT` list in `AGENTS.md` is advisory
-  prose until you do.
+  prose until you do. Where the plan offers neither (GitHub Free, private repo), the merge train is
+  the server-side gate: it alone merges, and only what passes `flow` and CI; the breach scan reports
+  what slipped around it.
 
 ## Pull requests
 
