@@ -1,5 +1,14 @@
 # Changelog — panoply
 
+Continuous flow in `git-workflow.md`. A night with a dozen parallel sessions froze a repo: six
+stacked PRs behind one conflict, merges waiting on a human, nothing enforcing the existing rules.
+"One open PR per repo" is replaced by any number of open PRs, all based on the default branch,
+none stacked (the stacking exception is gone). Green PRs merge through one mechanism, a merge
+queue or, where the plan has none (GitHub Free private repos), a merge-train bot. A required `flow`
+check fails a PR whose base is not the default branch, that is over 25 commits behind, or that
+conflicts. Agent hooks refuse pushes to the default branch, stacked `gh pr create` and ending a
+session with unpushed work; a breach scan reports what slipped through.
+
 MIT LICENSE — the kit now carries an explicit license. It is a drop-in artifact people copy into
 their own projects, and "no license" means nobody may legally reuse it, which defeats the purpose.
 Adds `LICENSE` (MIT, 2026 the owner).
