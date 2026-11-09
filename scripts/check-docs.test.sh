@@ -69,7 +69,7 @@ else bad "escape hatch did not lift the gate"; fi
 if grep -q 'DOCS_OFF=1' "$GATE"; then ok "the hatch is documented in the gate's usage header"
 else bad "DOCS_OFF exists but is undocumented — an undeclared hatch is not a hatch"; fi
 
-# --- once per PR: a PR is checked as a whole (Dustin, 2026-11-09, "Once per PR") ----------------
+# Once per PR: a PR is checked as a whole (Dustin, 2026-11-09, "Once per PR").
 # mk_pr <name>: a repo whose `main` branch is the base and whose `pr` branch is checked out.
 mk_pr() { r="$(mk_repo "$1")"; git -C "$r" branch -M main; git -C "$r" checkout -q -b pr; printf '%s\n' "$r"; }
 
