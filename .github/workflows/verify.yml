@@ -37,12 +37,16 @@ jobs:
             exit 1
           } || true
 
-      # Docs landing gate — fails if any commit in this PR changed code but not the worklog.
-      # Uses the PR base SHA (not a hardcoded branch name) so it works on any default branch and
+      # Docs landing gate — a PR that changes code needs a worklog line somewhere in its diff (once per
+      # PR). Uses the PR base SHA (not a hardcoded branch name) so it works on any default branch and
       # on the first commit; the ref-guard in check-docs.sh fails loudly rather than silently passing.
+      # On a push to the default branch every commit needs its own line (squash-merge = one per PR).
       - name: Docs in sync
         run: sh scripts/check-docs.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
+      - name: Docs in sync (default branch, every commit)
+        run: sh scripts/check-docs.sh --each-commit "${{ github.event.before }}"
+        if: github.event_name == 'push'
 
       # Conflict markers — the one corrupt state a generated file can be in that no other gate sees.
       # `sync-agents.sh --check` validates only its own block, so AGENTS.md reached main carrying

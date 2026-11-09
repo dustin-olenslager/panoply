@@ -55,7 +55,8 @@ from the worklog at release time, not maintained per-change in parallel. If the 
 
 ### The same-change update contract (every agent, every provider)
 
-In the SAME commit that lands work — any agent:
+In the SAME PR that lands work — any agent (once per PR is enough; on the default branch, where a
+squash leaves one commit per PR, that means the same commit):
 
 1. **Append one worklog line** (to `worklog.md`, or the `[Unreleased]` section) — what changed, where.
 2. **Update your task's row in `docs/agents/in-progress.md`** — its status and its Next-step handoff, or
@@ -94,17 +95,21 @@ already use, so the doctrine and the dogfood agree.
 
 ### The landing gate — mechanical enforcement
 
-The contract's deterministic core is enforced by `scripts/check-docs.sh`, which fails any commit that
-changes a non-markdown file (source, config, schema, scripts, CI) but not the worklog target in the
-same commit. It runs in required CI (`scripts/templates/ci-verify.yml`) and the pre-commit hook, so it
+The contract's deterministic core is enforced by `scripts/check-docs.sh`, which fails any PR that
+changes a non-markdown file (source, config, schema, scripts, CI) but not the worklog target anywhere
+in its diff, and any commit pushed to the default branch that does the same in that commit. It runs in required CI (`scripts/templates/ci-verify.yml`) and the pre-commit hook, so it
 binds every agent in every tool — the provider-neutral floor. The gate enforces **presence**, not
 **correctness**: a vague or wrong worklog line passes. Correctness is a review problem, not an
 automation problem — the honest limit of any git-native kit. The worklog target is auto-detected
 (`CHANGELOG.md`/`HISTORY.md` `[Unreleased]`, else `docs/agents/worklog.md`), overridable via
 `DOCS_WORKLOG`. Two further knobs: `DOCS_EXEMPT` (space-separated doc extensions, default `md` — a repo
 whose product *is* markdown, a docs site or blog, sets it empty so shipped `.md` counts as code), and
-the declared escape hatch `DOCS_OFF=1` for a deliberate exception. The `--since` mode walks every
-**non-merge** commit in the range; a merge commit is skipped.
+the declared escape hatch `DOCS_OFF=1` for a deliberate exception. The `--since` mode (pull requests)
+checks the PR as one diff from the merge-base with its base to HEAD, so the worklog line may sit in
+any of its commits and the default branch merged in is not charged to it. The `--each-commit` mode
+(pushes to the default branch) walks every **non-merge** commit in the range on its own; a merge
+commit is skipped. With no flag (pre-commit) it checks the staged change together with what the
+branch already changed since the remote default branch (`DOCS_BASE` overrides the base).
 
 `scripts/check-rule-fork.sh` is the sibling audit for a **forked** rule set: an adopted repo keeps its
 own adapted copy of the modules (`.claude/rules/` or `.agents/rules/`), which will never be

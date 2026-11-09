@@ -80,7 +80,8 @@ In a monorepo the closest `AGENTS.md` to the file you are editing wins; this roo
   updates `docs/agents/in-progress.md` (its status + Next step), appends one line to the running
   worklog, and moves the `roadmap.md` initiative when it starts or ships — all in the same commit as
   the code. Shipped-but-unlogged counts as not done. **The landing gate `scripts/check-docs.sh` fails
-  any commit that changes code but not the worklog in the same commit** — it runs in required CI, so
+  any PR that changes code but has no worklog line anywhere in its diff (once per PR; every commit
+  pushed to the default branch must carry its own)** — it runs in required CI, so
   no agent in any tool can land a code change without its doc update. Full doctrine:
   `.agents/rules/documentation.md`.
 

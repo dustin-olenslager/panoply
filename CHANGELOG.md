@@ -1,5 +1,12 @@
 # Changelog — panoply
 
+The docs gate checks a PR once, not every commit. `scripts/check-docs.sh --since` now diffs the
+PR as a whole from its merge-base, so the worklog line may sit in any of its commits and a merged-in
+default branch is not charged to it. The new `--each-commit` mode keeps the old per-commit check,
+and the CI template runs it on every push to the default branch (squash-merge = one commit per PR,
+each carrying its line; an all-zero `before` checks HEAD alone). Pre-commit counts what the branch
+already changed (`DOCS_BASE`). Canary cases 6-11. Adopted from Backlot (Dustin, 2026-11-09).
+
 Continuous flow in `git-workflow.md`. A night with a dozen parallel sessions froze a repo: six
 stacked PRs behind one conflict, merges waiting on a human, nothing enforcing the existing rules.
 "One open PR per repo" is replaced by any number of open PRs, all based on the default branch,
