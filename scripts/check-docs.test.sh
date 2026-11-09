@@ -69,6 +69,63 @@ else bad "escape hatch did not lift the gate"; fi
 if grep -q 'DOCS_OFF=1' "$GATE"; then ok "the hatch is documented in the gate's usage header"
 else bad "DOCS_OFF exists but is undocumented — an undeclared hatch is not a hatch"; fi
 
+# Once per PR: a PR is checked as a whole (Dustin, 2026-11-09, "Once per PR").
+# mk_pr <name>: a repo whose `main` branch is the base and whose `pr` branch is checked out.
+mk_pr() { r="$(mk_repo "$1")"; git -C "$r" branch -M main; git -C "$r" checkout -q -b pr; printf '%s\n' "$r"; }
+
+# case 6: code in one commit, its worklog line in a later commit of the same PR PASSES.
+r="$(mk_pr pr-line-later)"
+printf 'a\n' > "$r/src.ts"; git -C "$r" add -A; cmit "$r" "feat: code"
+printf -- '- line\n' > "$r/CHANGELOG.md"; git -C "$r" add -A; cmit "$r" "docs: worklog"
+if ( cd "$r" && sh scripts/check-docs.sh --since main >/dev/null 2>&1 ); then
+  ok "a PR with its worklog line in any one commit passes"
+else bad "--since must check the PR as a whole, not commit by commit"; fi
+
+# case 7: a PR that changes code and never touches the worklog REFUSES.
+r="$(mk_pr pr-no-line)"
+printf 'a\n' > "$r/src.ts"; git -C "$r" add -A; cmit "$r" "feat: code"
+printf 'b\n' > "$r/other.ts"; git -C "$r" add -A; cmit "$r" "feat: more code"
+if ( cd "$r" && sh scripts/check-docs.sh --since main >/dev/null 2>&1 ); then
+  bad "a PR with code and no worklog line anywhere must be refused"
+else ok "a PR with code and no worklog line anywhere is refused"; fi
+
+# case 8: main merged into the PR is not charged to the PR (the diff starts at the merge-base).
+r="$(mk_pr pr-merged-main)"
+printf '# n\n' > "$r/NOTES.md"; git -C "$r" add -A; cmit "$r" "docs: note"
+git -C "$r" checkout -q main; printf 'm\n' > "$r/main.ts"; git -C "$r" add -A; cmit "$r" "feat: main moved"
+git -C "$r" checkout -q pr; git -C "$r" -c user.email=t@t -c user.name=t merge -q --no-edit main
+if ( cd "$r" && sh scripts/check-docs.sh --since main >/dev/null 2>&1 ); then
+  ok "code that arrived by merging main in is not charged to the PR"
+else bad "--since charged the PR for main's own changes"; fi
+
+# case 9: --each-commit (pushes to main) stays strict: a code commit without its own line REFUSES.
+r="$(mk_pr each-strict)"
+printf 'a\n' > "$r/src.ts"; git -C "$r" add -A; cmit "$r" "feat: code"
+printf -- '- line\n' > "$r/CHANGELOG.md"; git -C "$r" add -A; cmit "$r" "docs: worklog"
+if ( cd "$r" && sh scripts/check-docs.sh --each-commit main >/dev/null 2>&1 ); then
+  bad "--each-commit must refuse a code commit without its own worklog line"
+else ok "--each-commit refuses a code commit without its own worklog line"; fi
+
+# case 10: --each-commit passes when every code commit carries its line (one squash per PR).
+r="$(mk_pr each-pass)"
+printf 'a\n' > "$r/src.ts"; printf -- '- line\n' > "$r/CHANGELOG.md"; git -C "$r" add -A; cmit "$r" "feat: squashed PR"
+if ( cd "$r" && sh scripts/check-docs.sh --each-commit main >/dev/null 2>&1 ); then
+  ok "--each-commit passes a squash commit that carries its line"
+else bad "--each-commit refused a commit that carries its line"; fi
+
+# case 10b: a new branch (`before` = forty zeros) checks HEAD alone instead of failing on the ref.
+if ( cd "$r" && sh scripts/check-docs.sh --each-commit 0000000000000000000000000000000000000000 >/dev/null 2>&1 ); then
+  ok "--each-commit with an all-zero before checks HEAD alone"
+else bad "--each-commit must accept GitHub's all-zero before for a new branch"; fi
+
+# case 11: pre-commit on a branch whose earlier commit has the line lets more code be committed.
+r="$(mk_pr staged-branch)"
+printf 'a\n' > "$r/src.ts"; printf -- '- line\n' > "$r/CHANGELOG.md"; git -C "$r" add -A; cmit "$r" "feat: first"
+printf 'b\n' > "$r/more.ts"; git -C "$r" add -A
+if ( cd "$r" && DOCS_BASE=main sh scripts/check-docs.sh >/dev/null 2>&1 ); then
+  ok "pre-commit passes more code on a branch that already has its line"
+else bad "pre-commit demanded a second worklog line on the same branch"; fi
+
 printf '\ncheck-docs canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0
