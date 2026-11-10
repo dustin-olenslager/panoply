@@ -20,7 +20,6 @@ entry to `completed-features.md`.
 |---|------|------|------------|----------|--------|-------|
 | 1 | The Algorithm — five-step pass, in the rules, in every mirror, and in Hermes (injection + gate) | governance | The Algorithm | `governance/execution-algorithm/plan.md` | In progress — M4/M5 open | Kit half (M1–M3) is on `main`: `.agents/rules/algorithm.md`, `scripts/check-algorithm.sh`, and every mirror. Next step = M4 (verify the installed `execution-algorithm` Hermes plugin against the plan's M4 text — its source lives outside this repo, which is why the milestone carries no in-repo evidence path and stays unticked), then M5, the non-code cadence report. No PR is open. |
 | 2 | Mirror allow-list: a repo chooses which tool-native mirrors `sync-agents.sh` generates | governance | Mirror allow-list | `governance/mirror-allow-list/plan.md` | In review | PR open with `hold`. Next step = Dustin's review and merge; then dev-kit re-applies the kit and sets `.agents/mirrors` to `none` (dev-kit plugin-gaps M3). |
-| 3 | Gate CI fixes: one-line hunks in milestone evidence; trivial label and prefix in expert review | governance | Gate CI fixes | `governance/gate-ci-false-results/plan.md` | In review | Found building dev-kit's plugin-gaps plan. Next: merge, then dev-kit takes both scripts. |
 
 **Status vocabulary:** `Not started` · `In progress — milestone N of M` · `Blocked — <on what>` ·
 `In review` · `Done — archiving`.

@@ -1,9 +1,9 @@
 # Plan: two gates that read the wrong thing in CI
 
-- **Area:** `governance`  ·  **Started:** 2026-11-10  ·  **Status:** In review
+- **Area:** `governance`  ·  **Started:** 2026-11-10  ·  **Status:** Shipped 2026-11-10
 - **Owner:** coordinator `Dev repo and workflow cleanup [a002eb]` (Dustin, 2026-11-10: "Fix them now")
-- **Next step:** merge this PR; dev-kit then takes the same two scripts and canaries from the kit.
-- **Roadmap initiative:** `../../roadmap.md` → Gate CI fixes.
+- **Next step:** none — shipped.
+- **Roadmap initiative:** `../../../roadmap.md` → Gate CI fixes.
 - **Spec:** `n/a — routine` — two defects inside existing gates, found while building dev-kit's plugin-gaps plan. Nothing new is designed.
 - **Domain & experts:** n/a — no outside domain. Shell gates in the kit itself.
 
@@ -56,4 +56,4 @@ Routine work inside existing gates: one regex, one helper, one parent lookup, th
 - [x] M1 — one-line hunks stay line-scoped — `scripts/check-milestone-evidence.sh`, canary case 13 in `scripts/check-milestone-evidence.test.sh`
 - [x] M2 — label from the event file, prefix from the PR head under a merge checkout — `scripts/check-expert-review.sh`, canary cases 9 and 10 in `scripts/check-expert-review.test.sh`
 - [x] M3 — the change record — `CHANGELOG.md`
-- [ ] M4 — dev-kit takes both scripts and canaries from the kit
+- [x] M4 — dev-kit takes both scripts and canaries from the kit — dev-kit `PR #52` (`06b58efa`), byte copies
