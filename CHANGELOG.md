@@ -1,5 +1,16 @@
 # Changelog — panoply
 
+Mirror allow-list. `sync-agents.sh` wrote every tool-native mirror in every repo: six single-file
+copies of the index and two sets of per-rule `.mdc` files, whether or not anyone there used the
+tool. A repo that commits its mirrors paid for that on every rule edit (one edit, 14 regenerated
+files in dev-kit), and could not drop them without forking a kit script. `.agents/mirrors` now
+lists the mirrors a repo wants (`claude copilot gemini conventions cline windsurf cursor
+agents-mdc`, one per line). No file means every mirror, so adopted repos see no change. An empty
+file or `none` leaves only the `AGENTS.md` index block. A switched-off mirror that this script
+generated is removed on write and fails `--check` while it is still on disk; a file without the
+GENERATED marker is hand-written and is never touched. Canary: `scripts/sync-agents.test.sh`, in
+the self-tests job and installed by `panoply.sh apply` beside the script.
+
 Continuous flow in `git-workflow.md`. A night with a dozen parallel sessions froze a repo: six
 stacked PRs behind one conflict, merges waiting on a human, nothing enforcing the existing rules.
 "One open PR per repo" is replaced by any number of open PRs, all based on the default branch,

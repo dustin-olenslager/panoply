@@ -438,7 +438,7 @@ cmd_apply() {
   for a in "$@"; do [ "$a" = "--force-scripts" ] && _force_scripts=1; done
   _tmpl_tmp="$(mktemp)"
   # The kit's own core, one per line so each is a matchable filename.
-  for _c in panoply.sh panoply.test.sh sync-agents.sh; do printf '%s\n' "$_c" >> "$_tmpl_tmp"; done
+  for _c in panoply.sh panoply.test.sh sync-agents.sh sync-agents.test.sh; do printf '%s\n' "$_c" >> "$_tmpl_tmp"; done
   if [ -f "$_src/scripts/templates/ci-verify.yml" ]; then
     # Every script the shipped workflow runs, deduped.
     _from_template="$(grep -oE 'scripts/[a-zA-Z0-9._-]+\.sh' "$_src/scripts/templates/ci-verify.yml" \

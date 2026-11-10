@@ -44,6 +44,13 @@ vendor, with a CI `sync-agents.sh --check` keeping every mirror in lockstep with
 
 **Never hand-edit a mirror.** Edit the source and re-run the sync.
 
+**Choose which mirrors exist.** By default every mirror is generated. A repo whose tools all read
+`AGENTS.md` can list the ones it wants in `.agents/mirrors`, one name per line: `claude`, `copilot`,
+`gemini`, `conventions`, `cline`, `windsurf`, `cursor`, `agents-mdc`. An empty file, or the word
+`none`, leaves only the index block inside `AGENTS.md`. The sync removes a generated mirror that is
+no longer listed, and `--check` fails while one is still on disk. A hand-written file at a mirror's
+path (for example a one-line `CLAUDE.md` holding `@AGENTS.md`) is left alone.
+
 ## The two ideas that make it work
 
 **Clean Architecture is the premise, not a module.** `clean-architecture.md` defines the four layers
