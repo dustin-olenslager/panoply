@@ -165,6 +165,36 @@ out="$( ( cd "$r" && sh scripts/check-expert-review.sh --since "$base" ) 2>&1 )"
 if [ "$rc" = "0" ]; then ok "docs-only change is exempt (exit 0)"
 else bad "docs-only change wrongly refused: $out"; fi
 
+# --- case 9: CI's checkout is GitHub's test MERGE commit, not the PR's head. A "trivial:" prefix on the
+# PR's own commit must still count; the gate once read the merge commit's subject and never saw it. ---
+big_change() {
+  mkdir -p "$1/src"; i=0; while [ "$i" -lt 3 ]; do
+    j=0; while [ "$j" -lt 20 ]; do printf 'x\n'; j=$((j+1)); done > "$1/src/c_$i.sh"; i=$((i+1))
+  done
+}
+r="$(mk_repo ci-merge-commit)"; base="$(head_sha "$r")"
+git -C "$r" checkout -q -b pr
+big_change "$r"; commit_all "$r" "trivial: rename only, three generated files"
+git -C "$r" checkout -q --detach "$base"
+git -C "$r" -c user.email=t@t -c user.name=t merge -q --no-ff pr -m "Merge pr into base"
+out="$( ( cd "$r" && sh scripts/check-expert-review.sh --since "$base" ) 2>&1 )" && rc=0 || rc=$?
+if [ "$rc" = "0" ] && printf '%s' "$out" | grep -q "'trivial:' prefix"; then
+  ok "a 'trivial:' PR commit counts when CI checks out the merge commit"
+else bad "the 'trivial:' prefix was missed under a merge-commit checkout (exit $rc): $out"; fi
+
+# --- case 10: the 'trivial' LABEL is read from GitHub's event file, with no token and no PR number ---
+r="$(mk_repo ci-label)"; base="$(head_sha "$r")"
+big_change "$r"; commit_all "$r" "feat: three generated files"
+printf '{"pull_request":{"number":7,"labels":[{"name":"docs"},{"name":"trivial"}]}}' > "$TMP/event-trivial.json"
+printf '{"pull_request":{"number":7,"labels":[{"name":"docs"}]}}' > "$TMP/event-plain.json"
+out="$( ( cd "$r" && GITHUB_EVENT_PATH="$TMP/event-trivial.json" sh scripts/check-expert-review.sh --since "$base" ) 2>&1 )" && rc=0 || rc=$?
+if [ "$rc" = "0" ] && printf '%s' "$out" | grep -q "'trivial' label"; then
+  ok "a 'trivial' label in the event file lifts the gate"
+else bad "the event file's 'trivial' label was ignored (exit $rc): $out"; fi
+out="$( ( cd "$r" && GITHUB_EVENT_PATH="$TMP/event-plain.json" sh scripts/check-expert-review.sh --since "$base" ) 2>&1 )" && rc=0 || rc=$?
+if [ "$rc" = "1" ]; then ok "an event file without the label still refuses the unreviewed change"
+else bad "an event file without 'trivial' lifted the gate (exit $rc)"; fi
+
 printf '\ncheck-expert-review canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

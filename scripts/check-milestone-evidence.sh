@@ -116,7 +116,11 @@ case "$MODE" in
     _dl_diff="$(git diff -U0 --diff-filter=AMR "$SINCE"...HEAD -- '*plan.md' 2>/dev/null || true)"
     _dl_idx="$(git diff -U0 --cached --diff-filter=AMR -- '*plan.md' 2>/dev/null || true)"
     CHANGED_LINES="$(printf '%s\n%s\n' "$_dl_diff" "$_dl_idx" \
-      | sed -n 's/^@@.*+\([0-9]*\),\([0-9]*\).*/\1 \2/p' | while read -r _st _ct; do
+      | sed -n 's/^@@ -[0-9,]* +\([0-9]*\)\(,[0-9]*\)\{0,1\} @@.*/\1 \2/p' | while read -r _st _ct; do
+          # git omits ",count" when a hunk is one line ("@@ -5 +5 @@"): that means one line, not none.
+          # Requiring the comma dropped every one-line hunk, so a change made only of one-line edits
+          # matched nothing and fell back to grading the whole plan.
+          _ct="${_ct#,}"; [ -n "$_ct" ] || _ct=1
           _i=0
           while [ "$_i" -lt "$_ct" ]; do printf '%s ' "$((_st + _i))"; _i=$((_i + 1)); done
         done)"

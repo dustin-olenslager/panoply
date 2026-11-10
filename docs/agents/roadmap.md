@@ -31,6 +31,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 |---|---|---|---|
 | The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 1 | `governance/execution-algorithm/plan.md` |
 | Mirror allow-list | A repo chooses which tool-native mirrors `sync-agents.sh` generates; no list means all of them, as before | row 2 | `governance/mirror-allow-list/plan.md` |
+| Gate CI fixes | `check-milestone-evidence` stays line-scoped on one-line edits; `check-expert-review` sees the trivial label and prefix in CI | row 3 | `governance/gate-ci-false-results/plan.md` |
 
 ## Next — committed, not yet started
 

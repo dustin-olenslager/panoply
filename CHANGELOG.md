@@ -1,5 +1,14 @@
 # Changelog — panoply
 
+FIX — two gates read the wrong thing in CI. `check-milestone-evidence.sh` dropped one-line hunks:
+git writes them as `@@ -5 +5 @@` with no count, the line regex required one, and a change made
+only of one-line edits (ticking a milestone, say) fell back to grading the whole plan, failing on
+older milestones it never touched. `check-expert-review.sh` never saw the trivial escape in CI: no
+workflow set `GITHUB_PR_NUMBER`, and CI checks out GitHub's test merge commit, whose subject never
+starts with `trivial:`. It now reads the PR's labels from `$GITHUB_EVENT_PATH` (no token needed)
+and the prefix from the merge commit's second parent, the PR's head. New canary cases fail against
+the old scripts. Found building dev-kit's plugin-gaps plan.
+
 FIX — the doc-map canary graded a hand-written `CLAUDE.md` as if it were a generated mirror. With
 the mirror allow-list a repo can switch the `claude` mirror off and keep a one-line `CLAUDE.md` that
 imports `AGENTS.md`; the canary then failed twice ("does not describe itself as an index", "every
