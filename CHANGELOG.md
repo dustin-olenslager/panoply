@@ -1,5 +1,11 @@
 # Changelog — panoply
 
+FIX — the doc-map canary graded a hand-written `CLAUDE.md` as if it were a generated mirror. With
+the mirror allow-list a repo can switch the `claude` mirror off and keep a one-line `CLAUDE.md` that
+imports `AGENTS.md`; the canary then failed twice ("does not describe itself as an index", "every
+rule module is named in the mirror index (got [0])"). It now grades a file only when it carries the
+GENERATED marker. Found applying the allow-list to dev-kit.
+
 Mirror allow-list. `sync-agents.sh` wrote every tool-native mirror in every repo: six single-file
 copies of the index and two sets of per-rule `.mdc` files, whether or not anyone there used the
 tool. A repo that commits its mirrors paid for that on every rule edit (one edit, 14 regenerated
