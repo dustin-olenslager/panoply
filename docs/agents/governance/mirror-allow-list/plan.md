@@ -53,6 +53,7 @@ gets exactly what it gets today.
 - [x] The allow-list in the generator — `scripts/sync-agents.sh`
 - [x] A canary for it, run in the self-tests job and installed by `panoply.sh apply` — `scripts/sync-agents.test.sh`
 - [x] README and CHANGELOG say how to use it — `README.md`
+- [x] Follow-up found applying it to dev-kit: the doc-map canary grades only a generated mirror, so a hand-written `CLAUDE.md` passes — `scripts/doc-map.test.sh`
 
 ## Review
 
