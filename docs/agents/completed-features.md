@@ -19,6 +19,16 @@ Add an entry when a feature is tested and signed off, at the same time you move 
 
 ---
 
+### Gates read the right thing in CI — 2026-11-10
+- **What shipped:** `check-milestone-evidence.sh` stays line-scoped when a diff hunk is one line
+  long, so a one-line tick no longer grades the whole plan. `check-expert-review.sh` reads the PR
+  number and labels from the CI event file, and the `trivial:` prefix from the PR head under a merge
+  checkout, so the trivial exemptions work in CI as documented. Canary cases cover both.
+- **Area:** `governance`
+- **Archived plan:** `governance/completed/gate-ci-false-results/plan.md`
+- **Notable decisions:** the event file comes first; `gh` stays the fallback.
+- **Known gaps:** none.
+
 ### Spec before plan — 2026-10-03
 - **What shipped:** a structural change in a kit repo must now carry a spec at
   `docs/agents/<area>/<feature>/spec.md` before its plan — prioritized user stories each with an

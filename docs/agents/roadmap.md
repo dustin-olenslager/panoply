@@ -31,7 +31,6 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 |---|---|---|---|
 | The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 1 | `governance/execution-algorithm/plan.md` |
 | Mirror allow-list | A repo chooses which tool-native mirrors `sync-agents.sh` generates; no list means all of them, as before | row 2 | `governance/mirror-allow-list/plan.md` |
-| Gate CI fixes | `check-milestone-evidence` stays line-scoped on one-line edits; `check-expert-review` sees the trivial label and prefix in CI | row 3 | `governance/gate-ci-false-results/plan.md` |
 
 ## Next — committed, not yet started
 
@@ -55,6 +54,7 @@ into the feature log.
 
 | Initiative | Shipped | Features (`completed-features.md`) |
 |---|---|---|
+| Gate CI fixes | 2026-11-10 | Gates read the right thing in CI |
 | Spine reconciliation — the queue reflects what actually merged | 2026-10-10 | The spine tells the truth — seven merged initiatives folded, and the doc rungs stop refusing honest work |
 | Claims and comment slop | 2026-10-10 | Claims are evidence, and comments are not decoration |
 | Kit self-update | 2026-10-06 | Kit self-update — a copy that knows it is stale, and an apply that tells the truth |
