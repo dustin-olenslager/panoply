@@ -170,6 +170,23 @@ rc="$(gate_class "$r" "$base")"
 if [ "$rc" = "ok" ]; then ok "an archived plan is not re-graded for its milestone evidence"
 else bad "an archived plan was re-graded (got '$rc')"; fi
 
+# case 13: a change made only of ONE-LINE edits is still line-scoped. git writes such a hunk as
+# "@@ -5 +5 @@" with no count; the gate once read only "+N,M", matched nothing, and graded the whole
+# plan, so an older bare milestone the change never touched failed it. A one-line tick with real
+# evidence beside an untouched older claim must pass.
+r="$(mkrepo pass-one-line-hunk)"
+mkdir -p "$r/docs/agents/core/thing"
+# shellcheck disable=SC2016  # markdown backticks inside the fixture text
+printf '# Plan\n\n## Milestones\n- [x] M1 — older, before the rule\n\nmiddle\n\n- [ ] M2 — the thing\n' > "$r/docs/agents/core/thing/plan.md"
+cmit "$r" "older plan"; base="$(git -C "$r" rev-parse HEAD)"
+# shellcheck disable=SC2016  # markdown backticks inside the fixture text
+sed 's/^- \[ \] M2 — the thing$/- [x] M2 — the thing — `thing.ts`/' "$r/docs/agents/core/thing/plan.md" > "$r/p.tmp"
+mv "$r/p.tmp" "$r/docs/agents/core/thing/plan.md"
+cmit "$r" "tick M2 in one line"
+rc="$(gate_class "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "a one-line edit is line-scoped, not graded as the whole plan"
+else bad "a one-line edit re-graded the whole plan (got '$rc')"; fi
+
 printf '\ncheck-milestone-evidence canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

@@ -124,22 +124,43 @@ fi
 
 # --- trivial escape hatches --------------------------------------------------
 # 1. PR has label "trivial"
-# 2. HEAD commit message starts with "trivial:"
+# 2. The PR's own head commit message starts with "trivial:"
 # 3. Only 1 file changed, ≤15 lines added, no schema/API/interface file
 is_trivial=0
 
-if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  PR_NUMBER="${GITHUB_PR_NUMBER:-${CI_PR_NUMBER:-}}"
-  if [ -n "$PR_NUMBER" ]; then
-    if gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name' 2>/dev/null | grep -q '^trivial$'; then
-      is_trivial=1
-      echo "check-expert-review: PR #$PR_NUMBER has 'trivial' label — skipping"
-    fi
+# GitHub Actions writes the triggering event to $GITHUB_EVENT_PATH. For a pull_request event it holds
+# the PR's number and labels, so the label check needs neither a token nor a PR number passed in.
+# Before this, CI never set GITHUB_PR_NUMBER and the label branch could not run there at all.
+event_field() {
+  [ -n "${GITHUB_EVENT_PATH:-}" ] && [ -f "$GITHUB_EVENT_PATH" ] && command -v python3 >/dev/null 2>&1 || return 0
+  python3 - "$GITHUB_EVENT_PATH" "$1" <<'PY' 2>/dev/null || true
+import json, sys
+pr = (json.load(open(sys.argv[1])).get("pull_request") or {})
+if sys.argv[2] == "number":
+    print(pr.get("number") or "")
+else:
+    print("\n".join(l.get("name", "") for l in pr.get("labels") or []))
+PY
+}
+PR_NUMBER="${GITHUB_PR_NUMBER:-${CI_PR_NUMBER:-$(event_field number)}}"
+
+if event_field labels | grep -q '^trivial$'; then
+  is_trivial=1
+  echo "check-expert-review: PR has 'trivial' label — skipping"
+elif [ -n "$PR_NUMBER" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  if gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name' 2>/dev/null | grep -q '^trivial$'; then
+    is_trivial=1
+    echo "check-expert-review: PR #$PR_NUMBER has 'trivial' label — skipping"
   fi
 fi
 
 if [ "$is_trivial" -eq 0 ]; then
-  LATEST_MSG="$(git log -1 --pretty=%s 2>/dev/null || echo "")"
+  # actions/checkout on a pull_request checks out GitHub's test merge commit ("Merge <head> into
+  # <base>"), whose subject never carries the prefix. Its second parent is the PR's own head commit,
+  # so read that one when HEAD is a merge.
+  _msg_ref=HEAD
+  git rev-parse -q --verify HEAD^2 >/dev/null 2>&1 && _msg_ref=HEAD^2
+  LATEST_MSG="$(git log -1 --pretty=%s "$_msg_ref" 2>/dev/null || echo "")"
   case "$LATEST_MSG" in
     trivial:*) is_trivial=1; echo "check-expert-review: commit message has 'trivial:' prefix — skipping" ;;
   esac
@@ -240,7 +261,6 @@ fi
 # anyone agreed to, so it needs EXPERT_REVIEW_REQUIRE_SIGNOFFS=1.
 if [ "${EXPERT_REVIEW_REQUIRE_SIGNOFFS:-0}" = "1" ] \
    && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  PR_NUMBER="${GITHUB_PR_NUMBER:-${CI_PR_NUMBER:-}}"
   if [ -n "$PR_NUMBER" ]; then
     body="$(gh pr view "$PR_NUMBER" --json body --jq .body 2>/dev/null || echo "")"
     # Count distinct persona sign-offs: Security, Performance, Maintainability, UX, <domain>
