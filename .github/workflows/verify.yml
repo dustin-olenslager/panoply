@@ -261,6 +261,12 @@ jobs:
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/panoply.test.sh
 
+      # The mirror allow-list (.agents/mirrors) decides which generated files exist. Its canary proves
+      # that no list still means every mirror, and that a switched-off mirror is removed and flagged.
+      - name: Mirror allow-list self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/sync-agents.test.sh
+
       # The comment gate's canary — proves it still refuses each banned shape, still passes a doc that
       # quotes the shapes, still counts what it compared, and still refuses an unresolvable base.
       - name: Comment gate self-test
