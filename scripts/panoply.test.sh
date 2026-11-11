@@ -89,6 +89,12 @@ R="$(_new_repo partial)"; cp "$KIT/AGENTS.md" "$R/AGENTS.md"; sed -i 's/{{PROJEC
 R="$(_new_repo unadapted)"; _make_adopted "$R"
 sed -i 's/fixture/{{PROJECT_NAME}}/' "$R/AGENTS.md"          # re-introduce one token
                                     assert_exit "unfilled placeholders"  13 "$R"
+# --- case 3b: a git-ignored leftover holding tokens is not part of the repo ----------------------
+# Seen 2026-11-11 in an adopter's stale checkout: twelve ignored .agents/rules/*.mdc files from an old
+# mirror made a correctly adopted repo read UNADAPTED.
+R="$(_new_repo ignored)"; _make_adopted "$R"
+printf '*.mdc\n' > "$R/.gitignore"; printf '{{PROJECT_NAME}} {{TEST_CMD}}\n' > "$R/.agents/rules/old-mirror.mdc"
+                                    assert_exit "ignored leftover is not unadapted" 0 "$R"
 # --- case 4: stale (adapted, no stamp) ---------------------------------------------------------
 R="$(_new_repo stale)"; _make_adopted "$R"; rm -f "$R/.panoply-version"
                                     assert_exit "stale (no stamp)"       12 "$R"
