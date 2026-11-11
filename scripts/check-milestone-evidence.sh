@@ -157,48 +157,58 @@ for plan in $TOUCHED; do
     # plan, which would fail any edit to an older plan for debt that predates the rule — 19 of this
     # repo's 54 completed milestones. That is friction that teaches people to avoid touching plans,
     # which is the opposite of the point. A milestone the change did not touch is historical record.
+    _lineno="$(printf '%s' "$line" | sed -n 's/^\([0-9]*\):.*/\1/p')"
+    _where="$plan:$_lineno
+    - [x] $(printf '%s' "$_trim" | cut -c1-90)"
     if [ "$LINE_SCOPED" -eq 1 ]; then
-      _lineno="$(printf '%s' "$line" | sed -n 's/^\([0-9]*\):.*/\1/p')"
       case " $CHANGED_LINES " in
         *" $_lineno "*) : ;;
         *) continue ;;
       esac
     fi
 
+    # Every reference the line offers: each backticked text, and each "PR #n". ANY one that resolves
+    # is the evidence (Dustin, 2026-11-11). Before this the gate read only the LAST backticked text
+    # and ignored a PR reference whenever backticked text was present, so a line naming a real path
+    # and then a label or a glob in backticks was refused.
     # shellcheck disable=SC2016  # the backticks are the markdown delimiter being matched, not a
-    # command substitution — they must stay literal in the single-quoted sed program.
-    _ev="$(printf '%s' "$_trim" | sed -n 's/.*`\([^`][^`]*\)`.*/\1/p' | head -1)"
-    _pr="$(printf '%s' "$_trim" | sed -n 's/.*\(PR[[:space:]]*#[0-9][0-9]*\).*/\1/p' | head -1)"
+    # command substitution — they must stay literal in the single-quoted grep pattern.
+    _evs="$(printf '%s\n' "$_trim" | grep -o '`[^`][^`]*`' | tr -d '`' || true)"
+    _prs="$(printf '%s\n' "$_trim" | grep -oE 'PR[[:space:]]*#[0-9]+' | sed 's/[^0-9]//g' || true)"
 
-    if [ -z "$_ev" ] && [ -z "$_pr" ]; then
+    if [ -z "$_evs" ] && [ -z "$_prs" ]; then
       FAILED=1
-      REPORT="$REPORT$plan
-    completed milestone claims nothing it can be checked against: $(printf '%s' "$_trim" | cut -c1-70)…
+      REPORT="$REPORT$_where
+    completed milestone claims nothing it can be checked against.
+    Fix: edit line $_lineno so it names a path that exists, in backticks, or cites \"PR #<number>\".
 "
       continue
     fi
 
-    # It claims something — does the claim resolve?
-    if [ -n "$_ev" ]; then
+    _resolved=0
+    _why=""
+    while IFS= read -r _ev; do
+      [ -n "$_ev" ] || continue
       case "$_ev" in
-        *" "*|'')  # a reference with spaces is prose, not a path; treat as unresolvable
-          FAILED=1
-          REPORT="$REPORT$plan
-    names '$_ev' as evidence, which is not a resolvable path (contains spaces).
+        *" "*)  # a reference with spaces is prose, not a path
+          _why="$_why    names '$_ev' as evidence, which is not a resolvable path (contains spaces).
 "
           continue ;;
       esac
-      if [ ! -e "$_ev" ]; then
-        # Directories and files both resolve; git can also check historical paths for a renamed file.
-        if ! git ls-files --error-unmatch "$_ev" >/dev/null 2>&1 && [ ! -d "$_ev" ]; then
-          FAILED=1
-          REPORT="$REPORT$plan
-    names '$_ev' as evidence, but no such path exists in the repo.
+      # Directories and files both resolve; git can also check a path that is tracked but absent.
+      if [ -e "$_ev" ] || git ls-files --error-unmatch "$_ev" >/dev/null 2>&1; then
+        _resolved=1
+      else
+        _why="$_why    names '$_ev' as evidence, but no such path exists in the repo.
 "
-        fi
       fi
-    elif [ -n "$_pr" ]; then
-      _num="$(printf '%s' "$_pr" | sed 's/[^0-9]//g')"
+    done <<EVS
+$_evs
+EVS
+
+    while IFS= read -r _num; do
+      [ -n "$_num" ] || continue
+      [ "$_resolved" -eq 0 ] || break
       # The PR reference must be real: `gh` when available, else the commit log for the merge of that PR
       # (squash-merge titles carry "(#NN)"). Absent both, the reference cannot be verified — report that
       # rather than passing it as though it had been.
@@ -216,19 +226,27 @@ for plan in $TOUCHED; do
         esac
       fi
       if [ "$_in_gh_repo" -eq 1 ]; then
-        if ! gh pr view "$_num" >/dev/null 2>&1; then
-          FAILED=1
-          REPORT="$REPORT$plan
-    cites PR #$_num as evidence, which does not exist in this repository.
+        if gh pr view "$_num" >/dev/null 2>&1; then _resolved=1
+        else _why="$_why    cites PR #$_num as evidence, which does not exist in this repository.
 "
         fi
-      elif ! git log --oneline -5000 2>/dev/null | grep -q "(#$_num)"; then
-        FAILED=1
-        REPORT="$REPORT$plan
-    cites PR #$_num as evidence, and no commit in the log references it. (Renumbered or from another
-    repo? Cite the path instead, or reconcile the number.)
+      elif git log --oneline -5000 2>/dev/null | grep -q "(#$_num)"; then
+        _resolved=1
+      else
+        _why="$_why    cites PR #$_num as evidence, and no commit in the log references it. (Renumbered, not
+    merged yet, or from another repo?)
 "
       fi
+    done <<PRS
+$_prs
+PRS
+
+    if [ "$_resolved" -eq 0 ]; then
+      FAILED=1
+      REPORT="$REPORT$_where
+$_why    None of the references on the line resolves; one that does is enough.
+    Fix: edit line $_lineno so it names a path that exists, in backticks, or cites a merged \"PR #<number>\".
+"
     fi
   done <<EOF
 $(grep -nE '^[[:space:]]*-[[:space:]]*\[[xX]\]' "$plan" 2>/dev/null || true)
@@ -244,13 +262,14 @@ if [ "$FAILED" -eq 1 ]; then
   echo "    - [x] M1 — the coverage gate — \`scripts/check-coverage.sh\`" >&2
   echo "    - [x] M2 — landed as PR #38" >&2
   echo "" >&2
-  echo "  Either a path that exists, or a PR number that resolves. If the milestone genuinely" >&2
+  echo "  Either a path that exists, or a PR number that resolves; any one on the line is enough. If the milestone genuinely" >&2
   echo "  produced no artifact of its own, say what it did produce — a decision recorded, a doc" >&2
   echo "  written, a thing deleted. 'Nothing' is a claim too, and an unverifiable one." >&2
   echo "" >&2
   echo "  This gate checks that evidence was OFFERED and RESOLVES. It cannot tell whether the" >&2
   echo "  milestone is truly finished or the reference is the right one — a review question." >&2
   echo "  Doctrine: .agents/rules/spec.md (the seam) and .agents/rules/workflow.md." >&2
+  echo "  Check before pushing: sh scripts/check-milestone-evidence.sh --since origin/main" >&2
   echo "  Deliberate exception? MILESTONE_OFF=1 — say so out loud." >&2
   exit 1
 fi

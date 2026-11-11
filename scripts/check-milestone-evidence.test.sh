@@ -187,6 +187,45 @@ rc="$(gate_class "$r" "$base")"
 if [ "$rc" = "ok" ]; then ok "a one-line edit is line-scoped, not graded as the whole plan"
 else bad "a one-line edit re-graded the whole plan (got '$rc')"; fi
 
+# case: ANY valid reference on the line is enough (Dustin, 2026-11-11). These are the lines from the
+# red runs: a real path, then a word in backticks that is not a path (a label, a glob).
+r="$(mkrepo pass-any-valid-reference)"; base="$(git -C "$r" rev-parse HEAD)"
+mkdir -p "$r/docs/agents/core/thing"
+# shellcheck disable=SC2016  # markdown backticks inside the fixture text
+printf '# Plan\n\n## Milestones\n- [x] M1 — `thing.ts` ships; CI labels it `big`\n- [x] M2 — `*.bak-20261110-pb` copies kept beside `thing.ts`\n' > "$r/docs/agents/core/thing/plan.md"
+cmit "$r" "path then word"
+rc="$(gate_class "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "a line with a real path passes even when other backticked text is not a path"
+else bad "a real path on the line was ignored because of other backticked text (got '$rc')"; fi
+
+# case: a PR reference counts even when the line also has backticked text that is not a path.
+r="$(mkrepo pass-pr-beside-word)"
+printf 'y\n' >> "$r/thing.ts"; cmit "$r" "feat: the thing (#7)"
+base="$(git -C "$r" rev-parse HEAD)"
+mkdir -p "$r/docs/agents/core/thing"
+# shellcheck disable=SC2016  # markdown backticks inside the fixture text
+printf '# Plan\n\n## Milestones\n- [x] M1 — labelled `big`, landed as PR #7\n' > "$r/docs/agents/core/thing/plan.md"
+cmit "$r" "pr beside word"
+rc="$(gate_class "$r" "$base")"
+if [ "$rc" = "ok" ]; then ok "a resolving PR reference passes beside backticked text that is not a path"
+else bad "a resolving PR reference was ignored because the line has backticked text (got '$rc')"; fi
+
+# case: the refusal says WHERE and HOW, and lists every reference that failed. Nothing on this line
+# resolves, so it is still refused.
+r="$(mkrepo message-names-the-fix)"; base="$(git -C "$r" rev-parse HEAD)"
+mkdir -p "$r/docs/agents/core/thing"
+# shellcheck disable=SC2016  # markdown backticks inside the fixture text
+printf '# Plan\n\n## Milestones\n- [x] M1 — `gone.ts` ships; CI labels it `big`\n' > "$r/docs/agents/core/thing/plan.md"
+cmit "$r" "words in backticks"
+out="$( ( cd "$r" && sh scripts/check-milestone-evidence.sh --since "$base" ) 2>&1 )" && rc=0 || rc=$?
+if [ "$rc" = "1" ] && printf '%s' "$out" | grep -q 'docs/agents/core/thing/plan.md:4$'; then
+  ok "refusal names the plan file and line"
+else bad "refusal does not name file:line (exit $rc): $out"; fi
+if printf '%s' "$out" | grep -q "Fix: edit line 4" && printf '%s' "$out" | grep -q "'gone.ts'" \
+   && printf '%s' "$out" | grep -q "'big'"; then
+  ok "refusal lists every reference that failed and the edit that fixes it"
+else bad "refusal does not say how to fix it: $out"; fi
+
 printf '\ncheck-milestone-evidence canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

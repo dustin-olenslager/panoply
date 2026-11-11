@@ -1,5 +1,13 @@
 # Changelog — panoply
 
+FIX — the Milestone evidence gate accepts any valid reference (Dustin, 2026-11-11). A ticked
+milestone passes when any backticked path on the line exists or any `PR #n` on it resolves, which is
+what the gate's own comment always said. It used to read only the last backticked text on the line
+and ignore a PR reference whenever backticked text was present, so a line naming a real path and
+then a label in backticks was refused; in dev-kit that caused five red runs in two days. A line
+where nothing resolves is still refused, and the refusal now gives `plan:line`, every reference
+that failed and the edit that fixes it. Canary cases 15-17. Ported from dev-kit.
+
 Rule module `small-slices.md`: ship the smallest piece someone can try, a plan is a queue of slices,
 build only what the slice needs, a PR past about 300 lines or 10 files splits or says why, and a brief
 names one slice. It is the doctrine behind `scripts/check-pr-size.sh`, whose warning now points at it.
