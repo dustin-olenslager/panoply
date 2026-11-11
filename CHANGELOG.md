@@ -1,5 +1,11 @@
 # Changelog — panoply
 
+`panoply.sh check` no longer reads git-ignored files when it looks for unfilled adapt tokens. It
+scanned the working directory, so an ignored leftover (twelve `.agents/rules/*.mdc` files from an old
+mirror, in an adopter's stale checkout on 2026-11-11) made a correctly adopted repo read `UNADAPTED`.
+It now scans what git tracks plus untracked files git does not ignore, so a fresh, uncommitted
+adoption is still checked. Canary case 3b covers it.
+
 Rule module `small-slices.md`: ship the smallest piece someone can try, a plan is a queue of slices,
 build only what the slice needs, a PR past about 300 lines or 10 files splits or says why, and a brief
 names one slice. It is the doctrine behind `scripts/check-pr-size.sh`, whose warning now points at it.
