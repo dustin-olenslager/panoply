@@ -1,14 +1,15 @@
 #!/usr/bin/env sh
-# check-docs.sh — the landing gate: no code change may land without its doc update in the same commit.
+# check-docs.sh — the landing gate: no code change may land without its doc update in the same change.
 #
 # Enforces the "same-change update contract" (.agents/rules/documentation.md) mechanically: a commit
 # that changes any non-doc file (source, config, schema, scripts, CI) must also change the worklog
-# target in the SAME commit. This is the provider-neutral floor — it binds every agent in every tool,
+# target in the SAME change: the staged commit before committing, the whole pull request in CI (PRs
+# are squash-merged into one commit, so the PR is the unit that lands; Dustin, 2026-11-11). This is the provider-neutral floor — it binds every agent in every tool,
 # because it runs in required CI (scripts/templates/ci-verify.yml) and, for convenience, in the
 # pre-commit hook.
 #
 #   sh scripts/check-docs.sh              # check the staged changes (pre-commit context)
-#   sh scripts/check-docs.sh --since REF  # check every commit in REF..HEAD (CI context)
+#   sh scripts/check-docs.sh --since REF  # check the combined change since REF (CI context)
 #
 #   DOCS_OFF=1   disable entirely (deliberate exception — say so out loud)
 #
@@ -74,7 +75,7 @@ check_files() {
   fi
   if [ "$touched_worklog" -eq 0 ]; then
     echo "check-docs: $label changed code but not $WORKLOG" >&2
-    echo "  add a line to $WORKLOG in the same commit (see .agents/rules/documentation.md)" >&2
+    echo "  add a line to $WORKLOG in the same change (see .agents/rules/documentation.md)" >&2
     return 1
   fi
   return 0
@@ -88,10 +89,7 @@ if [ "${1:-}" = "--since" ]; then
     echo "check-docs: ref '$ref' not found — cannot verify doc currency" >&2
     exit 1
   }
-  for sha in $(git rev-list "$ref"..HEAD); do
-    [ "$(git rev-list --no-walk --count --merges "$sha")" -eq 0 ] || continue
-    git show --name-only --format= "$sha" 2>/dev/null | check_files "commit $sha" || fail=1
-  done
+  git diff --name-only "$ref"...HEAD 2>/dev/null | check_files "the change since $ref" || fail=1
 else
   git diff --cached --name-only 2>/dev/null | check_files "staged change" || fail=1
 fi

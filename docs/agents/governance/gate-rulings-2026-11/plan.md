@@ -2,7 +2,7 @@
 
 - **Area:** `governance` · **Started:** 2026-11-11 · **Status:** In review
 - **Owner:** a dev-kit session porting Dustin's two 2026-11-11 gate rulings (dev-kit code audit lane `dk-ci-lint-waste`)
-- **Next step:** merge the milestone-gate PR once green, then open the docs-gate PR.
+- **Next step:** merge the docs-gate PR once green; then this plan is done. panoply#9 stays open for its own decision.
 - **Spec:** none. Two existing gates change what they accept; no new artifact, no new gate.
 
 ## What
@@ -41,7 +41,7 @@ same defects.
 ## Milestones
 
 - [x] Milestone evidence gate accepts any valid reference; canary cases from the red runs — `scripts/check-milestone-evidence.test.sh`
-- [ ] Docs landing gate judges the whole PR (separate PR)
+- [x] Docs landing gate judges the whole PR; canary cases for a follow-up commit, a range with no line, an unknown ref — `scripts/check-docs.test.sh`
 
 ## Launch
 
