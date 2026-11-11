@@ -2,7 +2,7 @@
 
 - **Area:** `governance` · **Started:** 2026-11-11 · **Status:** In review
 - **Owner:** a dev-kit session upstreaming dev-kit's two 2026-11-10 checks (dev-kit #53/#54/#55)
-- **Next step:** merge this PR once green. A rule module that names the size limits is a separate PR, held for Dustin's ratification.
+- **Next step:** Dustin ratifies the rule text in `.agents/rules/small-slices.md` (PR labelled `hold`); merge it once he does. Script, canary and CI merged in PR #16.
 - **Spec:** none. One new warn-only script; nothing existing changes behaviour.
 
 ## What
@@ -35,7 +35,7 @@ the build. This brings it to the kit, with dev-kit's stack-specific excludes (BM
 - [x] Script and canary, 8 cases, two of which fail against the dev-kit copy — `scripts/check-pr-size.test.sh`
 - [x] Wired into the kit's CI: a `size` job on PRs and a step in the self-tests job — `.github/workflows/verify.yml`
 - [x] Shipped to adopters: the same job and step in the template, so `panoply.sh apply` installs the script and its canary — `scripts/templates/ci-verify.yml`
-- [ ] Rule text naming the limits and the split-or-explain duty (separate PR, `hold`, needs Dustin's ratification)
+- [ ] Rule text naming the limits and the split-or-explain duty, held for Dustin's ratification — `.agents/rules/small-slices.md`
 
 ## Launch
 

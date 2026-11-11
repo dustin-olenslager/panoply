@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# check-pr-size.sh — flags a change too big for one reviewer to read in a sitting.
+# check-pr-size.sh — flags a change too big for one reviewer to read in a sitting (.agents/rules/small-slices.md).
 #
 # Warns, never fails: it prints `BIG` and writes `big=true` to $GITHUB_OUTPUT so CI can label the PR.
 # Docs, lock files, generated agent mirrors and binaries are not counted; they are not what a
@@ -41,7 +41,7 @@ done < "${TMPDIR:-/tmp}/pr-size.$$"
 rm -f "${TMPDIR:-/tmp}/pr-size.$$"
 
 if [ "$lines" -gt "$MAX_LINES" ] || [ "$files" -gt "$MAX_FILES" ]; then
-  msg="BIG: $lines changed lines in $files files (limit $MAX_LINES lines / $MAX_FILES files). Split it into smaller slices, or say in the PR body why it can't split."
+  msg="BIG: $lines changed lines in $files files (limit $MAX_LINES lines / $MAX_FILES files). Split it into smaller slices, or say in the PR body why it can't split. Rule: .agents/rules/small-slices.md"
   echo "check-pr-size: $msg"
   [ -n "${GITHUB_ACTIONS:-}" ] && echo "::warning title=PR too big::$msg"
   [ -n "${GITHUB_OUTPUT:-}" ] && echo "big=true" >> "$GITHUB_OUTPUT"

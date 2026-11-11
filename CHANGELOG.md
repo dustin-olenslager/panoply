@@ -1,5 +1,10 @@
 # Changelog — panoply
 
+Rule module `small-slices.md`: ship the smallest piece someone can try, a plan is a queue of slices,
+build only what the slice needs, a PR past about 300 lines or 10 files splits or says why, and a brief
+names one slice. It is the doctrine behind `scripts/check-pr-size.sh`, whose warning now points at it.
+Ported from dev-kit with the 10 Ton wording removed.
+
 PR size check, warn-only. `scripts/check-pr-size.sh` counts changed lines and files against the PR
 base (defaults 300 / 10; docs, `*.md`, generated mirrors and lock files excluded; `SIZE_MAX_LINES`,
 `SIZE_MAX_FILES`, `SIZE_EXCLUDE` tune it) and, past either limit, prints a CI warning and labels the
