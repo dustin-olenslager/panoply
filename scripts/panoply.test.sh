@@ -89,7 +89,7 @@ R="$(_new_repo partial)"; cp "$KIT/AGENTS.md" "$R/AGENTS.md"; sed -i 's/{{PROJEC
 R="$(_new_repo unadapted)"; _make_adopted "$R"
 sed -i 's/fixture/{{PROJECT_NAME}}/' "$R/AGENTS.md"          # re-introduce one token
                                     assert_exit "unfilled placeholders"  13 "$R"
-# --- case 3b: a git-ignored leftover holding tokens is not part of the repo ----------------------
+# case 3b: a git-ignored leftover holding tokens is not part of the repo.
 # Seen 2026-11-11 in an adopter's stale checkout: twelve ignored .agents/rules/*.mdc files from an old
 # mirror made a correctly adopted repo read UNADAPTED.
 R="$(_new_repo ignored)"; _make_adopted "$R"
