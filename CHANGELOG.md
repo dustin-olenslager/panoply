@@ -1,5 +1,13 @@
 # Changelog — panoply
 
+PR size check, warn-only. `scripts/check-pr-size.sh` counts changed lines and files against the PR
+base (defaults 300 / 10; docs, `*.md`, generated mirrors and lock files excluded; `SIZE_MAX_LINES`,
+`SIZE_MAX_FILES`, `SIZE_EXCLUDE` tune it) and, past either limit, prints a CI warning and labels the
+PR `big`. It never fails the build. Ported from dev-kit (#55) with stack-specific excludes dropped
+and one fix: the exclude globs were expanded against the working tree, so a nested doc such as
+`docs/area/x.md` was counted. Canary `check-pr-size.test.sh`, 8 cases, wired into self-tests. The adopter CI template carries
+the same job, so `panoply.sh apply` installs both scripts.
+
 FIX — the expert-review canary graded its cases against CI's own PR. Since the gate reads labels from
 `$GITHUB_EVENT_PATH`, the canary run inside CI inherited the real PR's event file, and on a PR
 labelled `trivial` every case skipped: 6 of 14 failed (dev-kit#56). The canary now unsets the

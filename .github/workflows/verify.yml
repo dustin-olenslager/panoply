@@ -141,6 +141,28 @@ jobs:
             --log-opts="--no-merges ${{ github.event.pull_request.base.sha }}..HEAD"
         if: github.event_name == 'pull_request'
 
+  # Warn-only PR size check: flags a PR past 300 changed lines or 10 files (docs, lock files and
+  # generated mirrors excluded) and labels it `big`. Never fails. Its own job so the write permission
+  # it needs for the label does not widen the verify job.
+  size:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: PR size
+        id: size
+        run: sh scripts/check-pr-size.sh --since "${{ github.event.pull_request.base.sha }}"
+      - name: Label big PR
+        if: steps.size.outputs.big == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr edit "${{ github.event.pull_request.number }}" -R "${{ github.repository }}" --add-label big || echo "could not add the big label"
+
   # Gate self-tests live in their OWN job, gated on the kit's own tooling changing. The kit ships
   # gates adapted repos depend on, so a gate that silently stops detecting anything is a kit defect
   # and must be re-proven — but only when a gate or its fixtures could have changed. Running them on
@@ -278,3 +300,9 @@ jobs:
       - name: Launch gate self-test
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-launch.test.sh
+
+      # The size check's canary — proves it still flags a big change, still never fails the build,
+      # and still excludes docs at any depth (an unquoted glob once expanded against the tree).
+      - name: PR size self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-pr-size.test.sh
