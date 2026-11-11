@@ -36,3 +36,8 @@ the build. This brings it to the kit, with dev-kit's stack-specific excludes (BM
 - [x] Wired into the kit's CI: a `size` job on PRs and a step in the self-tests job — `.github/workflows/verify.yml`
 - [x] Shipped to adopters: the same job and step in the template, so `panoply.sh apply` installs the script and its canary — `scripts/templates/ci-verify.yml`
 - [ ] Rule text naming the limits and the split-or-explain duty (separate PR, `hold`, needs Dustin's ratification)
+
+## Launch
+
+- **Launched** by merging this PR: the kit's own CI runs the `size` job on every PR, and adopters get it on their next `panoply.sh apply`.
+- **Rollback:** revert the PR, or in an adopter delete the `size` job from its workflow. The check never fails a build, so nothing is blocked while it is in place.
