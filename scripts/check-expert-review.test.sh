@@ -13,6 +13,9 @@
 # tree-global — `find docs/agents -name plan.md` and a tree-wide checklist grep — so it went GREEN on
 # exactly that PR. The canary now pins the change-scoped rule by proving the old behaviour is refused.
 set -u
+# A CI run exports the real PR's event file and number; a canary that inherits them grades every case
+# against that PR's labels (a 'trivial' label made every case skip). Each case sets its own.
+unset GITHUB_EVENT_PATH GITHUB_PR_NUMBER CI_PR_NUMBER GITHUB_BASE_REF 2>/dev/null || true
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 GATE="$HERE/check-expert-review.sh"

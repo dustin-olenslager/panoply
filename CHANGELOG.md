@@ -1,5 +1,10 @@
 # Changelog — panoply
 
+FIX — the expert-review canary graded its cases against CI's own PR. Since the gate reads labels from
+`$GITHUB_EVENT_PATH`, the canary run inside CI inherited the real PR's event file, and on a PR
+labelled `trivial` every case skipped: 6 of 14 failed (dev-kit#56). The canary now unsets the
+event file, PR number and base ref; each case sets its own.
+
 FIX — two gates read the wrong thing in CI. `check-milestone-evidence.sh` dropped one-line hunks:
 git writes them as `@@ -5 +5 @@` with no count, the line regex required one, and a change made
 only of one-line edits (ticking a milestone, say) fell back to grading the whole plan, failing on
