@@ -69,6 +69,31 @@ else bad "escape hatch did not lift the gate"; fi
 if grep -q 'DOCS_OFF=1' "$GATE"; then ok "the hatch is documented in the gate's usage header"
 else bad "DOCS_OFF exists but is undocumented — an undeclared hatch is not a hatch"; fi
 
+# case 6: --since judges the WHOLE change, not each commit
+# Dustin, 2026-11-11: PRs are squash-merged, so the PR is what lands. A later commit that touches
+# code with no worklog line passes when an earlier commit in the range added the line.
+r="$(mk_repo pass-whole-pr)"; base="$(git -C "$r" rev-parse HEAD)"
+printf 'a\n' > "$r/src.ts"; printf -- '- did a thing\n' > "$r/CHANGELOG.md"
+git -C "$r" add -A; cmit "$r" "feat: code with its worklog line"
+printf 'b\n' >> "$r/src.ts"
+git -C "$r" add -A; cmit "$r" "fix: follow-up, no worklog line of its own"
+if ( cd "$r" && sh scripts/check-docs.sh --since "$base" >/dev/null 2>&1 ); then
+  ok "--since passes when an earlier commit in the range added the worklog line"
+else bad "--since still judges each commit; a follow-up commit was refused"; fi
+
+# case 7: --since still REFUSES a range with code and no worklog line
+r="$(mk_repo fail-whole-pr)"; base="$(git -C "$r" rev-parse HEAD)"
+printf 'a\n' > "$r/src.ts"; git -C "$r" add -A; cmit "$r" "feat: code"
+printf 'b\n' >> "$r/src.ts"; git -C "$r" add -A; cmit "$r" "fix: more code"
+if ( cd "$r" && sh scripts/check-docs.sh --since "$base" >/dev/null 2>&1 ); then
+  bad "--since accepted a range that never touches the worklog"
+else ok "--since refuses a range with code and no worklog line"; fi
+
+# case 8: --since with an unknown ref refuses, never passes silently
+if ( cd "$r" && sh scripts/check-docs.sh --since no-such-ref >/dev/null 2>&1 ); then
+  bad "--since accepted a ref that does not exist"
+else ok "--since refuses a ref that does not exist"; fi
+
 printf '\ncheck-docs canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

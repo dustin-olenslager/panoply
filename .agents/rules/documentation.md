@@ -94,17 +94,17 @@ already use, so the doctrine and the dogfood agree.
 
 ### The landing gate — mechanical enforcement
 
-The contract's deterministic core is enforced by `scripts/check-docs.sh`, which fails any commit that
-changes a non-markdown file (source, config, schema, scripts, CI) but not the worklog target in the
-same commit. It runs in required CI (`scripts/templates/ci-verify.yml`) and the pre-commit hook, so it
+The contract's deterministic core is enforced by `scripts/check-docs.sh`, which fails any change that
+touches a non-markdown file (source, config, schema, scripts, CI) but not the worklog target: the
+staged commit in the pre-commit hook, the pull request's combined change in CI. It runs in required CI (`scripts/templates/ci-verify.yml`) and the pre-commit hook, so it
 binds every agent in every tool — the provider-neutral floor. The gate enforces **presence**, not
 **correctness**: a vague or wrong worklog line passes. Correctness is a review problem, not an
 automation problem — the honest limit of any git-native kit. The worklog target is auto-detected
 (`CHANGELOG.md`/`HISTORY.md` `[Unreleased]`, else `docs/agents/worklog.md`), overridable via
 `DOCS_WORKLOG`. Two further knobs: `DOCS_EXEMPT` (space-separated doc extensions, default `md` — a repo
 whose product *is* markdown, a docs site or blog, sets it empty so shipped `.md` counts as code), and
-the declared escape hatch `DOCS_OFF=1` for a deliberate exception. The `--since` mode walks every
-**non-merge** commit in the range; a merge commit is skipped.
+the declared escape hatch `DOCS_OFF=1` for a deliberate exception. The `--since` mode judges the
+combined change from the base to HEAD once, so the line may sit in any commit of the PR.
 
 `scripts/check-rule-fork.sh` is the sibling audit for a **forked** rule set: an adopted repo keeps its
 own adapted copy of the modules (`.claude/rules/` or `.agents/rules/`), which will never be

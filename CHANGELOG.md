@@ -1,5 +1,12 @@
 # Changelog — panoply
 
+The docs landing gate judges the whole PR (Dustin, 2026-11-11). `scripts/check-docs.sh --since <base>`
+checks the combined change from the base to HEAD once, so the worklog line may sit in any commit of
+the PR; PRs are squash-merged, so the PR is what lands. Before, every non-merge commit in the range
+needed its own line, and a follow-up commit failed a PR that already carried one. The staged
+(pre-commit) check is unchanged. Rule wording in `git-workflow.md`, `documentation.md` and
+`AGENTS.md` says the same. Canary cases 6-8. Ported from dev-kit.
+
 FIX — the Milestone evidence gate accepts any valid reference (Dustin, 2026-11-11). A ticked
 milestone passes when any backticked path on the line exists or any `PR #n` on it resolves, which is
 what the gate's own comment always said. It used to read only the last backticked text on the line
