@@ -31,6 +31,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 |---|---|---|---|
 | The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 1 | `governance/execution-algorithm/plan.md` |
 | Mirror allow-list | A repo chooses which tool-native mirrors `sync-agents.sh` generates; no list means all of them, as before | row 2 | `governance/mirror-allow-list/plan.md` |
+| PR size check | Flag a PR too big to review in one sitting; warn, never block | row 3 | `governance/pr-size-check/plan.md` |
 
 ## Next — committed, not yet started
 

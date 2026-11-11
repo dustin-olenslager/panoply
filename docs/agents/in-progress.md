@@ -20,6 +20,7 @@ entry to `completed-features.md`.
 |---|------|------|------------|----------|--------|-------|
 | 1 | The Algorithm — five-step pass, in the rules, in every mirror, and in Hermes (injection + gate) | governance | The Algorithm | `governance/execution-algorithm/plan.md` | In progress — M4/M5 open | Kit half (M1–M3) is on `main`: `.agents/rules/algorithm.md`, `scripts/check-algorithm.sh`, and every mirror. Next step = M4 (verify the installed `execution-algorithm` Hermes plugin against the plan's M4 text — its source lives outside this repo, which is why the milestone carries no in-repo evidence path and stays unticked), then M5, the non-code cadence report. No PR is open. |
 | 2 | Mirror allow-list: a repo chooses which tool-native mirrors `sync-agents.sh` generates | governance | Mirror allow-list | `governance/mirror-allow-list/plan.md` | In review | PR open with `hold`. Next step = Dustin's review and merge; then dev-kit re-applies the kit and sets `.agents/mirrors` to `none` (dev-kit plugin-gaps M3). |
+| 3 | Warn-only PR size check (300 lines / 10 files, label `big`) | governance | PR size check | `governance/pr-size-check/plan.md` | In review | Script + canary + CI in one PR, merged on green. Next step = the rule-text PR, held for Dustin. dev-kit's progress-board gate deliberately not ported (plan's deletion table says why). |
 
 **Status vocabulary:** `Not started` · `In progress — milestone N of M` · `Blocked — <on what>` ·
 `In review` · `Done — archiving`.
