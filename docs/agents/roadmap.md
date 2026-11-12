@@ -14,7 +14,7 @@ queue rows — **not** a single task.
 Three views, three altitudes, no overlap:
 - **`roadmap.md` (this file)** — strategic. Initiatives and their band (Now / Next / Later).
 - **`in-progress.md`** — tactical. The queue of what is next, which rolls up into these initiatives.
-- **The worklog** (`worklog.md`, or the `CHANGELOG` `[Unreleased]` section) — the change history underneath both.
+- **The worklog** (`worklog.d/` fragments, or an unmigrated repo's `worklog.md` / `CHANGELOG` `[Unreleased]`) — the change history underneath both.
 
 **This file owns exactly three things:** an initiative's *existence*, its *band*, and its *links down*
 to the queue rows and plan docs that execute it. It does **not** restate task status — that is derived

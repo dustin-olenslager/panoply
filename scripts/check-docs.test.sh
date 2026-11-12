@@ -94,6 +94,75 @@ if ( cd "$r" && sh scripts/check-docs.sh --since no-such-ref >/dev/null 2>&1 ); 
   bad "--since accepted a ref that does not exist"
 else ok "--since refuses a ref that does not exist"; fi
 
+# --- worklog fragments (docs/agents/worklog.d/), Dustin 2026-11-12 -------------
+# Fixture helper: a repo already migrated (fragment dir committed with one entry and a frozen worklog.md).
+mk_frag_repo() {
+  r="$(mk_repo "$1")"; mkdir -p "$r/docs/agents/worklog.d"
+  printf -- '- old entry\n' > "$r/docs/agents/worklog.d/2026-01-01-old.md"
+  printf -- '- frozen\n' > "$r/docs/agents/worklog.md"
+  git -C "$r" add -A; cmit "$r" "chore: migrate"
+  printf '%s\n' "$r"
+}
+
+# case 9: code + a NEW fragment passes (staged)
+r="$(mk_frag_repo frag-add)"
+printf 'a\n' > "$r/src.ts"; printf -- '- did a thing\n' > "$r/docs/agents/worklog.d/2026-11-12-thing.md"
+git -C "$r" add -A
+if ( cd "$r" && sh scripts/check-docs.sh --staged >/dev/null 2>&1 ); then ok "code + a new worklog fragment passes"
+else bad "a new fragment was refused"; fi
+
+# case 10: code + only a MODIFIED fragment fails
+r="$(mk_frag_repo frag-modify)"
+printf 'a\n' > "$r/src.ts"; printf -- '- edited\n' >> "$r/docs/agents/worklog.d/2026-01-01-old.md"
+git -C "$r" add -A
+if ( cd "$r" && sh scripts/check-docs.sh --staged >/dev/null 2>&1 ); then bad "a modified fragment was accepted as a new entry"
+else ok "code + a modified (not added) fragment is refused"; fi
+
+# case 11: code + only a DELETED fragment fails
+r="$(mk_frag_repo frag-delete)"
+printf 'a\n' > "$r/src.ts"; git -C "$r" rm -q "docs/agents/worklog.d/2026-01-01-old.md"
+git -C "$r" add -A
+if ( cd "$r" && sh scripts/check-docs.sh --staged >/dev/null 2>&1 ); then bad "a deleted fragment was accepted"
+else ok "code + a deleted fragment is refused"; fi
+
+# case 12: migrated repo — appending to the frozen worklog.md no longer counts
+r="$(mk_frag_repo frag-frozen)"
+printf 'a\n' > "$r/src.ts"; printf -- '- appended\n' >> "$r/docs/agents/worklog.md"
+git -C "$r" add -A
+if ( cd "$r" && sh scripts/check-docs.sh --staged >/dev/null 2>&1 ); then bad "the frozen worklog.md still satisfies the gate"
+else ok "migrated repo: touching the frozen worklog.md is refused"; fi
+
+# case 13: a dotfile / README in the fragment dir is not an entry
+r="$(mk_frag_repo frag-keep)"
+printf 'a\n' > "$r/src.ts"; : > "$r/docs/agents/worklog.d/.gitkeep"; printf '# r\n' > "$r/docs/agents/worklog.d/README.md"
+git -C "$r" add -A
+if ( cd "$r" && sh scripts/check-docs.sh --staged >/dev/null 2>&1 ); then bad ".gitkeep/README counted as a worklog entry"
+else ok ".gitkeep and README.md are not worklog entries"; fi
+
+# case 14: migrated repo, docs-only change passes
+r="$(mk_frag_repo frag-docs)"
+printf '# n\n' > "$r/NOTES.md"; git -C "$r" add -A
+if ( cd "$r" && sh scripts/check-docs.sh --staged >/dev/null 2>&1 ); then ok "migrated repo: a docs-only change is exempt"
+else bad "migrated repo refused a docs-only change"; fi
+
+# case 15: --since passes when the PR adds a fragment, refuses when it only edits one
+r="$(mk_frag_repo frag-since)"; base="$(git -C "$r" rev-parse HEAD)"
+printf 'a\n' > "$r/src.ts"; printf -- '- x\n' > "$r/docs/agents/worklog.d/2026-11-12-x.md"
+git -C "$r" add -A; cmit "$r" "feat: code + fragment"
+if ( cd "$r" && sh scripts/check-docs.sh --since "$base" >/dev/null 2>&1 ); then ok "--since passes when the PR adds a fragment"
+else bad "--since refused a PR that adds a fragment"; fi
+r="$(mk_frag_repo frag-since-edit)"; base="$(git -C "$r" rev-parse HEAD)"
+printf 'a\n' > "$r/src.ts"; printf -- '- y\n' >> "$r/docs/agents/worklog.d/2026-01-01-old.md"
+git -C "$r" add -A; cmit "$r" "feat: code, edits old fragment"
+if ( cd "$r" && sh scripts/check-docs.sh --since "$base" >/dev/null 2>&1 ); then bad "--since accepted an edited fragment"
+else ok "--since refuses a PR that only edits an existing fragment"; fi
+
+# case 16: DOCS_WORKLOG_DIR moves the fragment dir
+r="$(mk_repo frag-customdir)"; mkdir -p "$r/log.d"; : > "$r/log.d/.keep"; git -C "$r" add -A; cmit "$r" "chore: dir"
+printf 'a\n' > "$r/src.ts"; printf -- '- z\n' > "$r/log.d/2026-11-12-z.md"; git -C "$r" add -A
+if ( cd "$r" && DOCS_WORKLOG_DIR=log.d sh scripts/check-docs.sh --staged >/dev/null 2>&1 ); then ok "DOCS_WORKLOG_DIR relocates the fragment dir"
+else bad "DOCS_WORKLOG_DIR was ignored"; fi
+
 printf '\ncheck-docs canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

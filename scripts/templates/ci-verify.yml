@@ -38,7 +38,7 @@ jobs:
       - name: Agent mirrors in sync
         run: sh scripts/sync-agents.sh --check
 
-      # Docs landing gate — fails if this PR's combined change touches code but not the worklog.
+      # Docs landing gate — fails if this PR's combined change touches code but adds no worklog fragment (docs/agents/worklog.d/).
       # Uses the PR base SHA (not a hardcoded branch name) so it works on any default branch and
       # on the first commit; the ref-guard in check-docs.sh fails loudly rather than silently passing.
       - name: Docs in sync

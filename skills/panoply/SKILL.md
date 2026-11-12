@@ -44,13 +44,13 @@ or second-guess the adapt logic here — read the kit's file and execute it.
      rules, and personas that do not apply;
    - MERGES into any pre-existing `AGENTS.md` / history — the
      project's own files win and are never overwritten;
-   - seeds `docs/agents/roadmap.md` and the worklog (fresh `worklog.md`, or an
+   - seeds `docs/agents/roadmap.md` and the worklog (a fresh `worklog.d/`, or an
      existing `CHANGELOG`/`HISTORY` `[Unreleased]` section);
    - generates the provider-neutral mirrors via `scripts/sync-agents.sh` from the
      single-source `AGENTS.md` + `.agents/rules/*.md`;
    - installs the CI + pre-commit enforcement plane from `scripts/templates/`,
      including the docs landing gate (`scripts/check-docs.sh`) that fails any
-     commit changing code but not the worklog in the same commit.
+     commit changing code without a new worklog fragment (or, unmigrated, a worklog edit) in the same commit.
 
    Follow the adapt command's own question budget (it asks at most five, or none
    with `--yes`). Do not add or skip its steps.

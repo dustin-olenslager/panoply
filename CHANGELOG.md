@@ -1,5 +1,17 @@
 # Changelog — panoply
 
+Worklog fragments (Dustin, 2026-11-12). One shared worklog file made every merge to the default
+branch conflict every other open PR, and each fix cost a CI run. A repo now records each change as one
+NEW file, `docs/agents/worklog.d/<YYYY-MM-DD>-<slug>.md`. `scripts/check-docs.sh` passes a code change
+that ADDS a file there (editing or deleting one, a dotfile or a `README.md` does not count), keeps
+`DOCS_WORKLOG` and adds `DOCS_WORKLOG_DIR`; a repo is migrated when the dir exists, after which the old
+`worklog.md` is frozen history and no longer satisfies the gate. Unmigrated repos keep the legacy
+`CHANGELOG.md` / `HISTORY.md` / `worklog.md` target unchanged. Rule text (`documentation.md`,
+`git-workflow.md`, `workflow.md`), `AGENTS.md`, `docs/agents/README.md`, the plan template's "On ship"
+step, the CI and pre-commit templates and the adapt/audit commands all say the same. Canary cases 9-16.
+Panoply keeps this `CHANGELOG.md` as its own running log. Migrate an adopter by creating `worklog.d/`
+with a first fragment and adding a header line to `worklog.md` pointing at it.
+
 The docs landing gate judges the whole PR (Dustin, 2026-11-11). `scripts/check-docs.sh --since <base>`
 checks the combined change from the base to HEAD once, so the worklog line may sit in any commit of
 the PR; PRs are squash-merged, so the PR is what lands. Before, every non-merge commit in the range

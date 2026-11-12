@@ -121,7 +121,7 @@ affect or appended here. Written later, they are written wrong.
 ## On ship
 
 Move this whole folder into `<area>/completed/`, rename this file to describe what shipped, add an
-entry to `../../completed-features.md`, append the final line to the worklog (`../../worklog.md` or the
-repo's `CHANGELOG` `[Unreleased]`), remove the item from `../../in-progress.md`, MOVE the initiative in
+entry to `../../completed-features.md`, add the final worklog fragment (a new file `../../worklog.d/<YYYY-MM-DD>-<slug>.md`; an unmigrated repo appends to `../../worklog.md` or
+its `CHANGELOG` `[Unreleased]`), remove the item from `../../in-progress.md`, MOVE the initiative in
 `../../roadmap.md` (to Shipped if this was its last plan), and promote any durable lesson into
 `architecture.md` or `key-patterns.md` — all in the same commit as the ship.

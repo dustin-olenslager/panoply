@@ -2,8 +2,8 @@
 # check-docs.sh — the landing gate: no code change may land without its doc update in the same change.
 #
 # Enforces the "same-change update contract" (.agents/rules/documentation.md) mechanically: a commit
-# that changes any non-doc file (source, config, schema, scripts, CI) must also change the worklog
-# target in the SAME change: the staged commit before committing, the whole pull request in CI (PRs
+# that changes any non-doc file (source, config, schema, scripts, CI) must also record it in the
+# worklog in the SAME change: the staged commit before committing, the whole pull request in CI (PRs
 # are squash-merged into one commit, so the PR is the unit that lands; Dustin, 2026-11-11). This is the provider-neutral floor — it binds every agent in every tool,
 # because it runs in required CI (scripts/templates/ci-verify.yml) and, for convenience, in the
 # pre-commit hook.
@@ -13,8 +13,13 @@
 #
 #   DOCS_OFF=1   disable entirely (deliberate exception — say so out loud)
 #
-# Worklog target: CHANGELOG.md / HISTORY.md if present, else docs/agents/worklog.md.
-# Override with DOCS_WORKLOG=<path>. "Doc" files are exempt from the mandatory line; the exempt
+# Worklog, two shapes. A repo that has migrated (the fragment dir exists) records each change as ONE NEW
+# FILE under docs/agents/worklog.d/ (override the dir with DOCS_WORKLOG_DIR): the gate passes when the
+# change ADDS a file there; editing or deleting one does not count. One file per change means two open
+# PRs never touch the same path, so they never conflict on the log (Dustin, 2026-11-12). An unmigrated
+# repo keeps the legacy single-file target: CHANGELOG.md / HISTORY.md if present, else
+# docs/agents/worklog.md; touching it passes. Override the legacy target with DOCS_WORKLOG=<path>
+# (an explicit DOCS_WORKLOG counts in either shape). "Doc" files are exempt from the mandatory line; the exempt
 # extensions default to `md` and are overridable via DOCS_EXEMPT (space-separated, e.g. `md rst adoc`).
 # A repo whose product IS markdown (a docs site, a blog) must set DOCS_EXEMPT to empty so shipped .md
 # changes are treated as code. POSIX sh, no runtime deps.
@@ -36,8 +41,11 @@ cd "$ROOT"
 # needs one. A docs-only change in a repo with no worklog file yet is perfectly legal, and refusing it
 # blocked a fresh repo from committing its first markdown — the gate demanding a file that the change
 # itself has no reason to touch.
+FRAGDIR="${DOCS_WORKLOG_DIR:-docs/agents/worklog.d}"
+FRAGDIR="${FRAGDIR%/}"
+MIGRATED=0; [ -d "$FRAGDIR" ] && MIGRATED=1
 WORKLOG="${DOCS_WORKLOG:-}"
-if [ -z "$WORKLOG" ]; then
+if [ -z "$WORKLOG" ] && [ "$MIGRATED" -eq 0 ]; then
   if [ -f CHANGELOG.md ]; then WORKLOG="CHANGELOG.md"
   elif [ -f HISTORY.md ]; then WORKLOG="HISTORY.md"
   elif [ -f docs/agents/worklog.md ]; then WORKLOG="docs/agents/worklog.md"
@@ -57,28 +65,43 @@ is_code() {
   esac
 }
 
-# check_files <label>: read newline-delimited paths on stdin; fail if code changed but the worklog did not.
+# A fragment is an ADDED file (status A) directly under FRAGDIR, not a dotfile or README.
+is_fragment() {
+  case "$1" in
+    "$FRAGDIR"/*)
+      b="${1#"$FRAGDIR"/}"
+      case "$b" in */*|.*|README.md) return 1;; esac
+      return 0;;
+  esac
+  return 1
+}
+
+# check_files <label>: read `git diff --name-status` lines on stdin; fail if code changed but no worklog entry.
 check_files() {
   label="$1"
   changed_code=0; touched_worklog=0
-  while IFS= read -r f; do
+  while IFS="$(printf '\t')" read -r st f; do
     [ -n "$f" ] || continue
+    [ "$st" = "A" ] && is_fragment "$f" && touched_worklog=1
     [ -n "$WORKLOG" ] && [ "$f" = "$WORKLOG" ] && touched_worklog=1
     is_code "$f" && changed_code=1
   done
   # No code changed -> nothing to document, regardless of whether a worklog exists.
   [ "$changed_code" -eq 1 ] || return 0
+  [ "$touched_worklog" -eq 1 ] && return 0
+  if [ "$MIGRATED" -eq 1 ]; then
+    echo "check-docs: $label changed code but added no new file under $FRAGDIR/" >&2
+    echo "  add $FRAGDIR/$(date +%Y-%m-%d)-<slug>.md in the same change (see .agents/rules/documentation.md)" >&2
+    return 1
+  fi
   if [ -z "$WORKLOG" ]; then
     echo "check-docs: $label changed code but this repo has no worklog target" >&2
-    echo "  add CHANGELOG.md / HISTORY.md / docs/agents/worklog.md, or set DOCS_WORKLOG=<path>." >&2
+    echo "  add a file under $FRAGDIR/, or CHANGELOG.md / HISTORY.md / docs/agents/worklog.md, or set DOCS_WORKLOG=<path>." >&2
     return 1
   fi
-  if [ "$touched_worklog" -eq 0 ]; then
-    echo "check-docs: $label changed code but not $WORKLOG" >&2
-    echo "  add a line to $WORKLOG in the same change (see .agents/rules/documentation.md)" >&2
-    return 1
-  fi
-  return 0
+  echo "check-docs: $label changed code but not $WORKLOG" >&2
+  echo "  add a line to $WORKLOG in the same change (see .agents/rules/documentation.md)" >&2
+  return 1
 }
 
 fail=0
@@ -89,9 +112,9 @@ if [ "${1:-}" = "--since" ]; then
     echo "check-docs: ref '$ref' not found — cannot verify doc currency" >&2
     exit 1
   }
-  git diff --name-only "$ref"...HEAD 2>/dev/null | check_files "the change since $ref" || fail=1
+  git diff --no-renames --name-status "$ref"...HEAD 2>/dev/null | check_files "the change since $ref" || fail=1
 else
-  git diff --cached --name-only 2>/dev/null | check_files "staged change" || fail=1
+  git diff --cached --no-renames --name-status 2>/dev/null | check_files "staged change" || fail=1
 fi
 
 [ "$fail" -eq 0 ] && echo "check-docs: OK"
