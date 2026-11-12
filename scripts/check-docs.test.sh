@@ -94,7 +94,7 @@ if ( cd "$r" && sh scripts/check-docs.sh --since no-such-ref >/dev/null 2>&1 ); 
   bad "--since accepted a ref that does not exist"
 else ok "--since refuses a ref that does not exist"; fi
 
-# --- worklog fragments (docs/agents/worklog.d/), Dustin 2026-11-12 -------------
+# Worklog fragments (docs/agents/worklog.d/), Dustin 2026-11-12.
 # Fixture helper: a repo already migrated (fragment dir committed with one entry and a frozen worklog.md).
 mk_frag_repo() {
   r="$(mk_repo "$1")"; mkdir -p "$r/docs/agents/worklog.d"
