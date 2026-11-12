@@ -139,7 +139,7 @@ the right choice?
 Worth being precise about, because the difference decides whether any of this holds.
 
 **Enforced by the repo, whatever tool wrote the code:** `.github/workflows/verify.yml` plus the
-pre-commit hook — the check that code changed and the worklog did not, the plan-before-code gate, the
+pre-commit hook — the check that code changed and no worklog fragment was added, the plan-before-code gate, the
 architecture-boundary check, and `sync-agents.sh --check` for mirror drift.
 
 **Prose, and only as strong as the agent reading it:** `.agents/policy.md` — the hard MUST-NOTs

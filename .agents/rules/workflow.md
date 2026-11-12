@@ -8,7 +8,7 @@
 You cannot propose a change to a repo whose state you have not read. Before planning anything:
 
 - `git fetch --prune`, then survey branches, worktrees, and open PRs (`git branch -a`, `git worktree list`, `gh pr list --state open`).
-- Read the central plan doc (`docs/agents/roadmap.md` in kit repos; the repo's one plan doc where the adapt has set a lighter one), the running worklog, and only then the code you are about to change.
+- Read the central plan doc (`docs/agents/roadmap.md` in kit repos; the repo's one plan doc where the adapt has set a lighter one), the running worklog (`docs/agents/worklog.d/`), and only then the code you are about to change.
 - **Carry forward in-flight work** — continue the queued task or the open PR; never open a parallel track for work already in progress. (Full mechanics: `git-workflow.md` → Pre-flight.)
 
 ## The Algorithm pass — run before you plan, on anything structural

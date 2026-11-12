@@ -14,7 +14,7 @@ Start at the top; read what bears on the task, not everything every time.
 4. `key-patterns.md` — conventions, gotchas, testing practice.
 5. `infrastructure.md` — deploy, hosting, data stores, secrets, background jobs.
 6. `completed-features.md` — what already exists, so you do not rebuild it.
-7. `worklog.md` — the running per-change history (or the repo's `CHANGELOG` `[Unreleased]`); skim for what landed recently.
+7. `worklog.d/` — the running per-change history, one file per change (or, unmigrated, `worklog.md` / the repo's `CHANGELOG` `[Unreleased]`); skim for what landed recently.
 8. The relevant **area folder** — active plans and research for the thing you are changing.
 
 ## Layout
@@ -24,7 +24,8 @@ docs/agents/
   README.md               this file
   roadmap.md              canonical overall plan (initiatives, Now/Next/Later)
   in-progress.md          ordered queue of active work, rolls up into roadmap.md
-  worklog.md              running per-change log (omit if the repo uses CHANGELOG [Unreleased])
+  worklog.d/              running per-change log: one file per change, <YYYY-MM-DD>-<slug>.md
+  worklog.md              legacy single-file log, frozen once worklog.d/ exists (omit if the repo uses CHANGELOG [Unreleased])
   completed-features.md   shipped log, with archive paths
   architecture.md         decisions worth recording (ADRs)
   infrastructure.md       how it runs and deploys
@@ -55,7 +56,7 @@ are the point, not a defect. Newest file wins; earlier ones exist for trend comp
 
 1. **Plan** — copy `_templates/plan.md` into `<area>/<feature>/plan.md`; link it from `in-progress.md`.
 2. **Build** — re-read the plan at the start of each milestone; tick milestones off; record surprises
-   inline with `> **Build note:**` at the moment you find them; append a `worklog.md` line (or a
+   inline with `> **Build note:**` at the moment you find them; add a `worklog.d/` fragment (or, unmigrated, append a `worklog.md` /
    `CHANGELOG` `[Unreleased]` line) in the same commit as each landed change.
 3. **Ship** — move the whole `<feature>/` folder into `<area>/completed/`, rename files to describe
    what shipped, add a row to `completed-features.md`, delete the task's `in-progress.md` row

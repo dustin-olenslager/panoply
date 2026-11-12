@@ -85,10 +85,10 @@ update the rule, or fix the code — with a recommendation.
 - Area folders that are empty, and active work with no area folder at all.
 - The completed log not mentioning anything from the last several months, which usually means the
   whole lifecycle has quietly stopped being used — worth saying out loud rather than patching.
-- **Worklog currency.** Take the newest dated line in the worklog (`worklog.md`, or the `CHANGELOG`
-  `[Unreleased]` section if that is the target), then run
+- **Worklog currency.** Take the newest dated entry in the worklog (the newest `worklog.d/` fragment, or `worklog.md` / the `CHANGELOG`
+  `[Unreleased]` section if the repo has not migrated), then run
   `git log --no-merges --since=<that date> --name-only` and list commits that touched
-  source/config/schema/shipped-docs but added no worklog line in the same commit. Each is a
+  source/config/schema/shipped-docs but added no worklog entry in the same commit. Each is a
   same-change-contract miss — report the SHAs. Typo/format-only commits are exempt (they earn no line).
 - **Roadmap currency** — three cross-file consistency checks, all drift-to-report (never a judgment call):
   (a) every `roadmap.md` **Now** initiative has a live `in-progress.md` row or a `completed-features.md`

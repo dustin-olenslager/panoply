@@ -128,7 +128,7 @@ rather than scaffolding a fresh `docs/agents/` tree beside it.
 
 **Running change log.** Detect `CHANGELOG.md`/`HISTORY.md` and whether either carries an
 `## [Unreleased]` (or equivalent running) section. This decides the worklog target: an existing
-running log is REUSED as the worklog; only a repo with none gets a fresh `docs/agents/worklog.md`.
+running log is REUSED as the worklog; only a repo with none gets a fresh `docs/agents/worklog.d/` (one file per change, with a first fragment saying so).
 Never create a second parallel log.
 
 **Existing provider files.** `AGENTS.md` and generated tool mirrors. A pre-existing `AGENTS.md` is a
@@ -245,7 +245,7 @@ Work in this order; it is the order that avoids leaving orphans.
 8. **Scaffold the plan artifacts** (with the `docs/agents/` scaffold, only if absent): create
    `roadmap.md` from the kit template (keep the example row for the user to delete). For the worklog,
    use the Phase 1 decision — if a reusable `CHANGELOG`/`HISTORY` `[Unreleased]` log exists, point the
-   contract at it and do NOT create `worklog.md`; otherwise create `worklog.md`.
+   contract at it and do NOT create `worklog.d/`; otherwise create `worklog.d/` with a first fragment (never a new single-file `worklog.md`).
 9. **Generate the provider-neutral hub — run this LAST, after the rules are filled and pruned (steps
    1–8).** Copy the kit's `AGENTS.md` template, fill `{{PROJECT_NAME}}` (its only placeholder), keep its
    `<!-- PANOPLY:RULES:BEGIN/END -->` markers, then run `sh scripts/sync-agents.sh`. The generator emits
@@ -297,7 +297,7 @@ Run these and fix what they find. Do not report success on an unverified step.
   spot-check by grepping a distinctive sentence from `clean-architecture.md` and confirming it appears
   verbatim in generated tool mirrors. No mirror
   should say only "the canonical rules live in `.agents/rules/`" — that is the bug this generator fixes.
-- **Plan artifacts present.** `roadmap.md` exists; the worklog target exists (either `worklog.md` or a
+- **Plan artifacts present.** `roadmap.md` exists; the worklog target exists (either `worklog.d/` or a
   `CHANGELOG`/`HISTORY` `[Unreleased]` section) — exactly one, never both.
 - **Nothing outside scope changed.** `git status --porcelain` must show changes only under
   the generated agent hub, `.agents/`, `docs/agents/`, `.gitignore`, `AGENTS.md`, the generated tool-mirror paths
@@ -329,7 +329,7 @@ Output, in this order and nothing more:
    deploy/release path and what is dangerous about it, the decision that keeps getting re-litigated,
    the directory newcomers always misuse. Name the exact file and section where each belongs.
 7. **Worklog target** — state which was chosen: "reusing `CHANGELOG` `[Unreleased]`" vs "created
-   `docs/agents/worklog.md`".
+   `docs/agents/worklog.d/`".
 8. **Provider mirrors** — list the tool files emitted; note the source of truth is `AGENTS.md` and the
     fix for any drift is `sh scripts/sync-agents.sh` (wire `--check` into pre-commit/CI).
 9. **Branch protection** — report the outcome of `init-repo-protection.sh`: "configured" / "skipped (no gh)" / "skipped (user declined)" / "failed (reason)". If configured, note that `verify` check is now required on `{{DEFAULT_BRANCH}}`.

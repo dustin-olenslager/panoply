@@ -46,18 +46,27 @@ drifts. This is the anti-redundancy contract — keep to it and the logs cannot 
 |---|---|---|---|
 | Strategic | `docs/agents/roadmap.md` | Initiatives, their band (Now/Next/Later), links down | one initiative |
 | Tactical | `docs/agents/in-progress.md` (one file) | The active queue, blocked, parked, per-task Next step | one task/feature |
-| Continuous | `docs/agents/worklog.md` **or** the repo's `CHANGELOG`/`HISTORY` `[Unreleased]` | What actually landed | one change |
+| Continuous | `docs/agents/worklog.d/<YYYY-MM-DD>-<slug>.md` (one file per change) **or**, in a repo that has not migrated, `docs/agents/worklog.md` / the repo's `CHANGELOG`/`HISTORY` `[Unreleased]` | What actually landed | one change |
 | Durable | `docs/agents/completed-features.md` | What now exists + its archived plan path | one shipped feature |
 
 A fifth surface, `CHANGELOG.md`/`HISTORY.md` release notes, is **user-facing and derived** — curated
 from the worklog at release time, not maintained per-change in parallel. If the repo uses its
 `[Unreleased]` section AS the running worklog, there is no separate `worklog.md` (one running log, never two).
 
+**Worklog fragments (Dustin, 2026-11-12).** One shared worklog file makes every merge to the default
+branch conflict every other open PR on that file, and each fix costs a CI re-run. So the worklog is a
+directory: each change adds ONE NEW FILE, `docs/agents/worklog.d/<YYYY-MM-DD>-<slug>.md`, holding the
+same one-line (or short paragraph) entry the old log took. Two PRs never touch the same path, so they
+never conflict. A migrated repo's `docs/agents/worklog.md` is frozen history: its header points at
+`worklog.d/` and nothing new is appended to it. To migrate a repo, create `worklog.d/` with a first
+fragment that says so and freeze the old file. Read the log as `ls docs/agents/worklog.d/` (names sort
+by date), then the frozen file for older entries.
+
 ### The same-change update contract (every agent, every provider)
 
 In the SAME commit that lands work — any agent:
 
-1. **Append one worklog line** (to `worklog.md`, or the `[Unreleased]` section) — what changed, where.
+1. **Add one worklog fragment** (a NEW file `docs/agents/worklog.d/<YYYY-MM-DD>-<slug>.md`; in a repo that has not migrated, append a line to `worklog.md` or the `[Unreleased]` section) — what changed, where.
 2. **Update your task's row in `docs/agents/in-progress.md`** — its status and its Next-step handoff, or
    **delete the row** on ship — in the SAME PR that ships the code, never later (a row that outlives its
    merge is planned against as if still open; leftovers are retired from PR state with
@@ -95,13 +104,17 @@ already use, so the doctrine and the dogfood agree.
 ### The landing gate — mechanical enforcement
 
 The contract's deterministic core is enforced by `scripts/check-docs.sh`, which fails any change that
-touches a non-markdown file (source, config, schema, scripts, CI) but not the worklog target: the
-staged commit in the pre-commit hook, the pull request's combined change in CI. It runs in required CI (`scripts/templates/ci-verify.yml`) and the pre-commit hook, so it
+touches a non-markdown file (source, config, schema, scripts, CI) but adds no worklog fragment (or, in
+an unmigrated repo, does not touch the legacy worklog target): the staged commit in the pre-commit hook,
+the pull request's combined change in CI. Only a file ADDED under `docs/agents/worklog.d/` counts —
+editing or deleting a fragment, a dotfile or a `README.md` there does not, and in a migrated repo
+appending to the frozen `worklog.md` does not either. It runs in required CI (`scripts/templates/ci-verify.yml`) and the pre-commit hook, so it
 binds every agent in every tool — the provider-neutral floor. The gate enforces **presence**, not
 **correctness**: a vague or wrong worklog line passes. Correctness is a review problem, not an
-automation problem — the honest limit of any git-native kit. The worklog target is auto-detected
-(`CHANGELOG.md`/`HISTORY.md` `[Unreleased]`, else `docs/agents/worklog.md`), overridable via
-`DOCS_WORKLOG`. Two further knobs: `DOCS_EXEMPT` (space-separated doc extensions, default `md` — a repo
+automation problem — the honest limit of any git-native kit. The fragment dir is `docs/agents/worklog.d/`,
+overridable via `DOCS_WORKLOG_DIR`; a repo is migrated when that dir exists. The legacy target for an
+unmigrated repo is auto-detected (`CHANGELOG.md`/`HISTORY.md` `[Unreleased]`, else
+`docs/agents/worklog.md`), overridable via `DOCS_WORKLOG`. Two further knobs: `DOCS_EXEMPT` (space-separated doc extensions, default `md` — a repo
 whose product *is* markdown, a docs site or blog, sets it empty so shipped `.md` counts as code), and
 the declared escape hatch `DOCS_OFF=1` for a deliberate exception. The `--since` mode judges the
 combined change from the base to HEAD once, so the line may sit in any commit of the PR.

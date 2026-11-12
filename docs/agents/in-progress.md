@@ -8,7 +8,7 @@ open, the command to run, the blocker — refreshed whenever you pause, so the n
 cold. A row with no next step is a row nobody can pick up. (Doctrine: `.agents/rules/documentation.md`.)
 
 Each row rolls up to a `roadmap.md` initiative (the strategic view) and leaves a trail in the worklog
-(`worklog.md` or the `CHANGELOG` `[Unreleased]`). A row with no initiative is tactical work with no
+(a `worklog.d/` fragment, or an unmigrated repo's `worklog.md` / `CHANGELOG` `[Unreleased]`). A row with no initiative is tactical work with no
 strategic home — add the initiative to `roadmap.md`, or say in Notes why it is a deliberate one-off.
 
 When an item ships: remove its row from here, move its folder into `<area>/completed/`, and add an
