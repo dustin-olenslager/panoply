@@ -251,6 +251,7 @@ claim about its size. **Do not edit between the markers** — edit the modules a
 - `ai-features` — AI Features & Data Enrichment — `.agents/rules/ai-features.md`
 - `agent-readiness` — Agent Readiness (dual-mode apps) — `.agents/rules/agent-readiness.md`
 - `factory-phases` — The factory phases — `.agents/rules/factory-phases.md`
+- `progress-board` — Progress board: every project shows its live state — `.agents/rules/progress-board.md`
 - `small-slices` — Small Slices: Ship the Smallest Piece Someone Can Try — `.agents/rules/small-slices.md`
 - `wireframe-first` — Wireframe before backend — `.agents/rules/wireframe-first.md`
 

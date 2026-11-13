@@ -1,5 +1,11 @@
 # Changelog — panoply
 
+Rule module `progress-board.md`, ported from dev-kit (Dustin, 2026-11-13): every repo has one live
+progress board filled by one engine from the docs spine, and (new, item 6, ratified by Dustin as
+written on 2026-11-13) every queue or roadmap row links its Plane work item, Figma frame and Miro board
+from its Plan cell, a PR body from one `Links:` line, never guessed from other text. Panoply does not
+carry `scripts/check-progress-board.sh` yet; item 1's CI gate binds where dev-kit's gate is installed.
+
 Worklog fragments (Dustin, 2026-11-12). One shared worklog file made every merge to the default
 branch conflict every other open PR, and each fix cost a CI run. A repo now records each change as one
 NEW file, `docs/agents/worklog.d/<YYYY-MM-DD>-<slug>.md`. `scripts/check-docs.sh` passes a code change
