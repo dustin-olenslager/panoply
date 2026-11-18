@@ -1,6 +1,6 @@
 # Changelog — panoply
 
-Every CI job sets `timeout-minutes` (Dustin, 2026-11-18: "keep the code flowing"). A hung run fails at about 3x the job's normal duration instead of waiting out GitHub's 6 h default. The kit's own `verify.yml` sets 10/5/10. `scripts/templates/ci-verify.yml` starts adopters at 30/5/10, with a note to set 3x their own median. This pairs with the rule line "a hung main run is cancelled and rerun" in `git-workflow.md`.
+Every CI job sets `timeout-minutes` (Dustin, 2026-11-18: "keep the code flowing"). A hung run fails at a limit near 3x the job's normal duration (a 5-10 minute floor for jobs that take under a minute) instead of waiting out GitHub's 6 h default. The kit's own `verify.yml` sets 10/5/10. `scripts/templates/ci-verify.yml` starts adopters at 30/5/10, with a note to set 3x their own median. This pairs with the rule line "a hung main run is cancelled and rerun" in `git-workflow.md`.
 
 Rule module `progress-board.md`, ported from dev-kit (Dustin, 2026-11-13): every repo has one live
 progress board filled by one engine from the docs spine, and (new, item 6, ratified by Dustin as
