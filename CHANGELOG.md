@@ -1,5 +1,7 @@
 # Changelog — panoply
 
+Every CI job sets `timeout-minutes` (Dustin, 2026-11-18: "keep the code flowing"). A hung run fails at a limit near 2x the job's normal duration plus margin (Dustin, 2026-11-18: "Never wait; hang at 2x (Recommended)"; a 5-10 minute floor for jobs that take under a minute) instead of waiting out GitHub's 6 h default. The kit's own `verify.yml` sets 10/5/10. `scripts/templates/ci-verify.yml` starts adopters at 30/5/10, with a note to set 2x their own median plus margin. This pairs with the rule line "a hung main run is cancelled and rerun" in `git-workflow.md`, which now says 2x as well.
+
 FIX — the feature-completeness gate, ported from dev-kit (2026-11-18). `scripts/check-feature-completeness.sh`
 and its canary now ship in the kit. `User-facing: no - <reason>` takes any reason of 3+ characters that starts
 and ends with a letter or digit, after `-`, `:`, `–` or `—`; it used to refuse "a read API" (the reason had to

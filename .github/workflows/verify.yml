@@ -14,6 +14,7 @@ on:
 
 jobs:
   verify:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -146,6 +147,7 @@ jobs:
   # it needs for the label does not widen the verify job.
   size:
     if: github.event_name == 'pull_request'
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -170,6 +172,7 @@ jobs:
   # 4 of 11 steps), which is cost with no signal: a docs-only PR cannot tell anyone whether
   # check-spec.sh still detects. Push to main always runs them, so drift cannot hide behind the filter.
   self-tests:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
