@@ -72,7 +72,7 @@ done
 { printf '%s\n' 'User-facing: no'; sed -n '/Entry point/,$p' "$SANDBOX/full.md"; } > "$SANDBOX/nofull.md"
 out="$(FC_ENFORCE=1 sh "$GATE" --body "$SANDBOX/nofull.md" --files "$SANDBOX/ui.files")"
 want_in "4g a bare 'no' with every field filled is OK" "$out" "OK (all fields filled)"
-printf '%s\n' '<!-- write `User-facing: no - <reason>` if no user sees it -->' '- Entry point:' > "$SANDBOX/tmpl.md"
+printf '%s\n' '<!-- write User-facing: no - <reason> if no user sees it -->' '- Entry point:' > "$SANDBOX/tmpl.md"
 out="$(sh "$GATE" --body "$SANDBOX/tmpl.md" --files "$SANDBOX/ui.files")"
 want_in "4h a template comment is not an opt-out line" "$out" "MISSING in the PR body: Entry point"
 printf '%s\n' '<!-- User-facing: no - docs only -->' > "$SANDBOX/cmt.md"
