@@ -30,10 +30,10 @@ while [ $# -gt 0 ]; do
     *) echo "check-feature-completeness: unknown argument '$1'" >&2; exit 2 ;;
   esac
 done
-[ -n "$BODY" ] && [ -r "$BODY" ] || { echo "check-feature-completeness: --body FILE is required" >&2; exit 2; }
+if [ -z "$BODY" ] || [ ! -r "$BODY" ]; then echo "check-feature-completeness: --body FILE is required" >&2; exit 2; fi
 
 UI_RE="${FC_UI_RE:-\.(tsx|jsx|vue|svelte|css|scss)$|(^|/)app/.*page\.[a-z]+$|(^|/)changelog\.d/[^/]+\.md$|(notice|notif|notify|e?mail|slack|sms|push)[a-z-]*\.(ts|tsx|js|py|html|mjml)$}"
-[ -n "${FC_UI_ADD:-}" ] && UI_RE="$UI_RE|$FC_UI_ADD"
+if [ -n "${FC_UI_ADD:-}" ]; then UI_RE="$UI_RE|$FC_UI_ADD"; fi
 NOT_UI_RE="${FC_NOT_UI_RE:-(\.|/)(test|spec|stories|e2e)(\.|/)|__tests__/|/tests?/}"
 
 if [ -z "$FILES" ]; then
@@ -59,14 +59,14 @@ fi
 
 fail() {
   echo "check-feature-completeness: $1"
-  [ -n "${GITHUB_ACTIONS:-}" ] && echo "::warning title=Feature completeness::$1"
-  [ "${FC_ENFORCE:-0}" = "1" ] && exit 1
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::warning title=Feature completeness::$1"; fi
+  if [ "${FC_ENFORCE:-0}" = "1" ]; then exit 1; fi
   exit 0
 }
 
 # Text after "<label>:" plus following lines, up to the next "- label:" bullet or heading.
 field_text() {
-  tr -d '*_`\r' < "$BODY" | awk -v want="$(printf '%s' "$1" | tr 'A-Z' 'a-z')" '
+  tr -d '*_`\r' < "$BODY" | awk -v want="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')" '
     {
       line = tolower($0)
       if (!on && line ~ "^[[:space:]>*-]*(#+[[:space:]]*)?" want "[[:space:]]*:") {
@@ -85,7 +85,7 @@ field_text() {
 filled() {
   text="$(field_text "$1" | sed 's/<!--.*-->//g' | tr '\n' ' ' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
   [ -n "$text" ] || return 1
-  case "$(printf '%s' "$text" | tr 'A-Z' 'a-z')" in
+  case "$(printf '%s' "$text" | tr '[:upper:]' '[:lower:]')" in
     tbd|todo|"-"|n/a|"yes / no - reason") return 1 ;;
     "the nav item, page or tab that leads here"*) return 1 ;;
     "empty state (why, one primary action, help link), loading"*) return 1 ;;
