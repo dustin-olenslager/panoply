@@ -22,6 +22,9 @@ on:
 
 jobs:
   verify:
+    # Every job sets a limit of about 3x its normal duration, so a hung run fails instead of waiting out
+    # GitHub's 6 h default. Raise it to 3x your own median once you have one.
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -164,6 +167,7 @@ jobs:
   # and SIZE_EXCLUDE (space-separated globs) in the step's env; delete the job to opt out.
   size:
     if: github.event_name == 'pull_request'
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -190,6 +194,7 @@ jobs:
   # drift cannot hide behind the filter. Delete this job if you do not want the kit's gates
   # self-tested in your CI at all.
   self-tests:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
