@@ -22,8 +22,8 @@ on:
 
 jobs:
   verify:
-    # Every job sets a limit of about 3x its normal duration, so a hung run fails instead of waiting out
-    # GitHub's 6 h default. Raise it to 3x your own median once you have one.
+    # Every job sets a limit of about 2x its normal duration plus margin, so a hung run fails instead of
+    # waiting out GitHub's 6 h default. Set it to 2x your own median once you have one.
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:

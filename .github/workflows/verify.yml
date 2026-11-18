@@ -235,6 +235,13 @@ jobs:
         if: steps.gate-changes.outputs.run == 'true'
         run: sh scripts/check-wireframe.test.sh
 
+      # The feature-completeness gate's canary — proves a user-facing change with empty lines is
+      # MISSING, a reasoned `User-facing: no` passes with any 3+ character reason and any dash, and a
+      # bare `no` names its failing line instead of listing every field.
+      - name: Feature-completeness gate self-test
+        if: steps.gate-changes.outputs.run == 'true'
+        run: sh scripts/check-feature-completeness.test.sh
+
       # The milestone gate's canary — proves it still refuses a completed milestone with no
       # resolvable evidence, and still leaves an open milestone alone.
       - name: Milestone evidence gate self-test

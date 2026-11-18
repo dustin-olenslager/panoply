@@ -11,9 +11,9 @@ Dustin, 2026-11-18: "Figure out what caused the deployment bottleneck and make s
 
 ## Design
 
-- Every job sets `timeout-minutes` near 3x its median. Jobs that take under a minute get a 5-10 minute floor, because runner start and checkout jitter would fail anything tighter.
+- Every job sets `timeout-minutes` near 2x its main median plus margin (Dustin, 2026-11-18: "Never wait; hang at 2x (Recommended)"). Jobs that take under a minute get a 5-10 minute floor, because runner start and checkout jitter would fail anything tighter.
 - Kit `verify.yml`: verify 10, size 5, self-tests 10. Measured medians on ubuntu-latest were 0.2, 0.1 and 0.8 min (max 1.1).
-- Template `scripts/templates/ci-verify.yml`: 30/5/10 for adopters, with a comment to set 3x their own median.
+- Template `scripts/templates/ci-verify.yml`: 30/5/10 for adopters, with a comment to set 2x their own median plus margin.
 
 ## Deletion candidates
 
@@ -25,7 +25,7 @@ Dustin, 2026-11-18: "Figure out what caused the deployment bottleneck and make s
 
 - [x] Kit and template set `timeout-minutes` on every job — `.github/workflows/verify.yml`, `scripts/templates/ci-verify.yml`
 - [x] Expert review (independent subagent, diff only): approve. Placement is at job level, the YAML parses (10/5/10 and 30/5/10), and `size` keeps its `if:`. Fixed: the CHANGELOG no longer claims 3x for jobs that use the floor — `scripts/templates/ci-verify.yml`
-- [ ] Adopters synced (backlot verify gets 60 in 10-ton-productions/backlot#642)
+- [ ] Adopters synced (backlot verify gets 40 in 10-ton-productions/backlot#642)
 
 ## Launch
 

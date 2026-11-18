@@ -1,6 +1,14 @@
 # Changelog — panoply
 
-Every CI job sets `timeout-minutes` (Dustin, 2026-11-18: "keep the code flowing"). A hung run fails at a limit near 3x the job's normal duration (a 5-10 minute floor for jobs that take under a minute) instead of waiting out GitHub's 6 h default. The kit's own `verify.yml` sets 10/5/10. `scripts/templates/ci-verify.yml` starts adopters at 30/5/10, with a note to set 3x their own median. This pairs with the rule line "a hung main run is cancelled and rerun" in `git-workflow.md`.
+Every CI job sets `timeout-minutes` (Dustin, 2026-11-18: "keep the code flowing"). A hung run fails at a limit near 2x the job's normal duration plus margin (Dustin, 2026-11-18: "Never wait; hang at 2x (Recommended)"; a 5-10 minute floor for jobs that take under a minute) instead of waiting out GitHub's 6 h default. The kit's own `verify.yml` sets 10/5/10. `scripts/templates/ci-verify.yml` starts adopters at 30/5/10, with a note to set 2x their own median plus margin. This pairs with the rule line "a hung main run is cancelled and rerun" in `git-workflow.md`, which now says 2x as well.
+
+FIX — the feature-completeness gate, ported from dev-kit (2026-11-18). `scripts/check-feature-completeness.sh`
+and its canary now ship in the kit. `User-facing: no - <reason>` takes any reason of 3+ characters that starts
+and ends with a letter or digit, after `-`, `:`, `–` or `—`; it used to refuse "a read API" (the reason had to
+open with three letters), and its bracketed dashes failed in a C locale. A bare or 1-char reason prints
+`failing line: <the line>` and asks only for the reason instead of listing all five fields as MISSING. The
+rule module stays in dev-kit (`.agents/rules/feature-completeness.md`); repos opt in through
+`.github/gates.json` `feature_completeness`. Canary cases 4b-4g; kit CI runs it as a self-test.
 
 Rule module `progress-board.md`, ported from dev-kit (Dustin, 2026-11-13): every repo has one live
 progress board filled by one engine from the docs spine, and (new, item 6, ratified by Dustin as
