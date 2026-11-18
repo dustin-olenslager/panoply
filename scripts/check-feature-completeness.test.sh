@@ -63,7 +63,7 @@ for d in '—' '–' ':'; do
   out="$(LC_ALL=C sh "$GATE" --body "$SANDBOX/dash.md" --files "$SANDBOX/ui.files")"
   want_in "4c '$d' separates the reason, even in a C locale" "$out" "OK (PR states"
 done
-for e in 'User-facing: no -' 'User-facing: no - ' 'User-facing: no — x'; do
+for e in 'User-facing: no -' 'User-facing: no - ' 'User-facing: no — x' 'User-facing: no - ab'; do
   printf '%s\n' "$e" > "$SANDBOX/empty-reason.md"
   out="$(sh "$GATE" --body "$SANDBOX/empty-reason.md" --files "$SANDBOX/ui.files")"
   want_in "4d an empty or 1-char reason names its line ($e)" "$out" "failing line: User-facing: no"
@@ -72,6 +72,12 @@ done
 { printf '%s\n' 'User-facing: no'; sed -n '/Entry point/,$p' "$SANDBOX/full.md"; } > "$SANDBOX/nofull.md"
 out="$(FC_ENFORCE=1 sh "$GATE" --body "$SANDBOX/nofull.md" --files "$SANDBOX/ui.files")"
 want_in "4g a bare 'no' with every field filled is OK" "$out" "OK (all fields filled)"
+printf '%s\n' '<!-- write `User-facing: no - <reason>` if no user sees it -->' '- Entry point:' > "$SANDBOX/tmpl.md"
+out="$(sh "$GATE" --body "$SANDBOX/tmpl.md" --files "$SANDBOX/ui.files")"
+want_in "4h a template comment is not an opt-out line" "$out" "MISSING in the PR body: Entry point"
+printf '%s\n' '<!-- User-facing: no - docs only -->' > "$SANDBOX/cmt.md"
+out="$(sh "$GATE" --body "$SANDBOX/cmt.md" --files "$SANDBOX/ui.files")"
+want_in "4i an opt-out inside a comment does not pass" "$out" "MISSING in the PR body: Entry point"
 printf '%s\n' 'User-facing: nothing new here' > "$SANDBOX/notno.md"
 out="$(sh "$GATE" --body "$SANDBOX/notno.md" --files "$SANDBOX/ui.files")"
 want_in "4f 'no' must be a whole word" "$out" "MISSING in the PR body: Entry point"

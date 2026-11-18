@@ -49,9 +49,10 @@ if [ -z "$ui_files" ]; then
   exit 0
 fi
 
-# Alternation, not a bracket: in a C locale [–—] matches single bytes of the UTF-8 dash and never the whole dash.
-NO_RE='user-facing[[:space:]]*:[[:space:]]*no([^[:alnum:]]|$)'
-REASON_RE='user-facing[[:space:]]*:[[:space:]]*no[[:space:]]*(-|:|–|—)[[:space:]]*[[:alnum:]][^[:cntrl:]]*[[:alnum:]]'
+# Anchored to a bullet or heading, so template comments and prose never count. Alternation, not a bracket: in a C locale [–—] matches single bytes of the UTF-8 dash and never the whole dash.
+LEAD='^[[:space:]>-]*(#+[[:space:]]*)?'
+NO_RE="${LEAD}user-facing[[:space:]]*:[[:space:]]*no([^[:alnum:]]|\$)"
+REASON_RE="${LEAD}user-facing[[:space:]]*:[[:space:]]*no[[:space:]]*(-|:|–|—)[[:space:]]*[[:alnum:]][^[:cntrl:]]+[[:alnum:]]"
 if tr -d '*_`' < "$BODY" | grep -qiE -e "$REASON_RE"; then
   echo "check-feature-completeness: OK (PR states User-facing: no, with a reason)"
   exit 0
