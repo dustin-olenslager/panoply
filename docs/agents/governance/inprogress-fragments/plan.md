@@ -60,15 +60,20 @@ problem and moved to `worklog.d/` on 2026-11-12; the queue is the remaining shar
 
 ## Spec coverage
 
-FR-001..003 → `scripts/queue.test.sh`; FR-004 → canary case 1 + `panoply.sh` apply guard; FR-005 →
-`factory-detect.test.sh` case 18, `check-plan-home.sh` allowlist.
+| Requirement | Milestone |
+|---|---|
+| FR-001 | M1, M4 |
+| FR-002 | M1, M2 |
+| FR-003 | M1, M3 |
+| FR-004 | M1, M3 |
+| FR-005 | M3 |
 
 ## Milestones
 
-- [x] M1 `scripts/queue.sh` + canary (`scripts/queue.test.sh`)
-- [x] M2 doctrine (`documentation.md`, `workflow.md`, `AGENTS.md`, `docs/agents/README.md`, template)
-- [x] M3 kit readers (`factory-detect.sh`, `check-plan-home.sh`, `panoply.sh apply`) + CI template step
-- [x] M4 the kit's own queue migrated (`docs/agents/in-progress.d/`)
+- [x] M1 the queue tool and its canary — `scripts/queue.sh`, `scripts/queue.test.sh`
+- [x] M2 doctrine — `.agents/rules/documentation.md`, `.agents/rules/workflow.md`, `AGENTS.md`, `docs/agents/README.md`
+- [x] M3 kit readers + CI step — `scripts/factory-detect.sh`, `scripts/check-plan-home.sh`, `scripts/panoply.sh`, `scripts/templates/ci-verify.yml`
+- [x] M4 the kit's own queue migrated — `docs/agents/in-progress.d/README.md`
 - [ ] M5 dev-kit adopts (dev-kit PR); backlot + frameforge in V2
 
 ## Open questions

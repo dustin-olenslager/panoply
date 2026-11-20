@@ -13,6 +13,21 @@ A contributor (person or agent) changes the queue in a PR by adding, editing or 
 task's file, and that PR never conflicts with another PR's queue change. A reader still sees one ordered
 queue table.
 
+Wireframe: n/a — no screen; the surface is a file layout and a CLI (`sh scripts/queue.sh render`), and
+its rendered output is the existing queue table, unchanged.
+
+## User interviews (simulated, 4 personas)
+
+These are SIMULATED role-plays by the planning agent, not real interviews; they surface requirements to
+check, never quotes.
+
+| # | Persona | What they were asked | What they said (SIMULATED) | Decision it changed |
+|---|---|---|---|---|
+| 1 | Operator who reads the queue each morning | What must not change for you? | The same ordered table, top = next; I do not want to open 70 files. | `render` reproduces the old table; no committed render (it would conflict). |
+| 2 | Headless agent lane opening a PR | How do you add your task? | One new file I own, a shape I can write without a library, and a clear refusal if I get it wrong. | Flat `key: value` front matter; `check` names the file and the fix. |
+| 3 | Reviewer of a PR | What do you need in the diff? | The queue change next to the code, small. | One fragment per task in the same PR. |
+| 4 | Maintainer of an unmigrated repo | What breaks for you? | Nothing until I choose to migrate. | Unmigrated passes; `apply` never creates the folder beside an existing table. |
+
 ## User stories
 
 1. **P1 — two PRs, no conflict.** Two PRs each add or update a different queue item; both merge, in
