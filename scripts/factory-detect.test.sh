@@ -282,6 +282,25 @@ if why_of "$d" | grep -qi 'backfill'; then
   bad "backfill was flagged for a feature with nothing to draft from"
 else ok "a feature with no artifacts is a plain spec task, not backfill"; fi
 
+# case 18: a migrated queue (one file per task in in-progress.d/, no in-progress.md) still counts as
+# the spine, its fragments as queue rows, and a feature named in a fragment as the active one.
+d="$(mkrepo fragment-queue)"
+mkdoctor "$d" 0
+mkdir -p "$d/docs/agents/core/thing" "$d/docs/agents/core/other" "$d/docs/agents/in-progress.d"
+printf '# roadmap\n' > "$d/docs/agents/roadmap.md"
+printf '# In Progress\n\n<!-- queue:active -->\n' > "$d/docs/agents/in-progress.d/README.md"
+printf -- '---\norder: 10\nitem: Thing\nplan: core/thing/plan.md\nstatus: In progress\n---\n' > "$d/docs/agents/in-progress.d/thing.md"
+printf '# Plan\n\n- [ ] M1\n' > "$d/docs/agents/core/thing/plan.md"
+printf '# Plan\n\n- [ ] M1\n' > "$d/docs/agents/core/other/plan.md"
+cmit "$d" "fragment queue"
+out="$( cd "$d" && sh scripts/factory-detect.sh 2>/dev/null )"
+if printf '%s' "$out" | grep -q 'spine files present: 2/2'; then ok "in-progress.d/ counts as the queue half of the spine"
+else bad "in-progress.d/ was not counted as the spine" "$(printf '%s' "$out" | grep spine)"; fi
+if printf '%s' "$out" | grep -q 'queue rows: 1$'; then ok "each fragment counts as one queue row (README excluded)"
+else bad "fragment rows miscounted" "$(printf '%s' "$out" | grep 'queue rows')"; fi
+if printf '%s' "$out" | grep -q 'active feature: docs/agents/core/thing'; then ok "the feature a fragment names is the active one"
+else bad "the active feature was not read from the fragments" "$(printf '%s' "$out" | grep 'active feature')"; fi
+
 printf '\nfactory-detect canary: %s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ] || exit 1
 exit 0

@@ -109,7 +109,7 @@ ev "O3 kit stamp: $STAMP"
 # --- O4: governance spine --------------------------------------------------------------------
 SPINE=0
 [ -f docs/agents/roadmap.md ] && SPINE=$((SPINE + 1))
-[ -f docs/agents/in-progress.md ] && SPINE=$((SPINE + 1))
+{ [ -d docs/agents/in-progress.d ] || [ -f docs/agents/in-progress.md ]; } && SPINE=$((SPINE + 1))
 ev "O4 governance spine files present: $SPINE/2"
 
 # --- O5/O6/O7: feature folders and their artifacts -------------------------------------------
@@ -190,8 +190,12 @@ fi
 if [ -z "$ACTIVE" ]; then
   for f in $FEATURES; do
     slug="$(basename "$f")"
-    [ -f docs/agents/in-progress.md ] || continue
-    grep -q "$slug" docs/agents/in-progress.md 2>/dev/null && { ACTIVE="$f"; break; }
+    # The queue is one file per task (in-progress.d/) or, unmigrated, the one in-progress.md table.
+    if [ -d docs/agents/in-progress.d ]; then
+      grep -rqs -- "$slug" docs/agents/in-progress.d && { ACTIVE="$f"; break; }
+    elif [ -f docs/agents/in-progress.md ]; then
+      grep -q -- "$slug" docs/agents/in-progress.md 2>/dev/null && { ACTIVE="$f"; break; }
+    fi
   done
 fi
 if [ -z "$ACTIVE" ] && [ -n "$(printf '%s' "$FEATURES" | tr -d ' ')" ]; then
@@ -225,7 +229,11 @@ ev "O9 verify evidence: $VERIFY"
 
 # --- O10/O11: queue and roadmap --------------------------------------------------------------
 QUEUE_ROWS=0
-[ -f docs/agents/in-progress.md ] && QUEUE_ROWS="$(grep -cE '^\|' docs/agents/in-progress.md 2>/dev/null || echo 0)"
+if [ -d docs/agents/in-progress.d ]; then
+  QUEUE_ROWS="$(find docs/agents/in-progress.d -maxdepth 1 -name '*.md' ! -name README.md 2>/dev/null | wc -l | tr -d ' ')"
+elif [ -f docs/agents/in-progress.md ]; then
+  QUEUE_ROWS="$(grep -cE '^\|' docs/agents/in-progress.md 2>/dev/null || echo 0)"
+fi
 ev "O10 queue rows: $QUEUE_ROWS"
 ROADMAP_ROWS=0
 [ -f docs/agents/roadmap.md ] && ROADMAP_ROWS="$(grep -cE '^\|' docs/agents/roadmap.md 2>/dev/null || echo 0)"

@@ -8,17 +8,17 @@
 > fold it into a row here and archive it.
 
 The one canonical strategic view: the **initiatives** this project is committed to, in priority order.
-One row is one initiative — a body of work that spawns several plan docs and several `in-progress.md`
-queue rows — **not** a single task.
+One row is one initiative — a body of work that spawns several plan docs and several queue items
+(`in-progress.d/` files) — **not** a single task.
 
 Three views, three altitudes, no overlap:
 - **`roadmap.md` (this file)** — strategic. Initiatives and their band (Now / Next / Later).
-- **`in-progress.md`** — tactical. The queue of what is next, which rolls up into these initiatives.
+- **`in-progress.d/`** (one file per task; `sh scripts/queue.sh render`) — tactical. The queue of what is next, which rolls up into these initiatives.
 - **The worklog** (`worklog.d/` fragments, or an unmigrated repo's `worklog.md` / `CHANGELOG` `[Unreleased]`) — the change history underneath both.
 
 **This file owns exactly three things:** an initiative's *existence*, its *band*, and its *links down*
 to the queue rows and plan docs that execute it. It does **not** restate task status — that is derived
-from the linked `in-progress.md` rows — so there is almost nothing here to go stale.
+from the linked queue items in `in-progress.d/` — so there is almost nothing here to go stale.
 
 **Update it in the SAME change that starts, reprioritises, or finishes an initiative:**
 - New initiative → add a row to Now/Next/Later.
@@ -27,12 +27,13 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 
 ## Now — in active development
 
-| Initiative | Intent (one line) | Queue rows (`in-progress.md`) | Plan docs |
+| Initiative | Intent (one line) | Queue items (`in-progress.d/`) | Plan docs |
 |---|---|---|---|
 | The Algorithm — one pass for every effort | Question / delete / simplify / accelerate / automate, in order, on anything structural — code and non-code, in repos and in Hermes (injection + gate) | row 1 | `governance/execution-algorithm/plan.md` |
 | Mirror allow-list | A repo chooses which tool-native mirrors `sync-agents.sh` generates; no list means all of them, as before | row 2 | `governance/mirror-allow-list/plan.md` |
 | PR size check | Flag a PR too big to review in one sitting; warn, never block | row 3 | `governance/pr-size-check/plan.md` |
 | Gate rulings 2026-11 | Two document gates stop refusing what their own descriptions allow | row 4 | `governance/gate-rulings-2026-11/plan.md` |
+| Queue fragments | The queue is one file per task, so two PRs that each change a queue item merge in either order with no conflict | `inprogress-fragments` | `governance/inprogress-fragments/plan.md` |
 
 ## Next — committed, not yet started
 
@@ -43,7 +44,7 @@ from the linked `in-progress.md` rows — so there is almost nothing here to go 
 ## Later — directional, not yet committed
 
 Records the "why we said no / not yet" so the same idea does not get re-proposed every month
-(the strategic twin of `in-progress.md` → Parked).
+(the strategic twin of the queue's Parked section).
 
 | Initiative | Why it matters | Revisit when |
 |---|---|---|

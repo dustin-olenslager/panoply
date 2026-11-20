@@ -30,8 +30,8 @@ work fit**.
 1. **This file (`AGENTS.md`)** — the map and the non-negotiables below.
 2. **`docs/agents/roadmap.md`** — the overall plan: the initiatives this project is committed to, in
    Now / Next / Later. This is the strategic arc — what we are building and where we are in it.
-3. **`docs/agents/in-progress.md`** — the tactical queue that rolls up into the roadmap: what is in
-   flight, what is next, and the *exact next step* to resume cold. **Carry these initiatives forward;
+3. **`docs/agents/in-progress.d/`** — the tactical queue, one file per task (`sh scripts/queue.sh render`
+   shows it as one table), that rolls up into the roadmap: what is in flight, what is next, and the *exact next step* to resume cold. **Carry these initiatives forward;
    do NOT open a parallel track for work already queued here.**
 4. **The running worklog** — `docs/agents/worklog.d/` (one file per change; names sort by date), or in
    a repo that has not migrated `docs/agents/worklog.md` / its `CHANGELOG.md` / `HISTORY.md`
@@ -78,7 +78,7 @@ In a monorepo the closest `AGENTS.md` to the file you are editing wins; this roo
 - **Plan before code; verify before commit.** No multi-file change without a persisted plan under
   `docs/agents/`; no commit without a green test / typecheck / lint run in the same session.
 - **The plan and worklog are never stale — and this is enforced, not just asked.** Every change
-  updates `docs/agents/in-progress.md` (its status + Next step), adds one new file under
+  updates its own task's file in `docs/agents/in-progress.d/` (its status + Next step), adds one new file under
   `docs/agents/worklog.d/` (never an edit to a shared log), and moves the `roadmap.md` initiative when it starts or ships — all in the same commit as
   the code. Shipped-but-unlogged counts as not done. **The landing gate `scripts/check-docs.sh` fails
   any change (a staged commit; in CI the whole PR) that touches code but adds no worklog fragment** — it runs in required CI, so
@@ -111,11 +111,11 @@ declared in the use-case layer) implemented by an **adapter** at the edge.
 
 **Before writing anything, open `AGENTS.md` at the repo root and read it fully.** The short version:
 
-- **Read, in order:** `docs/agents/roadmap.md` (the plan) → `docs/agents/in-progress.md` (the queue +
-  the exact next step) → the running worklog (`docs/agents/worklog.d/`, or an unmigrated repo's
+- **Read, in order:** `docs/agents/roadmap.md` (the plan) → `docs/agents/in-progress.d/` (the queue, one
+  file per task, + the exact next step; `sh scripts/queue.sh render`) → the running worklog (`docs/agents/worklog.d/`, or an unmigrated repo's
   `worklog.md` / `CHANGELOG` `[Unreleased]`) → `AGENTS.md` (stack + commands) → the `.agents/rules/` module for what you
   touch.
-- **Carry existing work forward.** The top of `in-progress.md` is the live task with its next step —
+- **Carry existing work forward.** The top of the queue (`sh scripts/queue.sh render`) is the live task with its next step —
   continue it; do NOT open a parallel track for work already queued.
 - **Keep the plan and worklog current in the SAME change as the code.** Shipped-but-unlogged = not done.
 - **Clean Architecture is mandatory:** dependencies point inward only; business rules import no
@@ -181,7 +181,7 @@ whatever the repo has wired server-side (branch protection + required CI). Honor
 | You need | Read |
 |---|---|
 | The overall plan (initiatives) | `docs/agents/roadmap.md` |
-| What to work on now | `docs/agents/in-progress.md` |
+| What to work on now | `docs/agents/in-progress.d/` (`sh scripts/queue.sh render`) |
 | What landed recently | `docs/agents/worklog.d/` (or, unmigrated, `docs/agents/worklog.md` / `CHANGELOG.md` `[Unreleased]`) |
 | How to work (process) | `.agents/rules/workflow.md`, `quality-bar.md`, `git-workflow.md`, `documentation.md` |
 | Architecture premise | `.agents/rules/clean-architecture.md` |

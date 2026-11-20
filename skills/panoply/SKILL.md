@@ -60,5 +60,5 @@ or second-guess the adapt logic here — read the kit's file and execute it.
 
 5. **Report** what was filled / pruned / seeded / installed (the adapt command's
    Phase 5 report), plus the onboarding read-order the kit establishes: start at
-   `AGENTS.md`, then `docs/agents/roadmap.md` + `docs/agents/in-progress.md`, then
+   `AGENTS.md`, then `docs/agents/roadmap.md` + the queue `docs/agents/in-progress.d/`, then
    the deep rules under `.agents/rules/`.

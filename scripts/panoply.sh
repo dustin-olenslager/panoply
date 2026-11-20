@@ -383,9 +383,9 @@ cmd_apply() {
 
   # 1. Spine. Create only what is absent; never overwrite the repo's own docs.
   mkdir -p docs/agents .agents/rules scripts
-  for _d in roadmap.md in-progress.md worklog.md; do
-    if [ ! -f "docs/agents/$_d" ] && [ -f "$_src/docs/agents/$_d" ]; then
-      cp "$_src/docs/agents/$_d" "docs/agents/$_d"; printf '    ADDED docs/agents/%s\n' "$_d"
+  for _d in roadmap.md in-progress.d/README.md worklog.md; do
+    if [ ! -f "docs/agents/$_d" ] && [ -f "$_src/docs/agents/$_d" ] && { [ "$_d" != in-progress.d/README.md ] || [ ! -f docs/agents/in-progress.md ]; }; then
+      mkdir -p "docs/agents/$(dirname "$_d")" && cp "$_src/docs/agents/$_d" "docs/agents/$_d"; printf '    ADDED docs/agents/%s\n' "$_d"
     elif [ -f "docs/agents/$_d" ] && ! cmp -s "$_src/docs/agents/$_d" "docs/agents/$_d"; then
       printf '    KEPT  docs/agents/%s — yours differs from the kit template; review it\n' "$_d"
     fi
