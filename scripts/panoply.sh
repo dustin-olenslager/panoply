@@ -383,25 +383,13 @@ cmd_apply() {
 
   # 1. Spine. Create only what is absent; never overwrite the repo's own docs.
   mkdir -p docs/agents .agents/rules scripts
-  for _d in roadmap.md worklog.md; do
-    if [ ! -f "docs/agents/$_d" ] && [ -f "$_src/docs/agents/$_d" ]; then
-      cp "$_src/docs/agents/$_d" "docs/agents/$_d"; printf '    ADDED docs/agents/%s\n' "$_d"
+  for _d in roadmap.md in-progress.d/README.md worklog.md; do
+    if [ ! -f "docs/agents/$_d" ] && [ -f "$_src/docs/agents/$_d" ] && { [ "$_d" != in-progress.d/README.md ] || [ ! -f docs/agents/in-progress.md ]; }; then
+      mkdir -p "docs/agents/$(dirname "$_d")" && cp "$_src/docs/agents/$_d" "docs/agents/$_d"; printf '    ADDED docs/agents/%s\n' "$_d"
     elif [ -f "docs/agents/$_d" ] && ! cmp -s "$_src/docs/agents/$_d" "docs/agents/$_d"; then
       printf '    KEPT  docs/agents/%s — yours differs from the kit template; review it\n' "$_d"
     fi
   done
-  # The queue is one file per task (docs/agents/in-progress.d/). Seed only its page (README.md) and only
-  # in a repo with no queue at all: a repo that still keeps the one in-progress.md table is unmigrated,
-  # and creating the folder there would hide its rows behind an empty render. Migrating is a reviewed
-  # PR (documentation.md, "Queue fragments"), never a side effect of apply.
-  if [ ! -d docs/agents/in-progress.d ] && [ ! -f docs/agents/in-progress.md ] \
-     && [ -f "$_src/docs/agents/in-progress.d/README.md" ]; then
-    mkdir -p docs/agents/in-progress.d
-    cp "$_src/docs/agents/in-progress.d/README.md" docs/agents/in-progress.d/README.md
-    printf '    ADDED docs/agents/in-progress.d/README.md\n'
-  elif [ -f docs/agents/in-progress.md ] && [ ! -d docs/agents/in-progress.d ]; then
-    printf '    KEPT  docs/agents/in-progress.md — one shared queue table; migrate it to in-progress.d/ (documentation.md, "Queue fragments")\n'
-  fi
 
   # 2. Rule modules. Never clobber an edited module — report the divergence instead.
   for _m in "$_src"/.agents/rules/*.md; do
