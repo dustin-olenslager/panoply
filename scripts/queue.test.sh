@@ -40,6 +40,7 @@ mkrepo() {
 
 frag() { # frag <repo> <slug> <order> <item> <status> [notes]
   mkdir -p "$1/docs/agents/in-progress.d"
+  # shellcheck disable=SC2016 # the backticks are markdown in the fixture, not a command substitution
   printf -- '---\norder: %s\nitem: %s\narea: core\ninitiative: Thing\nplan: `core/%s/plan.md`\nstatus: %s\n---\n%s\n' \
     "$3" "$4" "$2" "$5" "${6:-Next: do it.}" > "$1/docs/agents/in-progress.d/$2.md"
 }
@@ -87,7 +88,7 @@ else bad "valid fragments failed: $( cd "$r" && sh scripts/queue.sh check 2>&1 )
 refuse() { # refuse <label> <file name> <content>
   rr="$(mkrepo "refuse-$(printf '%s' "$1" | tr -c 'a-z0-9' '-')")"
   page "$rr"
-  printf -- "$3" > "$rr/docs/agents/in-progress.d/$2"
+  printf '%b' "$3" > "$rr/docs/agents/in-progress.d/$2"
   if ( cd "$rr" && sh scripts/queue.sh check ) >/dev/null 2>&1; then bad "check accepted: $1"
   else ok "check refuses: $1"; fi
 }
