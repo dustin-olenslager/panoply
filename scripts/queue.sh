@@ -80,7 +80,7 @@ records() {
       if (line != "") body = (body == "") ? line : body " " line
     }
     END { flush() }
-  ' $_files | sort -t "$TAB" -k1,1n -k2,2n -k3,3
+  ' $_files | LC_ALL=C sort -t "$TAB" -k1,1n -k2,2n -k3,3
 }
 
 cmd_list() {
