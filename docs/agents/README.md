@@ -8,8 +8,8 @@ setup do **not** belong here — those live in your own `~/.agents/` memory.
 
 Start at the top; read what bears on the task, not everything every time.
 
-1. `roadmap.md` — the overall plan: initiatives in Now/Next/Later. Read with `in-progress.md`.
-2. `in-progress.md` — the ordered queue of what is next, with plan-doc pointers. **Always read first among the tactical docs.**
+1. `roadmap.md` — the overall plan: initiatives in Now/Next/Later. Read with the queue, `in-progress.d/`.
+2. `in-progress.d/` — the ordered queue of what is next, one file per task, with plan-doc pointers (`sh scripts/queue.sh render` shows it as one table). **Always read first among the tactical docs.**
 3. `architecture.md` — decisions and their reasoning (ADR entries).
 4. `key-patterns.md` — conventions, gotchas, testing practice.
 5. `infrastructure.md` — deploy, hosting, data stores, secrets, background jobs.
@@ -23,7 +23,8 @@ Start at the top; read what bears on the task, not everything every time.
 docs/agents/
   README.md               this file
   roadmap.md              canonical overall plan (initiatives, Now/Next/Later)
-  in-progress.md          ordered queue of active work, rolls up into roadmap.md
+  in-progress.d/          ordered queue of active work, one <slug>.md per task, rolls up into roadmap.md
+  in-progress.md          frozen pointer to in-progress.d/ (CI refuses edits)
   worklog.d/              running per-change log: one file per change, <YYYY-MM-DD>-<slug>.md
   worklog.md              legacy single-file log, frozen once worklog.d/ exists (omit if the repo uses CHANGELOG [Unreleased])
   completed-features.md   shipped log, with archive paths
@@ -42,7 +43,7 @@ docs/agents/
 Never create flat files at the top of `docs/agents/` — new work goes in an area folder.
 
 **`roadmap.md` is the single plan doc for the whole project** — one per repo, the file every agent
-reads before planning and edits when planning. Everything else here is subordinate: `in-progress.md`
+reads before planning and edits when planning. Everything else here is subordinate: the queue (`in-progress.d/`)
 is its queue, `<area>/<feature>/plan.md` is its detail. A plan doc found anywhere else (repo root, a
 stray folder) is stale by definition — fold it into a roadmap row and archive it. `scripts/check-plan-home.sh`
 fails CI and pre-commit on any plan doc outside this tree.
@@ -54,12 +55,12 @@ are the point, not a defect. Newest file wins; earlier ones exist for trend comp
 
 ## Lifecycle of a doc
 
-1. **Plan** — copy `_templates/plan.md` into `<area>/<feature>/plan.md`; link it from `in-progress.md`.
+1. **Plan** — copy `_templates/plan.md` into `<area>/<feature>/plan.md`; link it from its task's `in-progress.d/<slug>.md`.
 2. **Build** — re-read the plan at the start of each milestone; tick milestones off; record surprises
    inline with `> **Build note:**` at the moment you find them; add a `worklog.d/` fragment (or, unmigrated, append a `worklog.md` /
    `CHANGELOG` `[Unreleased]` line) in the same commit as each landed change.
 3. **Ship** — move the whole `<feature>/` folder into `<area>/completed/`, rename files to describe
-   what shipped, add a row to `completed-features.md`, delete the task's `in-progress.md` row
+   what shipped, add a row to `completed-features.md`, delete the task's `in-progress.d/<slug>.md` file
    **in the same PR that ships the code**, and move the initiative in `roadmap.md` (to
    Shipped if it was its last plan). A row that outlives its merge misleads every later session;
    leftovers are retired from PR state with `phalanx-docs-reconcile.sh --apply` (Phalanx ≥ 1.7.30),

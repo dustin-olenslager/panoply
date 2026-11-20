@@ -64,6 +64,7 @@ is_allowed() {
   case "$1" in
     "$CANON") return 0;;
     docs/agents/in-progress.md) return 0;;
+    docs/agents/in-progress.d/*) return 0;;
     docs/agents/_templates/*) return 0;;
     docs/agents/reports/*) return 0;;
     # docs/agents/<area>/<feature>/plan.md — and anything under an area's completed/ archive.

@@ -48,6 +48,14 @@ jobs:
         run: sh scripts/check-docs.sh --since "${{ github.event.pull_request.base.sha }}"
         if: github.event_name == 'pull_request'
 
+      # Queue gate — the queue is one file per task (docs/agents/in-progress.d/<slug>.md). Fails on a
+      # fragment with a bad front matter, and, once a repo has migrated, on any PR that edits the frozen
+      # docs/agents/in-progress.md (the shared table that made every merge conflict every open PR).
+      # An unmigrated repo passes.
+      - name: Queue fragments
+        run: sh scripts/queue.sh check --since "${{ github.event.pull_request.base.sha }}"
+        if: github.event_name == 'pull_request'
+
       # Conflict markers — the one corrupt state a generated file can be in that no other gate sees.
       # `sync-agents.sh --check` validates only its own block, so a file can reach main carrying
       # `<<<<<<< HEAD` and a doubled block with every other gate green. One pass over the tracked tree.

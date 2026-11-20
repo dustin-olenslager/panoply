@@ -28,14 +28,14 @@ Two facts it makes visible, both of which cost real context when ignored:
 
 ## Read order (start here, in this order)
 
-1. **`docs/agents/in-progress.md`** — the queue, ONE FILE, an ordered table where each row carries a task's status and its exact next step. Always read this first; it tells you what the current work actually is, which is the one thing a fresh context window cannot infer from the code.
+1. **`docs/agents/in-progress.d/`** — the queue, ONE FILE PER TASK, each carrying the task's order, status and exact next step; `sh scripts/queue.sh render` shows it as one ordered table. Always read this first; it tells you what the current work actually is, which is the one thing a fresh context window cannot infer from the code.
 2. **`docs/agents/architecture.md`** — the decisions and their reasoning, so you extend the design instead of re-litigating it.
 3. **`docs/agents/key-patterns.md`** — conventions, gotchas, and testing practice, so your code matches what is already there.
 4. **`docs/agents/infrastructure.md`** — deploy pipeline, hosting, data stores, secrets, background jobs. Read before touching anything that runs outside the dev machine.
 5. **`docs/agents/completed-features.md`** — what already exists, so you do not rebuild it.
 6. **The relevant area folder** (e.g. `docs/agents/<area>/…`) — active plans and research for the feature you are working on.
 
-Read the specific files that bear on the task, not all of them every time. But never start non-trivial work without at least `in-progress.md` and the area folder for the thing you are changing.
+Read the specific files that bear on the task, not all of them every time. But never start non-trivial work without at least the queue (`in-progress.d/`) and the area folder for the thing you are changing.
 
 ## The always-current plan & worklog
 
@@ -45,7 +45,7 @@ drifts. This is the anti-redundancy contract — keep to it and the logs cannot 
 | Altitude | File | Owns | Granularity |
 |---|---|---|---|
 | Strategic | `docs/agents/roadmap.md` | Initiatives, their band (Now/Next/Later), links down | one initiative |
-| Tactical | `docs/agents/in-progress.md` (one file) | The active queue, blocked, parked, per-task Next step | one task/feature |
+| Tactical | `docs/agents/in-progress.d/<slug>.md` (one file per task) **or**, in a repo that has not migrated, `docs/agents/in-progress.md` | The active queue, blocked, parked, per-task Next step | one task/feature |
 | Continuous | `docs/agents/worklog.d/<YYYY-MM-DD>-<slug>.md` (one file per change) **or**, in a repo that has not migrated, `docs/agents/worklog.md` / the repo's `CHANGELOG`/`HISTORY` `[Unreleased]` | What actually landed | one change |
 | Durable | `docs/agents/completed-features.md` | What now exists + its archived plan path | one shipped feature |
 
@@ -62,16 +62,34 @@ never conflict. A migrated repo's `docs/agents/worklog.md` is frozen history: it
 fragment that says so and freeze the old file. Read the log as `ls docs/agents/worklog.d/` (names sort
 by date), then the frozen file for older entries.
 
+**Queue fragments (Dustin, 2026-11-20).** The same thing happened to the queue. One shared
+`in-progress.md` table, edited by every PR, left every other open PR conflicting after each merge
+(dev-kit, 2026-11-20: 5 of 8 open PRs blocked by that one file, with 40 headless jobs a day opening
+PRs). So the queue is a directory too: each task is ONE FILE, `docs/agents/in-progress.d/<slug>.md`,
+with `key: value` lines between `---` fences (`order`, `item`, `status`, `plan`, and `area`,
+`initiative`, `id` where the repo's table has them) and the Notes / next step below. `order` is an
+integer (lower is nearer the top; leave gaps), ties break by file name. A PR adds, edits or deletes only
+its own task's file; two PRs that each change a queue item merge in either order. The folder's
+`README.md` is the page around the tables. `sh scripts/queue.sh render` prints the queue as the same
+ordered table the old file held; that render is generated on read and NEVER committed, because a
+committed render is the shared file again. A migrated repo keeps `docs/agents/in-progress.md` only as a
+frozen pointer to the folder; `sh scripts/queue.sh check --since <base>` (required CI) refuses a PR
+that edits it, and refuses a fragment with a bad shape. Tools read the folder through
+`scripts/queue.sh` (or a parser tested against it), never by grepping the old table. To migrate a repo,
+split each row into a fragment and the page into the README in one PR, prove `queue.sh render` gives
+the same rows, and replace the old file with the pointer.
+
 ### The same-change update contract (every agent, every provider)
 
 In the SAME commit that lands work — any agent:
 
 1. **Add one worklog fragment** (a NEW file `docs/agents/worklog.d/<YYYY-MM-DD>-<slug>.md`; in a repo that has not migrated, append a line to `worklog.md` or the `[Unreleased]` section) — what changed, where.
-2. **Update your task's row in `docs/agents/in-progress.md`** — its status and its Next-step handoff, or
-   **delete the row** on ship — in the SAME PR that ships the code, never later (a row that outlives its
-   merge is planned against as if still open; leftovers are retired from PR state with
-   `phalanx-docs-reconcile.sh`). A one-line row edit is small enough that two open PRs rarely collide,
-   and git's own merge resolves the ordinary case.
+2. **Update your task's file in `docs/agents/in-progress.d/`** (in a repo that has not migrated, its row
+   in `docs/agents/in-progress.md`) — its status and its Next-step handoff, or **delete the file** on
+   ship — in the SAME PR that ships the code, never later (a task that outlives its merge is planned
+   against as if still open; leftovers are retired from PR state with `phalanx-docs-reconcile.sh`).
+   Touch only your own task's file: an edit to another task's file, or to the folder's `README.md`, is
+   the shared-file conflict this layout exists to prevent.
 3. **On ship**, additionally: add the `completed-features.md` entry, MOVE the `roadmap.md` initiative
    (to Shipped if this was its last plan), and archive the plan folder.
 4. **On a new or reprioritised initiative**: add or move its `roadmap.md` row.
@@ -80,26 +98,32 @@ This contract has one mechanically-enforced core — the worklog line, checked b
 
 ### The queue is the ONLY backlog — autonomous drivers included
 
-A project has exactly one answer to "what is next", and it is `docs/agents/in-progress.md`. An agent
+A project has exactly one answer to "what is next", and it is `docs/agents/in-progress.d/`. An agent
 that keeps its own private list — an untracked `TASKS.md`, a session database, a scratch file — has
 created a second backlog that nobody else can see, and within a day the two disagree about what is done.
 
 So the queue is written to be **driven, not just read**. Each row carries what a driver needs:
 
 ```markdown
-| Task | Status | Next step | Plan |
-|---|---|---|---|
-| <slug> | open / in-progress / blocked / done | <the exact next action> | <link or —> |
+---
+order: 40
+item: <what a user can do when this ships>
+plan: `<area>/<feature>/plan.md`
+status: Not started / In progress — milestone N of M / Blocked — <on what> / In review
+---
+<the exact next action>
 ```
 
-`Status` is the queue state (a `- [ ]` checkbox by another name). A blocked row names its blocker in
-the Next step, so a driver stops and asks rather than guessing. **Next step** is the handoff a cold
-session resumes from, and it is the one line always worth writing — the person who needs it cannot
-reconstruct where you stopped from the code alone.
+`status` is the queue state (a `- [ ]` checkbox by another name); `order` is the ordering a driver
+takes the top of. A blocked task names its blocker in its Next step, so a driver stops and asks rather
+than guessing. **Next step** is the handoff a cold session resumes from, and it is the one line always
+worth writing — the person who needs it cannot reconstruct where you stopped from the code alone.
+`sh scripts/queue.sh list` gives a driver one line per task (section, order, slug, status, item).
 
-A committed queue is also the only kind a reviewer, a diff, or a non-agent can see at all — and one
-file is the shape the kit's own repo, its onboarding contract, and `scripts/check-plan-home.sh` all
-already use, so the doctrine and the dogfood agree.
+A committed queue is also the only kind a reviewer, a diff, or a non-agent can see at all. The kit's
+own repo keeps its queue in `docs/agents/in-progress.d/` too, so the doctrine and the dogfood agree
+(an earlier fragment rule was withdrawn in 2026 because the kit repo did not use it; this one ships
+with the kit's own queue migrated, the render script, and the CI check).
 
 ### The landing gate — mechanical enforcement
 
@@ -119,6 +143,11 @@ whose product *is* markdown, a docs site or blog, sets it empty so shipped `.md`
 the declared escape hatch `DOCS_OFF=1` for a deliberate exception. The `--since` mode judges the
 combined change from the base to HEAD once, so the line may sit in any commit of the PR.
 
+`scripts/queue.sh check --since <base>` is the queue's half of the gate, in the same required CI: every
+fragment in `docs/agents/in-progress.d/` has a valid front matter (an integer `order`, an `item`, a
+`status`, a known `section`, no unknown or repeated key, a lowercase `<slug>.md` name), and in a
+migrated repo no PR edits the frozen `docs/agents/in-progress.md`. An unmigrated repo passes.
+
 `scripts/check-rule-fork.sh` is the sibling audit for a **forked** rule set: an adopted repo keeps its
 own adapted copy of the modules (`.claude/rules/` or `.agents/rules/`), which will never be
 byte-identical, so the gate compares a curated set of **policy anchors** instead of a line diff and
@@ -127,9 +156,9 @@ adoption-time audit, not a per-PR gate; its escape hatch is `RULE_FORK_OFF=1`.
 
 ## When to write
 
-- **When a plan is made** — persist it to a file under the area folder, from `docs/agents/_templates/plan.md`, and link it from your task's `in-progress.md` row. Plans that live only in chat are erased by compaction.
+- **When a plan is made** — persist it to a file under the area folder, from `docs/agents/_templates/plan.md`, and link it from your task's `in-progress.d/` file (`plan:`). Plans that live only in chat are erased by compaction.
 - **During the build, at the moment of discovery** — when reality contradicts the plan, record it inline with a `> **Build note:**` line. Written later, it is written wrong; written never, the next person rediscovers it the expensive way.
-- **When you pause or hand off** — before you stop, write the *exact next action* where the next session looks first: the **Next step** cell of your task's `in-progress.md` row, or the `Next step` line of the plan doc for a multi-session feature. Not a topic ("continue the auth work") — the file to open, the function to change, the command to run, the blocker. A cold session resumes from this and nothing else, so it is the one note always worth writing: the person who needs it is not you, and cannot reconstruct where you stopped from the code alone.
+- **When you pause or hand off** — before you stop, write the *exact next action* where the next session looks first: the Notes of your task's `in-progress.d/<slug>.md` file, or the `Next step` line of the plan doc for a multi-session feature. Not a topic ("continue the auth work") — the file to open, the function to change, the command to run, the blocker. A cold session resumes from this and nothing else, so it is the one note always worth writing: the person who needs it is not you, and cannot reconstruct where you stopped from the code alone.
 - **When a decision is made that a future reader would otherwise question** — add an ADR entry to `architecture.md`. The trigger is "someone will wonder why we did this," not "this was hard."
 - **Always ADR-worthy: anything that moves a layer boundary or introduces a port.** A new port and the adapter behind it, a rule relocated between layers, a Detail swapped out (database, framework, vendor), or a deliberate decision to let one layer know about another. These are precisely what `architecture.md` exists for: the reasoning is invisible in the diff six months later, so without the entry the next person re-litigates a decision that was already made carefully. See `clean-architecture.md`.
 - **When you get burned by a non-obvious behavior** — add it to `key-patterns.md` as a gotcha, with the symptom, not just the fix. The next person will arrive with the symptom.
@@ -144,7 +173,7 @@ After a feature is tested and signed off:
 1. Move its entire folder — plan, research, references, everything — into that area's `completed/` subfolder.
 2. **Rename the files to describe what shipped**, not generic `plan.md`. A folder of six files named `plan.md` is unsearchable.
 3. Add an entry to `completed-features.md`: what shipped, when, and the archived path.
-4. Delete the task's `in-progress.md` row.
+4. Delete the task's `in-progress.d/<slug>.md` file.
 5. Update any closed issue or milestone descriptions that pointed at the old paths.
 
 Archive, do not delete. The reasoning behind a shipped feature is the context for the next change to it.

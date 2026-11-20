@@ -1,5 +1,21 @@
 # Changelog — panoply
 
+Queue fragments (Dustin, 2026-11-20). One shared `docs/agents/in-progress.md` table, edited by every PR,
+left every other open PR conflicting after each merge (dev-kit: 5 of 8 open PRs blocked by it alone). The
+queue is now one file per task, `docs/agents/in-progress.d/<slug>.md`: `key: value` front matter
+(`order`, `item`, `status`, `plan`, `area`, `initiative`, `id`, `section` …) and the Notes as body. A PR
+adds, edits or deletes only its own task's file, so two PRs that each change a queue item merge in
+either order. New `scripts/queue.sh`: `render` prints the queue as the same ordered table (built on read,
+never committed), `list` gives drivers one line per task, `check --since <base>` (new CI template step
+"Queue fragments") refuses a bad fragment and, once a repo has migrated, any edit to the frozen
+`in-progress.md`. Canary `scripts/queue.test.sh` merges two queue-changing branches both ways. Readers:
+`factory-detect.sh` (case 18), `check-plan-home.sh` and `panoply.sh apply` read the folder; `apply`
+seeds `in-progress.d/README.md` only in a repo with no queue at all and never beside an existing table.
+The kit's own queue is migrated (render is byte-identical to the old table). Rule text:
+`documentation.md` ("Queue fragments"), `workflow.md`, `AGENTS.md`, `docs/agents/README.md`, the
+roadmap and plan templates. Migrate an adopter in one PR: split each row into a fragment and the page
+into the README, prove the render gives the same rows, replace the old file with the pointer.
+
 Every CI job sets `timeout-minutes` (Dustin, 2026-11-18: "keep the code flowing"). A hung run fails at a limit near 2x the job's normal duration plus margin (Dustin, 2026-11-18: "Never wait; hang at 2x (Recommended)"; a 5-10 minute floor for jobs that take under a minute) instead of waiting out GitHub's 6 h default. The kit's own `verify.yml` sets 10/5/10. `scripts/templates/ci-verify.yml` starts adopters at 30/5/10, with a note to set 2x their own median plus margin. This pairs with the rule line "a hung main run is cancelled and rerun" in `git-workflow.md`, which now says 2x as well.
 
 FIX — the feature-completeness gate, ported from dev-kit (2026-11-18). `scripts/check-feature-completeness.sh`
