@@ -1,5 +1,7 @@
 # Changelog — panoply
 
+Rule module `reuse-first.md` (Dustin, 2026-11-20, card `reuse-code-across-platforms` V1): before building, check dev-kit's `docs/agents/reuse-catalog.md` and search the sibling 10 Ton repos for an existing implementation; port or extract it and name the source under the PR's `## Patterns reused`, or write `none found`.
+
 Queue fragments (Dustin, 2026-11-20). One shared `docs/agents/in-progress.md` table, edited by every PR,
 left every other open PR conflicting after each merge (dev-kit: 5 of 8 open PRs blocked by it alone). The
 queue is now one file per task, `docs/agents/in-progress.d/<slug>.md`: `key: value` front matter
