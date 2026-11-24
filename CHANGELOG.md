@@ -1,5 +1,10 @@
 # Changelog — panoply
 
+`design-system.md` gains "Shared design system — when the organisation has one, it wins" (2026-11-24): a
+project inside an organisation with a shared design system replaces this module with the organisation's rule,
+uses its tokens and components only, ships every theme, starts mock-ups from its design-tool library, and
+proposes missing or wrong parts upstream instead of patching locally. No new placeholder.
+
 Rule module `reuse-first.md` (Dustin, 2026-11-20, card `reuse-code-across-platforms` V1): before building, check dev-kit's `docs/agents/reuse-catalog.md` and search the sibling 10 Ton repos for an existing implementation; port or extract it and name the source under the PR's `## Patterns reused`, or write `none found`.
 
 Queue fragments (Dustin, 2026-11-20). One shared `docs/agents/in-progress.md` table, edited by every PR,

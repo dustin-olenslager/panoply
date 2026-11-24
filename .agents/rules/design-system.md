@@ -11,6 +11,25 @@
 
 Name a real product, not adjectives. "Clean and modern" means nothing shared; a named product is a target the model has already seen thousands of screens of, so every unstated decision (border weight, empty-state tone, how a table row highlights) resolves the same way instead of being invented per screen.
 
+## Shared design system — when the organisation has one, it wins
+
+If this project belongs to an organisation with a shared design system (a tokens package, a component
+library, a design-tool library), that system replaces the per-project choices in this file. Replace this
+module with the organisation's own rule, word for word, and add only what is specific to this app.
+
+- **Tokens only.** Every colour, size, radius and shadow comes from the shared tokens; a literal value in the
+  app is a defect. Values are defined in the shared system's repo, nowhere else.
+- **Open-source components first** (the library the shared system is built on), then the shared system's own
+  classes for what the library lacks. Never hand-roll a component the library has.
+- **Every theme the system ships** (light, dark, system) works on every surface.
+- **Mock-ups start from the shared design-tool library**, bound to its variables.
+- **Propose, never patch locally.** When the app needs a token, component or pattern the system lacks, or
+  finds one wrong, open a change (PR for small, issue for large) on the shared system with screenshots in
+  every theme, and use the closest existing part meanwhile with a link to the proposal. The system grows
+  from the apps' needs through that one door.
+
+Without a shared system, fill the sections below for this project.
+
 ## Visual style
 
 Pick one value per axis and hold it everywhere. An inconsistent axis is more noticeable than a "wrong" one.
